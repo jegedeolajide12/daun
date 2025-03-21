@@ -5,7 +5,4 @@ register = template.Library()
 
 @register.filter
 def model_name(obj):
-    try:
-        obj._meta.model_name
-    except AttributeError:
-        return None
+    return obj._meta.model_name

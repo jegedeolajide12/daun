@@ -7,11 +7,12 @@ from django.views.generic.base import TemplateResponseMixin, View
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.contenttypes.models import ContentType
 from django.forms.models import modelform_factory
 from django.apps import apps
 
 
-from .models import Course, Content, Topic
+from .models import Course, Content, Topic, Video
 from .forms import CourseForm, ModuleFormSet
 
 
@@ -141,8 +142,20 @@ def course_detail(request, course_slug):
 
 def topic_detail(request, topic_id):
     topic = get_object_or_404(Topic, id=topic_id)
-    contents = topic.contents.all()
-    context = {'topic':topic,'contents':contents}
+    contents = Content.objects.prefetch_related('content_type').filter(topic=topic)
+
+    # Get the ContentType for the Video model
+    video_content_type = ContentType.objects.get_for_model(Video)
+
+    # Filter by the ContentType instance
+    video_count = contents.filter(content_type=video_content_type).count()
+
+    # Debugging output
+    print(f"Video ContentType: {video_content_type}")
+    print(f"Video Count: {video_count}")
+    print(f"Contents: {contents.filter(content_type=video_content_type)}")
+
+    context = {'topic': topic, 'contents': contents, 'video_count': video_count}
     return render(request, 'courses/manage/module/module_detail.html', context)
 
 
