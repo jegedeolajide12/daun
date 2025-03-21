@@ -1,0 +1,107 @@
+[
+{
+  "model": "pages.faculty",
+  "pk": 1,
+  "fields": {
+    "name": "Theology",
+    "slug": "theology"
+  }
+},
+{
+  "model": "pages.faculty",
+  "pk": 2,
+  "fields": {
+    "name": "Ministry",
+    "slug": "ministry"
+  }
+},
+{
+  "model": "pages.faculty",
+  "pk": 3,
+  "fields": {
+    "name": "Education",
+    "slug": "education"
+  }
+},
+{
+  "model": "pages.faculty",
+  "pk": 4,
+  "fields": {
+    "name": "Arts",
+    "slug": "arts"
+  }
+},
+{
+  "model": "pages.faculty",
+  "pk": 5,
+  "fields": {
+    "name": "Education",
+    "slug": "ed"
+  }
+},
+{
+  "model": "pages.course",
+  "pk": 1,
+  "fields": {
+    "teacher": 1,
+    "faculty": 1,
+    "name": "Theology",
+    "slug": "theology",
+    "code": "THEO",
+    "overview": "blah",
+    "created": "2025-01-08T11:05:36.948Z"
+  }
+},
+{
+  "model": "pages.course",
+  "pk": 2,
+  "fields": {
+    "teacher": 1,
+    "faculty": 5,
+    "name": "Christian Religious Studies",
+    "slug": "christian-religious-studies",
+    "code": "CRS",
+    "overview": "blah",
+    "created": "2025-01-08T11:06:24.848Z"
+  }
+},
+{
+  "model": "pages.course",
+  "pk": 3,
+  "fields": {
+    "teacher": 1,
+    "faculty": 2,
+    "name": "Christian Discipleship",
+    "slug": "christian-discipleship",
+    "code": "CDS",
+    "overview": "BLAH",
+    "created": "2025-01-08T11:12:16.494Z"
+  }
+},
+{
+  "model": "pages.course",
+  "pk": 4,
+  "fields": {
+    "teacher": 1,
+    "faculty": 3,
+    "name": "Christian Health Education",
+    "slug": "christian-health-education",
+    "code": "CHE",
+    "overview": "blah",
+    "created": "2025-01-08T11:13:17.771Z"
+  }
+},
+{
+  "model": "pages.course",
+  "pk": 5,
+  "fields": {
+    "teacher": 1,
+    "faculty": 4,
+    "name": "Christian Psychology",
+    "slug": "christian-psychology",
+    "code": "CPS",
+    "overview": "blah",
+    "created": "2025-01-08T11:14:44.974Z"
+  }
+}
+]

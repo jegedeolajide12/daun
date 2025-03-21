@@ -1,0 +1,20 @@
+{% extends parent_template|default:"navbar.html" %}
+{% load static %}
+{% block content %}	
+<div class="account-form">
+	<div class="account-head" style="background-image:url('{% static "assets/images/background/bg2.jpg" %}');">
+		<a href="index.html"><img src="{% static "assets/images/logo-white-2.png" %}" alt=""></a>
+	</div>
+	<div class="account-form-inner">
+		<div class="account-container">
+			<div class="error-page">
+				<h5>Are you sure you want to log out?</h5>
+				<form class="contact-bx" method="post" action="{% url "account_logout" %}">
+					{% csrf_token %}
+                        <button name="submit" type="submit" value="Submit" class="btn m-r5">Logout</button>
+						<a href="index.html" class="btn outline black">Back To Home</a>
+				</form>
+			</div>
+		</div>
+	</div>
+{% endblock %}

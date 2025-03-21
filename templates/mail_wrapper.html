@@ -1,0 +1,14 @@
+<div class="email-menu-bar">
+    <div class="compose-mail">
+        <a href="{% url "account:mail_compose" %}" class="btn btn-block">Compose</a>
+    </div>
+    <div class="email-menu-bar-inner">
+        <ul>
+            <li class="active"><a href="mailbox.html"><i class="fa fa-envelope-o"></i>Inbox <span class="badge badge-success">8</span></a></li>
+            <li><a href="{% url "account:sent_mail" %}"><i class="fa fa-send-o"></i>Sent</a></li>
+            <li><a href="{% url "account:mail_draft" %}"><i class="fa fa-file-text-o"></i>Drafts <span class="badge badge-warning">8</span></a></li>
+            <li><a href="mailbox.html"><i class="fa fa-cloud-upload"></i>Outbox <span class="badge badge-danger">8</span></a></li>
+            <li><a href="mailbox.html"><i class="fa fa-trash-o"></i>Trash</a></li>
+        </ul>
+    </div>
+</div>
