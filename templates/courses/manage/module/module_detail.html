@@ -47,7 +47,6 @@
                                     <div class="col-lg-8 col-sm-12 col-md-12">
                                         <a href="{% url 'course:topic_content_create' topic.id 'text' %}" class="btn btn-secondary">TEXT</a>
                                         {% if video_count < 1 %}
-                                        {{ video_count }}
                                             <a href="{% url 'course:topic_content_create' topic.id 'video' %}" class="btn btn-secondary">VIDEO</a>
                                         {% endif %}
                                         <a href="{% url 'course:topic_content_create' topic.id 'image' %}" class="btn btn-secondary">IMAGES</a>
