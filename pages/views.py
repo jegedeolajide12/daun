@@ -3,6 +3,7 @@ from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView,UpdateView,DeleteView
 from django.views.generic.base import TemplateResponseMixin, View
+from django.db.models import Count
 
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy
@@ -12,7 +13,7 @@ from django.forms.models import modelform_factory
 from django.apps import apps
 
 
-from .models import Course, Content, Topic, Video
+from .models import Course, Content, Topic, Video, Faculty
 from .forms import CourseForm, ModuleFormSet
 
 
@@ -86,9 +87,12 @@ class ContentDeleteView(View):
     def post(self, request, content_id):
         content = get_object_or_404(Content, id=content_id, topic__course__owner=request.user)
         topic = content.topic
-        content.item.delete()
+        if content.item.owner != request.user:
+            return redirect('course:topic_detail', content.topic.id)  # Redirect if not the owner
+        if content.item:
+            content.item.delete()
         content.delete()
-        return redirect('course:detail', topic.id)
+        return redirect('course:topic_detail', topic.id)
     
 
 class OwnerMixin:
@@ -135,7 +139,7 @@ class CourseDeleteView(OwnerCourseMixin, DeleteView):
 
 
 def course_detail(request, course_slug):
-    course = get_object_or_404(Course, slug__iexact=course_slug)
+    course = get_object_or_404(Course.objects.annotate(total_topics=Count('course_topics')), slug__iexact=course_slug)
     context = {'course':course}
     return render(request, 'courses/manage/course/course_detail.html', context)
 
@@ -150,12 +154,19 @@ def topic_detail(request, topic_id):
     # Filter by the ContentType instance
     video_count = contents.filter(content_type=video_content_type).count()
 
-    # Debugging output
-    print(f"Video ContentType: {video_content_type}")
-    print(f"Video Count: {video_count}")
-    print(f"Contents: {contents.filter(content_type=video_content_type)}")
 
     context = {'topic': topic, 'contents': contents, 'video_count': video_count}
     return render(request, 'courses/manage/module/module_detail.html', context)
 
 
+class CourseListView(TemplateResponseMixin, View):
+    model = Course
+    template_name = 'courses/course/course_list.html'
+    
+    def get(self, request, faculty=None):
+        faculties = Faculty.objects.annotate(total_courses=Count('faculty_courses'))
+        courses = Course.objects.annotate(total_topics=Count('course_topics'))
+        if faculty:
+            faculty = get_object_or_404(Faculty, slug=faculty)
+            courses = courses.filter(faculty=faculty)
+        return self.render_to_response({'faculties':faculties, 'faculty':faculty, 'courses':courses})

@@ -369,6 +369,24 @@
 	   $('input[type="file"]').imageuploadify();
     });
 </script>
+<script>
+	const video = document.getElementById("myVideo");
+	const canvas = document.getElementById("thumbnailCanvas");
+	const img = document.getElementById("thumbnail");
+	const ctx = canvas.getContext("2d");
+  
+	video.addEventListener("loadeddata", () => {
+	  video.currentTime = 10; // Capture at 1 second (adjust as needed)
+	});
+  
+	video.addEventListener("seeked", () => {
+	  canvas.width = video.videoWidth;
+	  canvas.height = video.videoHeight;
+	  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+	  img.src = canvas.toDataURL(); // Convert canvas to image
+	  video.style.display = "none"; // Hide video element
+	});
+  </script>
 
 </body>
 

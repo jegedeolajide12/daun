@@ -28,6 +28,14 @@
                                             <img src="{{ content.item.file.url }}" alt="{{ content.item.title }}" class="rounded" width="100%">
                                         </div>
                                     {% endif %}
+                                    
+                                    <!-- Show Delete Button Only to the Owner -->
+                                    {% if content.item.owner == user %}
+                                        <form method="post" action="{% url 'course:content_delete' content.id %}">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger mt-2">Delete</button>
+                                        </form>
+                                    {% endif %}
                                 {% endfor %}
                                 <!-- Topic Details -->
                                 <div class="info-bx">
@@ -48,6 +56,8 @@
                                         <a href="{% url 'course:topic_content_create' topic.id 'text' %}" class="btn btn-secondary">TEXT</a>
                                         {% if video_count < 1 %}
                                             <a href="{% url 'course:topic_content_create' topic.id 'video' %}" class="btn btn-secondary">VIDEO</a>
+                                        {% else %}
+                                            <button class="btn btn-disabled" disabled>Video</button>
                                         {% endif %}
                                         <a href="{% url 'course:topic_content_create' topic.id 'image' %}" class="btn btn-secondary">IMAGES</a>
                                         <a href="{% url 'course:topic_content_create' topic.id 'file' %}" class="btn btn-secondary">FILES</a>
@@ -121,9 +131,8 @@
 
                         <!-- Sidebar Start -->
                         <div class="col-lg-4 col-xl-4">
-                            <aside class="side-bar sticky-top">
                                 <!-- Search Widget -->
-                                <div class="widget">
+                                <!--<div class="widget">
                                     <h6 class="widget-title">Search</h6>
                                     <div class="search-bx style-1">
                                         <form role="search" method="post">
@@ -135,26 +144,33 @@
                                             </div>
                                         </form>
                                     </div>
-                                </div>
+                                </div>-->
 
                                 <!-- Recent Posts Widget -->
                                 <div class="widget recent-posts-entry">
-                                    <h6 class="widget-title">Recent Posts</h6>
+                                    <h6 class="widget-title">Topic Contents</h6>
                                     <div class="widget-post-bx">
                                         <!-- Example Post -->
                                         <div class="widget-post clearfix">
-                                            <div class="ttr-post-media">
-                                                <img src="{% static 'assets/images/blog/recent-blog/pic1.jpg' %}" width="200" height="143" alt="">
-                                            </div>
-                                            <div class="ttr-post-info">
-                                                <div class="ttr-post-header">
-                                                    <h6 class="post-title"><a href="blog-details.html">This Story Behind Education Will Haunt You Forever.</a></h6>
-                                                </div>
-                                                <ul class="media-post">
-                                                    <li><a href="#"><i class="fa fa-calendar"></i>Oct 23 2019</a></li>
-                                                    <li><a href="#"><i class="fa fa-comments-o"></i>15 Comment</a></li>
-                                                </ul>
-                                            </div>
+                                            {% for content in contents %}
+                                                {% if content.item|model_name == 'video' and content.item.file %}
+                                                    <h6 class="widget-title">Video</h6>
+                                                    <div class="ttr-post-media">
+                                                        <video id="myVideo" width="100" height="143">
+                                                            <source src="{{ content.item.file.url }}" type="video/mp4">
+                                                            Your browser does not support the video tag.
+                                                        </video>
+                                                        <canvas id="thumbnailCanvas" style="display:none;"></canvas>
+                                                        <img id="thumbnail" width="640" height="360">
+                                                    </div>
+                                                
+                                                    <div class="ttr-post-info">
+                                                        <div class="ttr-post-header">
+                                                            <h6 class="post-title"><a href="blog-details.html">{{ content.item.title }}</a></h6>
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                            {% endfor%}
                                         </div>
                                         <!-- Repeat for other posts -->
                                     </div>
@@ -195,7 +211,6 @@
                                         <!-- Repeat for other tags -->
                                     </div>
                                 </div>
-                            </aside>
                         </div>
                         <!-- Sidebar END -->
                     </div>
