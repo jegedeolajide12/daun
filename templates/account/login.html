@@ -1,5 +1,6 @@
 {% extends parent_template|default:"navbar.html" %}
 {% load static %}
+{% load socialaccount %}
 {% block content %}
 <div class="account-form">
     <div class="account-head" style="background-image:url('{% static "assets/images/background/bg2.jpg" %}');">
@@ -67,7 +68,7 @@
                         <h6>Login with Social media</h6>
                         <div class="d-flex">
                             <a class="btn flex-fill m-r5 facebook" href="#"><i class="fa fa-facebook"></i>Facebook</a>
-                            <a class="btn flex-fill m-l5 google-plus" href="#"><i class="fa fa-google-plus"></i>Google Plus</a>
+                            <a class="btn flex-fill m-l5 google-plus" href="{% provider_login_url 'google' %}"><i class="fa fa-google-plus"></i>Google Plus</a>
                         </div>
                     </div>
                 </div>

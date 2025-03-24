@@ -1,0 +1,99 @@
+{% extends parent_template|default:"navbar.html" %}
+{% load static %}
+{% block content %}
+	<div class="account-form">
+		<div class="account-head" style="background-image:url('{% static "assets/images/background/bg2.jpg" %}');">
+			<a href="{% url "course:index" %}"><img src="{% static "assets/images/logo-white-2.png" %}" alt=""></a>
+		</div>
+		<div class="account-form-inner">
+			<div class="account-container">
+				<div class="heading-bx left">
+					<h2 class="title-head">Sign Up <span>Now</span></h2>
+					<p>Login Your Account <a href="{% url "account_login" %}">Click here</a></p>
+				</div>	
+				<form class="contact-bx" method="post" action="{% url "account_signup" %}" enctype="multipart/form-data">
+					{% csrf_token %}
+					{% if form.non_field_errors %}
+						<ul class="errorlist">
+							{% for error in form.non_field_errors %}
+								<li>{{ error }}</li>
+							{% endfor %}
+						</ul>
+                	{% endif %}
+					<div class="row placeani">
+						<div class="col-lg-12">
+							<div class="form-group">
+								<div class="input-group">
+									<label for="id_username">Your Username</label>
+									<input id="id_username" name="username" type="text" value="{% if form.username.value %}{{ form.username.value }}{% endif %}" required="" class="form-control">
+									{% if form.username.errors %}
+										<ul class="errorlist">
+											{% for error in form.username.errors %}
+												<li>{{ error }}</li>
+											{% endfor %}
+										</ul>
+                                	{% endif %}
+								</div>
+							</div>
+						</div>
+						<div class="col-lg-12">
+							<div class="form-group">
+								<div class="input-group">
+									<label for="id_email">Your Email Address</label>
+									<input id="id_email" name="email" type="email" value="{% if form.email.value %}{{ form.email.value }}{% endif %}" required="" class="form-control">
+									{% if form.email.errors %}
+										<ul class="errorlist">
+											{% for error in form.email.errors %}
+												<li>{{ error }}</li>
+											{% endfor %}
+										</ul>
+                                	{% endif %}
+								</div>
+							</div>
+						</div>
+						<div class="col-lg-12">
+							<div class="form-group">
+								<div class="input-group"> 
+									<label for="id_password1">Your Password</label>
+									<input id="id_password1" name="password1" type="password" class="form-control" required="">
+									{% if form.password1.errors %}
+										<ul class="errorlist">
+											{% for error in form.password1.errors %}
+												<li>{{ error }}</li>
+											{% endfor %}
+										</ul>
+                                	{% endif %}
+								</div>
+							</div>
+						</div>
+						
+						<div class="col-lg-12">
+							<div class="form-group">
+								<div class="input-group"> 
+									<label for="id_password2">Confirm Password</label>
+									<input id="id_password2" name="password2" type="password" class="form-control" required="">
+									{% if form.password2.errors %}
+										<ul class="errorlist">
+											{% for error in form.password2.errors %}
+												<li>{{ error }}</li>
+											{% endfor %}
+										</ul>
+                                	{% endif %}
+								</div>
+							</div>
+						</div>
+						<div class="col-lg-12 m-b30">
+							<button name="submit" type="submit" value="Submit" class="btn button-md">Sign Up</button>
+						</div>
+						<div class="col-lg-12">
+							<h6>Sign Up with Social media</h6>
+							<div class="d-flex">
+								<a class="btn flex-fill m-r5 facebook" href="#"><i class="fa fa-facebook"></i>Facebook</a>
+								<a class="btn flex-fill m-l5 google-plus" href="{% provider_login_url 'google' %}"><i class="fa fa-google-plus"></i>Google Plus</a>
+							</div>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+{% endblock %}

@@ -33,6 +33,8 @@ INSTALLED_APPS = [
     # Third-party
     "allauth",
     "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
     "crispy_forms",
     "crispy_bootstrap5",
     "debug_toolbar",
@@ -40,6 +42,7 @@ INSTALLED_APPS = [
     # Local
     "accounts",
     "pages",
+    'students.apps.StudentsConfig',
 ]
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#middleware
@@ -193,6 +196,7 @@ SITE_ID = 1
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#login-redirect-url
 LOGIN_REDIRECT_URL = "course:home"
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"  # Options: "mandatory", "optional", "none"
 
 # https://django-allauth.readthedocs.io/en/latest/views.html#logout-account-logout
 ACCOUNT_LOGOUT_REDIRECT_URL = "course:index"
@@ -205,7 +209,9 @@ AUTHENTICATION_BACKENDS = (
 # https://django-allauth.readthedocs.io/en/latest/configuration.html
 ACCOUNT_SESSION_REMEMBER = True
 ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = False
-ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_USERNAME_REQUIRED = True
 ACCOUNT_AUTHENTICATION_METHOD = "username_email"
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
+
+SOCIALACCOUNT_PROVIDERS = {}
