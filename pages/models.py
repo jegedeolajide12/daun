@@ -21,6 +21,7 @@ class Faculty(models.Model):
         return self.name
     
 class Course(models.Model):
+    students = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='courses_joined', blank=True)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='courses_created', on_delete=models.CASCADE)
     faculty = models.ForeignKey(Faculty, related_name='facuty_courses', on_delete=models.CASCADE)
     name = models.CharField(max_length=200)

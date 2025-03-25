@@ -33,10 +33,20 @@
 								<div class="course-price">
 									<del>$190</del>
 									<h4 class="price">$120</h4>
-								</div>	
-								<div class="course-buy-now text-center">
-									<a href="{% url "course:course_module_update" course.slug %}" class="btn radius-xl text-uppercase">Edit the Topics</a>
 								</div>
+								{% if request.user.is_authenticated %}
+									{% if request.user == course.owner %}
+										<div class="course-buy-now text-center">
+											<a href="{% url "course:course_module_update" course.slug %}" class="btn radius-xl text-uppercase">Edit the Topics</a>
+										</div>
+									{% else %}
+										<div class="course-buy-now text-center">
+											<form action="{% url 'student:student_enroll_course' %}" method="post">
+												<button type="submit" class="btn radius-xl text-uppercase">Enroll</button>
+											</form>
+										</div>
+									{% endif %}
+								{% endif %}
 								<div class="teacher-bx">
 									<div class="teacher-info">
 										<div class="teacher-thumb">

@@ -12,6 +12,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.forms.models import modelform_factory
 from django.apps import apps
 
+from students.forms import CourseEnrollForm
 
 from .models import Course, Content, Topic, Video, Faculty
 from .forms import CourseForm, ModuleFormSet
@@ -137,10 +138,13 @@ class CourseDeleteView(OwnerCourseMixin, DeleteView):
     template_name = 'courses/manage/course/delete_confirm.html'
 
 
-
+@login_required
 def course_detail(request, course_slug):
     course = get_object_or_404(Course.objects.annotate(total_topics=Count('course_topics')), slug__iexact=course_slug)
-    context = {'course':course}
+    # Initialize the enrollment form with the current course
+    enroll_form = CourseEnrollForm(initial={'course': course})
+    owner = course.owner
+    context = {'course':course, 'enroll_form':enroll_form, 'owner':owner}
     return render(request, 'courses/manage/course/course_detail.html', context)
 
 

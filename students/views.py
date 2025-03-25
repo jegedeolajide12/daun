@@ -1,9 +1,13 @@
 from django.shortcuts import render
 from django.urls import reverse_lazy
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
+from django.views.generic.list import ListView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from .forms import CourseEnrollForm
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login, authenticate
 
+from pages.models import Course
 
 class StudentRegistrationView(CreateView):
     template_name = 'students/student/registration.html'
@@ -19,3 +23,24 @@ class StudentRegistrationView(CreateView):
         else:
             form.add_error(None, "Authentication failed. Please check your credentials.")
         return result
+
+
+class StudentEnrollCourseView(LoginRequiredMixin, FormView):
+    course = None
+    form_class = CourseEnrollForm
+
+    def form_valid(self, form):
+        self.course = form.cleaned_data['course']
+        self.course.students.add(self.request.user)
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('student:student_course_detail', args=[self.course.id])
+
+class StudentCourseListView(LoginRequiredMixin, ListView):
+    model = Course
+    template_name = 'courses/course/student_courses.html'
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        return qs.filter(students__in=[self.request.user])
