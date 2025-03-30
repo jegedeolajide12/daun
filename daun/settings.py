@@ -182,6 +182,7 @@ DEFAULT_FROM_EMAIL = "root@localhost"
 # https://docs.djangoproject.com/en/dev/ref/settings/#internal-ips
 INTERNAL_IPS = ["127.0.0.1"]
 
+ACCOUNT_ADAPTER = 'accounts.adapters.CustomAccountAdapter'
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024 * 1024
 MAX_REQUEST_SIZE = 1024 * 1024 * 1024
@@ -195,7 +196,7 @@ AUTH_USER_MODEL = "accounts.CustomUser"
 SITE_ID = 1
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#login-redirect-url
-LOGIN_REDIRECT_URL = "course:home"
+LOGIN_REDIRECT_URL = "student:student_home"
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"  # Options: "mandatory", "optional", "none"
 
 # https://django-allauth.readthedocs.io/en/latest/views.html#logout-account-logout

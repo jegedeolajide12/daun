@@ -6,23 +6,21 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from .forms import CourseEnrollForm
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login, authenticate
+from django.contrib.auth.models import Group
 
-from pages.models import Course
+from pages.models import Course, Faculty
 
-class StudentRegistrationView(CreateView):
-    template_name = 'students/student/registration.html'
-    form_class = UserCreationForm
-    success_url = reverse_lazy('student:student')
-
-    def form_valid(self, form):
-        result = super().form_valid(form)
-        cd = form.cleaned_data
-        user = authenticate(username=cd['username'], email=cd['email'], password=cd['password1'])
-        if user is not None:
-            login(self.request, user)
-        else:
-            form.add_error(None, "Authentication failed. Please check your credentials.")
-        return result
+class StudentHomePage(ListView):
+    model = Course
+    template_name = 'courses/student_home.html'
+    context_object_name = 'courses'
+    def get_context_data(self, **kwargs):
+        instructor_group = Group.objects.get(name="Instructors").user_set.all()
+        context = super().get_context_data(**kwargs)
+        context['courses'] = Course.objects.all()
+        context['faculties'] = Faculty.objects.all()
+        context['is_instructor'] = self.request.user.groups.filter(name="Instructors").exists()
+        return context
 
 
 class StudentEnrollCourseView(LoginRequiredMixin, FormView):

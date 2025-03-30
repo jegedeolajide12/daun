@@ -338,7 +338,26 @@
 	<!-- Left sidebar menu end -->
 
 {% block content %}
-
+{% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+    <script>
+        // Automatically hide messages after 5 seconds
+        setTimeout(function() {
+            const messages = document.querySelector('.messages');
+            if (messages) {
+                messages.style.transition = 'opacity 0.5s ease';
+                messages.style.opacity = '0';
+                setTimeout(() => messages.remove(), 500); // Remove from DOM after fade-out
+            }
+        }, 5000); // 5000ms = 5 seconds
+    </script>
+{% endif %}
 {% endblock %}
 <script src="{% static "asset/js/jquery.min.js" %}"></script>
 <script src="{% static "asset/vendors/bootstrap/js/popper.min.js" %}"></script>

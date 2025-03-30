@@ -1,12 +1,73 @@
-from django.shortcuts import render
-# Create your views here.
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required,user_passes_test
+from django.contrib import messages
+from django.contrib.auth.models import Group
+
+from .forms import InstructorApplicationForm, CustomUserChangeForm
+from .models import CustomUser, InstructorApplication
+
+
+from allauth.account.views import SignupView
+
+def is_admin(user):
+    return user.groups.filter(name='Admin').exists()
+def is_instructor(user):
+    return user.groups.filter(name='Instructors').exists()
 
 
 
+@login_required
+def instructor_application(request):
+    application, created = InstructorApplication.objects.get_or_create(user=request.user)
+    if not application.is_verified:
+        messages.warning(request, "Your application is pending verification.")
+        return redirect(request.META.get('HTTP_REFERER'))
+    
+
+    if request.method == 'POST':
+        form = InstructorApplicationForm(request.POST, request.FILES, instance=request.user)
+        if form.is_valid():
+            form.save()
+            application.is_verified = False  # Mark the application as pending verification
+            application.save()
+            messages.success(request, "Your application has been submitted successfully. Please wait for admin approval.")
+            return redirect('account:dashboard')
+    else:
+        form = InstructorApplicationForm(instance=request.user)
+    
+    return render(request, 'account/instructor_application.html', {'form': form})
 
 
+@user_passes_test(is_admin)
+def verify_application(request, application_id):
+    
+    try:
+        application = InstructorApplication.objects.get(id=application_id)
+        application.is_verified = True
+        application.save()
+
+        # Add the user to the "Instructors" group
+        instructors_group, _ = Group.objects.get_or_create(name="Instructors")
+        application.user.groups.add(instructors_group)
+
+        messages.success(request, "Instructor application verified successfully.")
+    except InstructorApplication.DoesNotExist:
+        messages.error(request, "Instructor application not found.")
+
+    return redirect('account:dashboard')
+def reject_application(request, application_id):
+    try:
+        application = InstructorApplication.objects.get(id=application_id)
+        application.delete()
+        messages.success(request, "Instructor application rejected successfully.")
+    except InstructorApplication.DoesNotExist:
+        messages.error(request, "Instructor application not found.")
+    return redirect('account:dashboard')
+
+@user_passes_test(lambda user: is_instructor(user) or is_admin(user))
 def admin_dashboard(request):
-    context = {}
+    applications = InstructorApplication.objects.filter(is_verified=False)
+    context = {'applications': applications}
     return render(request, 'account/admin/dashboard.html', context)
 
 def mail_inbox(request):

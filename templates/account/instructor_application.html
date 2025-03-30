@@ -1,0 +1,101 @@
+{% extends parent_template|default:"navbar.html" %}
+{% load static %}
+{% block content %}
+    <div class="account-form">
+        <div class="account-head" style="background-image:url('{% static "assets/images/background/bg2.jpg" %}');">
+            <a href="{% url "course:index" %}"><img src="{% static "assets/images/logo-white-2.png" %}" alt=""></a>
+        </div>
+        <div class="account-form-inner">
+            <div class="account-container">
+                <div class="heading-bx left">
+                    <h2 class="title-head">Apply to be an instructor <span>Now</span></h2>
+                    <p>Login Your Account <a href="{% url "account_login" %}">Click here</a></p>
+                </div>    
+                <form class="contact-bx" method="post" action="{% url "account:instructor_application" %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {% if form.non_field_errors %}
+                        <ul class="errorlist">
+                            {% for error in form.non_field_errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    <div class="row placeani">
+                        
+                        <!-- Profile Picture Field -->
+                        <div class="col-lg-12">
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <label for="id_profile_picture">Profile Picture</label>
+                                    {{ form.profile_picture }}
+                                    {% if form.profile_picture.errors %}
+                                        <ul class="errorlist">
+                                            {% for error in form.profile_picture.errors %}
+                                                <li>{{ error }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Date of Birth Field -->
+                        <div class="col-lg-12">
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <label for="id_date_of_birth">Date of Birth</label>
+                                    {{ form.date_of_birth }}
+                                    {% if form.date_of_birth.errors %}
+                                        <ul class="errorlist">
+                                            {% for error in form.date_of_birth.errors %}
+                                                <li>{{ error }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Bio Field -->
+                        <div class="col-lg-12">
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <label for="id_bio">Short Bio</label>
+                                    {{ form.bio }}
+                                    {% if form.bio.errors %}
+                                        <ul class="errorlist">
+                                            {% for error in form.bio.errors %}
+                                                <li>{{ error }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Phone Number Field -->
+                        <div class="col-lg-12">
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <label for="id_phone_number">Phone Number</label>
+                                    {{ form.phone_number }}
+                                    {% if form.phone_number.errors %}
+                                        <ul class="errorlist">
+                                            {% for error in form.phone_number.errors %}
+                                                <li>{{ error }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <div class="col-lg-12 m-b30">
+                            <button name="submit" type="submit" value="Submit" class="btn button-md">Submit Application</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+{% endblock %}

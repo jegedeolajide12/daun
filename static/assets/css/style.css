@@ -15,6 +15,7 @@
 11. COUNTERUP
 12. FOOTER
 13. INNER CONTENT CSS
+14. MESSAGES
 ======================================
   * END TABLE CONTENT *  
 ======================================
@@ -3355,4 +3356,38 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#391800', end
 		font-size: 24px;
 		margin-bottom: 5px;
 	}
+}
+/*========================
+	14. MESSAGES
+=========================*/
+.messages {
+    margin: 20px auto;
+    padding: 10px;
+    width: 90%;
+    max-width: 800px;
+}
+
+.alert {
+    padding: 15px;
+    margin-bottom: 10px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+
+.alert-success {
+    color: #3c763d;
+    background-color: #dff0d8;
+    border-color: #d6e9c6;
+}
+
+.alert-error {
+    color: #a94442;
+    background-color: #f2dede;
+    border-color: #ebccd1;
+}
+
+.alert-info {
+    color: #31708f;
+    background-color: #d9edf7;
+    border-color: #bce8f1;
 }

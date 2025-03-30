@@ -1,30 +1,56 @@
 from django.contrib import admin
-from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.models import Group
 
-from .forms import CustomUserCreationForm, CustomUserChangeForm
-from .models import CustomUser
+from .models import CustomUser,InstructorApplication
+from .forms import InstructorApplicationForm, CustomUserChangeForm
 
 
-class CustomUserAdmin(UserAdmin):
-    add_form = CustomUserCreationForm
-    form = CustomUserChangeForm
+
+class InstructorAdmin(UserAdmin):
+    add_form = InstructorApplicationForm  # Use the custom creation form
+    form = CustomUserChangeForm  # Use the custom change form
     model = CustomUser
-    list_display = [
-        "email",
-        "username",
-    ]
 
-    # Explicitly define add_fieldsets to prevent unexpected fields
+    # Fields to display in the admin list view
+    list_display = ('username', 'email', 'is_staff', 'is_active')
+    list_filter = ('is_staff', 'is_active')
+
+    # Fields to display in the admin detail view
+    fieldsets = (
+        (None, {'fields': ('username', 'email', 'password')}),
+        ('Personal Info', {'fields': ('first_name', 'last_name', 'profile_picture', 'date_of_birth', 'bio', 'phone_number')}),
+        ('Permissions', {'fields': ('is_staff', 'is_active', 'groups', 'user_permissions')}),
+    )
     add_fieldsets = (
-        (
-            None,
-            {
-                "classes": ("wide",),
-                "fields": ("username", "email", "password1", "password2"),
-            },
+        (None, {
+            'classes': ('wide',),
+            'fields': ('username', 'email', 'password1', 'password2', 'roles', 'is_staff', 'is_active')}
         ),
     )
 
+    search_fields = ('username', 'email', 'roless')
+    ordering = ('username',)
+# Register the CustomUser model with the custom admin
+admin.site.register(CustomUser, InstructorAdmin)
 
-admin.site.register(CustomUser, CustomUserAdmin)
+@admin.register(InstructorApplication)
+class InstructorApplicationAdmin(admin.ModelAdmin):
+    list_display = ('user', 'application_date', 'is_verified')
+    list_filter = ('is_verified',)
+    search_fields = ('user__username', 'user__email')
+    ordering = ('-application_date',)
+    actions = ['approve_applications', 'reject_applications']
+    def approve_applications(self, request, queryset):
+        instructors_group, _ = Group.objects.get_or_create(name='Instructors')
+        for application in queryset:
+            application.is_verified = True
+            application.user.groups.add(instructors_group)
+            application.user.save()
+            application.save()
+    approve_applications.short_description = "Approve selected instructor applications"
+    def reject_applications(self, request, queryset):
+        for application in queryset:
+            application.is_verified = False
+            application.save()
+    reject_applications.short_description = "Reject selected instructor applications"

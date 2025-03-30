@@ -17,7 +17,7 @@
 					<div class="widget-card widget-bg1">					 
 						<div class="wc-item">
 							<h4 class="wc-title">
-								Total Frofit
+								Total Profit
 							</h4>
 							<span class="wc-des">
 								All Customs Value
@@ -208,71 +208,28 @@
 				<div class="col-lg-6 m-b30">
 					<div class="widget-box">
 						<div class="wc-title">
-							<h4>New Users</h4>
+							<h4>New Instructor Applications</h4>
 						</div>
 						<div class="widget-inner">
 							<div class="new-user-list">
 								<ul>
+									{% for application in applications %}
 									<li>
 										<span class="new-users-pic">
-											<img src="assets/images/testimonials/pic1.jpg" alt=""/>
+											<img src="{{ application.user.profile_picture.url }}" alt=""/>
 										</span>
 										<span class="new-users-text">
-											<a href="#" class="new-users-name">Anna Strong </a>
-											<span class="new-users-info">Visual Designer,Google Inc </span>
+											<a href="#" class="new-users-name">{{ application.user.username }}</a>
+											<span class="new-users-info">{{ application.user.email }} </span>
 										</span>
 										<span class="new-users-btn">
-											<a href="#" class="btn button-sm outline">Follow</a>
-										</span>
-									</li>
-									<li>
-										<span class="new-users-pic">
-											<img src="assets/images/testimonials/pic2.jpg" alt=""/>
-										</span>
-										<span class="new-users-text">
-											<a href="#" class="new-users-name"> Milano Esco </a>
-											<span class="new-users-info">Product Designer, Apple Inc </span>
+											<a href="{% url "account:verify_application" application.id %}" class="btn button-sm outline">Approve</a>
 										</span>
 										<span class="new-users-btn">
-											<a href="#" class="btn button-sm outline">Follow</a>
+											<a href="{% url "account:reject_application" application.id %}" class="btn button-sm outline">Reject</a>
 										</span>
 									</li>
-									<li>
-										<span class="new-users-pic">
-											<img src="assets/images/testimonials/pic1.jpg" alt=""/>
-										</span>
-										<span class="new-users-text">
-											<a href="#" class="new-users-name">Nick Bold  </a>
-											<span class="new-users-info">Web Developer, Facebook Inc </span>
-										</span>
-										<span class="new-users-btn">
-											<a href="#" class="btn button-sm outline">Follow</a>
-										</span>
-									</li>
-									<li>
-										<span class="new-users-pic">
-											<img src="assets/images/testimonials/pic2.jpg" alt=""/>
-										</span>
-										<span class="new-users-text">
-											<a href="#" class="new-users-name">Wiltor Delton </a>
-											<span class="new-users-info">Project Manager, Amazon Inc </span>
-										</span>
-										<span class="new-users-btn">
-											<a href="#" class="btn button-sm outline">Follow</a>
-										</span>
-									</li>
-									<li>
-										<span class="new-users-pic">
-											<img src="assets/images/testimonials/pic3.jpg" alt=""/>
-										</span>
-										<span class="new-users-text">
-											<a href="#" class="new-users-name">Nick Stone </a>
-											<span class="new-users-info">Project Manager, Amazon Inc  </span>
-										</span>
-										<span class="new-users-btn">
-											<a href="#" class="btn button-sm outline">Follow</a>
-										</span>
-									</li>
+								{% endfor %}
 								</ul>
 							</div>
 						</div>
