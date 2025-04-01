@@ -19,8 +19,8 @@ def is_instructor(user):
 @login_required
 def instructor_application(request):
     application, created = InstructorApplication.objects.get_or_create(user=request.user)
-    if not application.is_verified:
-        messages.warning(request, "Your application is pending verification.")
+    if not created and not application.is_verified:
+        messages.error(request, "Your application is already submitted and is pending verification.")
         return redirect(request.META.get('HTTP_REFERER'))
     
 
@@ -31,7 +31,7 @@ def instructor_application(request):
             application.is_verified = False  # Mark the application as pending verification
             application.save()
             messages.success(request, "Your application has been submitted successfully. Please wait for admin approval.")
-            return redirect('account:dashboard')
+            return redirect('student:student_home')
     else:
         form = InstructorApplicationForm(instance=request.user)
     
