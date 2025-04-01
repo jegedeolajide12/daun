@@ -1,0 +1,42 @@
+{% extends parent_template|default:"navbar.html" %}
+{% load static %}
+{% block content %}
+
+    <!-- Content -->
+    <div class="page-content bg-white">
+        <!-- inner page banner -->
+        <div class="page-banner ovbl-dark" style="background-image:url(assets/images/banner/banner2.jpg);">
+            <div class="container">
+                <div class="page-banner-entry">
+                    <h1 class="text-white">Confirm Email</h1>
+				 </div>
+            </div>
+        </div>
+		<!-- Breadcrumb row -->
+		<div class="breadcrumb-row">
+			<div class="container">
+				<ul class="list-inline">
+					<li><a href="#">Home</a></li>
+					<li>Confirm Email</li>
+				</ul>
+			</div>
+		</div>
+		<!-- Breadcrumb row END -->
+        <!-- inner page banner END -->
+		<div class="content-block">
+            <!-- About Us -->
+			<div class="section-area section-sp2">
+                <div class="container">
+					<div class="row">
+						<div class="col-md-12 heading-bx text-center">
+							<h2 class="title-head text-uppercase m-b0">Check Your Email</h2>
+                            <p>We have sent a confirmation email to your inbox. Please check your email and click the confirmation link to complete the process.</p>
+                            <p>If you don't see the email, please check your spam folder or <a href="{% url 'account_email' %}">resend the confirmation email</a>.</p>
+						</div>
+					</div>
+				</div>
+            </div>
+		</div>
+    </div>
+    <!-- Content END-->
+{% endblock %}

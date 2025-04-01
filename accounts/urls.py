@@ -1,4 +1,5 @@
 from django.urls import path
+from allauth.account.views import EmailVerificationSentView
 
 from .views import (admin_dashboard,
                      mail_inbox, 
