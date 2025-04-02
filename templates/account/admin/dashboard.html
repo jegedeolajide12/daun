@@ -215,9 +215,11 @@
 								<ul>
 									{% for application in applications %}
 									<li>
-										<span class="new-users-pic">
-											<img src="{{ application.user.profile_picture.url }}" alt=""/>
-										</span>
+										{% if application.user.profile_picture %}
+											<span class="new-users-pic">
+												<img src="{{ application.user.profile_picture.url }}" alt=""/>
+											</span>
+										{% endif%}
 										<span class="new-users-text">
 											<a href="#" class="new-users-name">{{ application.user.username }}</a>
 											<span class="new-users-info">{{ application.user.email }} </span>
