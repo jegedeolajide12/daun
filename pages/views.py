@@ -4,6 +4,7 @@ from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView,UpdateView,DeleteView
 from django.views.generic.base import TemplateResponseMixin, View
 from django.db.models import Count
+from django.contrib import messages
 
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy
@@ -26,7 +27,12 @@ class CourseModuleUpdateView(TemplateResponseMixin, View):
         return ModuleFormSet(instance=self.course, data=data)
     
     def dispatch(self, request, course_slug):
-        self.course = get_object_or_404(Course, slug=course_slug, owner = request.user)
+        try:
+            self.course = get_object_or_404(Course, slug=course_slug, owner = request.user)
+        except Course.DoesNotExist:
+            # Handle the case where the course does not exist
+            messages.error(request, "You do not own this course")
+            return redirect('course:home')
         return super().dispatch(request, course_slug)
     
     def get(self, request, *args, **kwargs):
@@ -126,6 +132,9 @@ class ManageCourseListView(OwnerCourseMixin, ListView):
     context_object_name = 'courses'
     template_name = 'courses/manage/course/list.html'
     permission_required = 'pages.view_course'
+
+    def get_queryset(self):
+        courses = Course.objects.filter(owner=self.request.user)
 
 class CourseCreateView(OwnerCourseEditMixin, CreateView):
     permission_required = 'pages.add_course'
