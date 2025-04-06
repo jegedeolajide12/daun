@@ -120,6 +120,15 @@ class OwnerCourseMixin(OwnerMixin, LoginRequiredMixin, PermissionRequiredMixin):
     success_url = reverse_lazy('course:home')
 
 
+class OwnerCourseCreateMixin(OwnerCourseMixin, CreateView):
+    template_name = 'courses/manage/course/create_course.html'
+    permission_required = 'pages.add_course'
+
+    def form_valid(self, form):
+        form.instance.owner = self.request.user  # Set the owner to the current user
+        return super().form_valid(form)
+
+
 class OwnerCourseEditMixin(OwnerCourseMixin, OwnerEditMixin):
     template_name = 'courses/manage/course/edit_course.html'
 
@@ -135,8 +144,9 @@ class ManageCourseListView(OwnerCourseMixin, ListView):
 
     def get_queryset(self):
         courses = Course.objects.filter(owner=self.request.user)
+        return courses
 
-class CourseCreateView(OwnerCourseEditMixin, CreateView):
+class CourseCreateView(OwnerCourseCreateMixin):
     permission_required = 'pages.add_course'
 
 class CourseUpdateView(OwnerCourseEditMixin, UpdateView):

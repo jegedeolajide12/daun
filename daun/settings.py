@@ -182,7 +182,6 @@ DEFAULT_FROM_EMAIL = "root@localhost"
 # https://docs.djangoproject.com/en/dev/ref/settings/#internal-ips
 INTERNAL_IPS = ["127.0.0.1"]
 
-ACCOUNT_ADAPTER = 'accounts.adapters.CustomAccountAdapter'
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024 * 1024
 MAX_REQUEST_SIZE = 1024 * 1024 * 1024

@@ -6,17 +6,14 @@ from .models import CustomUser,InstructorApplication
 from .forms import InstructorApplicationForm, CustomUserChangeForm
 
 
-
 class InstructorAdmin(UserAdmin):
-    add_form = InstructorApplicationForm  # Use the custom creation form
-    form = CustomUserChangeForm  # Use the custom change form
+    add_form = InstructorApplicationForm
+    form = CustomUserChangeForm
     model = CustomUser
 
-    # Fields to display in the admin list view
     list_display = ('username', 'email', 'is_staff', 'is_active')
     list_filter = ('is_staff', 'is_active')
 
-    # Fields to display in the admin detail view
     fieldsets = (
         (None, {'fields': ('username', 'email', 'password')}),
         ('Personal Info', {'fields': ('first_name', 'last_name', 'profile_picture', 'date_of_birth', 'bio', 'phone_number')}),
@@ -25,14 +22,15 @@ class InstructorAdmin(UserAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('username', 'email', 'password1', 'password2', 'roles', 'is_staff', 'is_active')}
+            'fields': ('username', 'email', 'password1', 'password2', 'is_staff', 'is_active')}
         ),
     )
 
-    search_fields = ('username', 'email', 'roless')
+    search_fields = ('username', 'email')
     ordering = ('username',)
-# Register the CustomUser model with the custom admin
+
 admin.site.register(CustomUser, InstructorAdmin)
+
 
 @admin.register(InstructorApplication)
 class InstructorApplicationAdmin(admin.ModelAdmin):

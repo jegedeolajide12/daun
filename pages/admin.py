@@ -16,7 +16,7 @@ class CourseAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug':('name',)}
     list_display = ['name', 'slug', 'created']
     list_filter = ['created', 'faculty']
-    search_fields = ['title', 'overview']
+    search_fields = ['name', 'overview']
     inlines = [TopicInline]
 
 admin.site.register(Video)
