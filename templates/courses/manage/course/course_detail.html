@@ -50,7 +50,11 @@
 								<div class="teacher-bx">
 									<div class="teacher-info">
 										<div class="teacher-thumb">
-											<img src="{% static "assets/images/testimonials/pic1.jpg" %}" alt=""/>
+											{% if course.owner.profile_picture %}
+												<img src="{{ course.owner.profile_picture.url }}" alt="">
+											{% else %}
+												<img src="{% static "asset/images/empty_profile.jpg" %}" alt="">
+											{% endif %}
 										</div>
 										<div class="teacher-name">
 											<h5>{{ course.owner.last_name }} {{ course.owner.first_name }}</h5>
@@ -88,7 +92,7 @@
 						<div class="col-lg-9 col-md-8 col-sm-12">
 							<div class="courses-post">
 								<div class="ttr-post-media media-effect">
-									<a href="#"><img src="{% static "assets/images/blog/default/thum1.jpg" %}" alt=""></a>
+									<a href="#"><img src="{{ course.cover_image.url }}" alt=""></a>
 								</div>
 								<div class="ttr-post-info">
 									<div class="ttr-post-title ">
@@ -157,7 +161,11 @@
 								<h4>Instructor</h4>
 								<div class="instructor-bx">
 									<div class="instructor-author">
-										<img src="{% static "assets/images/testimonials/pic1.jpg" %}" alt="">
+										{% if course.owner.profile_picture %}
+											<img src="{{ course.owner.profile_picture.url }}" alt="">
+										{% else %}
+											<img src="{% static "asset/images/empty_profile.jpg" %}" alt="">
+										{% endif %}
 									</div>
 									<div class="instructor-info">
 										<h6>{{ course.owner.last_name }} {{ course.owner.first_name }}</h6>
@@ -168,7 +176,7 @@
 											<li><a href="#" class="btn sharp-sm linkedin"><i class="fa fa-linkedin"></i></a></li>
 											<li><a href="#" class="btn sharp-sm google-plus"><i class="fa fa-google-plus"></i></a></li>
 										</ul>
-										<p class="m-b0">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries</p>
+										<p class="m-b0">{{ course.owner.bio|truncatewords:30 }}</p>
 									</div>
 								</div>
 							</div>
