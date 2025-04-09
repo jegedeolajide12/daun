@@ -40,11 +40,15 @@
 											<a href="{% url "course:course_module_update" course.slug %}" class="btn radius-xl text-uppercase">Edit the Topics</a>
 										</div>
 									{% else %}
-										<div class="course-buy-now text-center">
-											<form action="{% url 'student:student_enroll_course' %}" method="post">
-												<button type="submit" class="btn radius-xl text-uppercase">Enroll</button>
-											</form>
-										</div>
+										{% if not is_student %}
+											<div class="course-buy-now text-center">
+												<form method="post">
+													{% csrf_token %}
+													{{ enroll_form.as_p }}
+													<button type="submit" class="btn radius-xl text-uppercase">Enroll</button>
+												</form>
+											</div>
+										{% endif %}
 									{% endif %}
 								{% endif %}
 								<div class="teacher-bx">

@@ -25,3 +25,4 @@ class InstructorApplication(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {'verified' if self.is_verified else 'not verified'} - {self.application_date}"
+

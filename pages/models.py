@@ -1,5 +1,6 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
@@ -7,6 +8,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 
 from .fields import OrderField
 
+User = get_user_model()
 # Create your models here.
 
 class Faculty(models.Model):
@@ -88,3 +90,4 @@ class Video(ItemBase):
 
     def has_video(self):
         return bool(self.file or self.url)
+

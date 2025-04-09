@@ -160,10 +160,21 @@ class CourseDeleteView(OwnerCourseMixin, DeleteView):
 @login_required
 def course_detail(request, course_slug):
     course = get_object_or_404(Course.objects.annotate(total_topics=Count('course_topics')), slug__iexact=course_slug)
-    # Initialize the enrollment form with the current course
-    enroll_form = CourseEnrollForm(initial={'course': course})
     owner = course.owner
-    context = {'course':course, 'enroll_form':enroll_form, 'owner':owner}
+    is_student = course.students.filter(id=request.user.id).exists()
+
+    if request.method == 'POST':
+        # Handle form submission
+        enroll_form = CourseEnrollForm(request.POST)
+        if enroll_form.is_valid():
+            course.students.add(request.user)  # Enroll the user in the course
+            messages.success(request, "You have successfully enrolled in the course!")
+            return redirect('course:course', course_slug=course.slug)
+    else:
+        # Initialize the enrollment form with the current course
+        enroll_form = CourseEnrollForm(initial={'course': course})
+
+    context = {'course': course, 'enroll_form': enroll_form, 'owner': owner, 'is_student': is_student}
     return render(request, 'courses/manage/course/course_detail.html', context)
 
 

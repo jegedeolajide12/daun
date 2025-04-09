@@ -55,7 +55,6 @@ def instructor_application(request):
     return render(request, 'account/instructor_application.html', {'form': form})
 
 
-
 @user_passes_test(is_admin)
 def verify_application(request, application_id):
     
@@ -67,6 +66,7 @@ def verify_application(request, application_id):
         # Add the user to the "Instructors" group
         instructors_group, _ = Group.objects.get_or_create(name="Instructors")
         application.user.groups.add(instructors_group)
+
 
         messages.success(request, "Instructor application verified successfully.")
     except InstructorApplication.DoesNotExist:

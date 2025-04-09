@@ -45,7 +45,7 @@
                                 </ul>
                             </div>
 							<div class="widget">
-								<a href="#"><img src="assets/images/adv/adv.jpg" alt=""/></a>
+								<a href="#"><img src="{% static "assets/images/adv/adv.jpg" %}" alt=""/></a>
 							</div>
 						</div>
 						<div class="col-lg-9 col-md-8 col-sm-12">
@@ -58,7 +58,7 @@
 											<a href="#" class="btn">Read More</a>
 										</div>
 										<div class="info-bx text-center">
-											<h5><a href="#">{{ course.name|upper }}</a></h5>
+											<h5><a href="{% url "course:course" course.slug %}">{{ course.name|upper }}</a></h5>
 											<span>Faculty of {{ course.faculty|title }}</span>
 										</div>
 										<div class="cours-more-info">

@@ -23,17 +23,6 @@ class StudentHomePage(ListView):
         return context
 
 
-class StudentEnrollCourseView(LoginRequiredMixin, FormView):
-    course = None
-    form_class = CourseEnrollForm
-
-    def form_valid(self, form):
-        self.course = form.cleaned_data['course']
-        self.course.students.add(self.request.user)
-        return super().form_valid(form)
-
-    def get_success_url(self):
-        return reverse_lazy('student:student_course_detail', args=[self.course.id])
 
 class StudentCourseListView(LoginRequiredMixin, ListView):
     model = Course
