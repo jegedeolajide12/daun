@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
-
+from django.utils.text import slugify
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
@@ -35,6 +35,7 @@ class Course(models.Model):
 
     class Meta:
         ordering = ['-created']
+    
     
     def __str__(self):
         return self.name
