@@ -21,6 +21,9 @@
                     </div>
                     <!-- Debugging context -->
                     {% if courses %}
+                    <div class="widget-inner text-right p-5">
+                        <a href="{% url 'course:course_create' %}" class="btn green radius-xl">Create a Course</a>
+                    </div>
                     <div class="widget-inner">
                         {% for course in courses %}
                         <div class="card-courses-list admin-courses">
@@ -71,6 +74,7 @@
                             </div>
                         </div>
                         {% endfor %}
+                        
                     </div>
                     {% else %}
                     <div class="widget-inner text-center p-5">
