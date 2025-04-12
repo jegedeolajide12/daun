@@ -129,6 +129,7 @@ class OwnerCourseCreateMixin(OwnerCourseMixin, CreateView):
         try:
             form.instance.owner = self.request.user # Set the owner to the current user
             form.instance.slug = slugify(form.instance.name)
+            return super().form_valid(form)
         except IntegrityError:
             messages.error(self.request, "A Course with this name already exists. Please choose a different name")
             return self.render_to_response(self.get_context_data(form=form))
@@ -150,25 +151,13 @@ class ManageCourseListView(OwnerCourseMixin, ListView):
     def get_queryset(self):
         courses = Course.objects.filter(owner=self.request.user)
         return courses
+
 class CourseCreateView(OwnerCourseCreateMixin):
     permission_required = 'pages.add_course'
 
-    def form_valid(self, form):
-        form.instance.owner = self.request.user
-        form.instance.slug = slugify(form.instance.name)
-        try:
-            return super().form_valid(form)
-        except IntegrityError:
-            messages.error(self.request, "A course with this name already exists. Please choose a different name.")
-            form.add_error('name', "A course with this name already exists.")
-            return self.form_invalid(form)  # This returns a response
+            
 
-        # ✅ Always end with a return, though this line will never be reached.
-        return super().form_invalid(form)
-
-    def form_invalid(self, form):
-        messages.error(self.request, "There was an error with your submission. Please correct the errors below.")
-        return super().form_invalid(form)
+    
 
 
 class CourseUpdateView(OwnerCourseEditMixin, UpdateView):
@@ -189,7 +178,8 @@ def course_detail(request, course_slug):
     course = get_object_or_404(Course.objects.annotate(total_topics=Count('course_topics')), slug__iexact=course_slug)
     owner = course.owner
     is_student = course.students.filter(id=request.user.id).exists()
-
+    is_owner = Course.objects.filter(owner=request.user)
+    is_instructor = is_owner.filter(slug=course_slug).exists()
     if request.method == 'POST':
         # Handle form submission
         enroll_form = CourseEnrollForm(request.POST)
@@ -201,7 +191,7 @@ def course_detail(request, course_slug):
         # Initialize the enrollment form with the current course
         enroll_form = CourseEnrollForm(initial={'course': course})
 
-    context = {'course': course, 'enroll_form': enroll_form, 'owner': owner, 'is_student': is_student}
+    context = {'course': course, 'enroll_form': enroll_form, 'owner': owner, 'is_student': is_student, 'is_instructor': is_instructor}
     return render(request, 'courses/manage/course/course_detail.html', context)
 
 

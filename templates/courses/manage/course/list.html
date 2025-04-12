@@ -14,6 +14,11 @@
         </div>  
         <div class="row">
             <!-- Your Profile Views Chart -->
+            {% if courses %}
+                <div class="widget-inner text-right p-5">
+                    <a href="{% url 'course:course_create' %}" class="btn green radius-xl">Create a Course</a>
+                </div>
+            {% endif %}
             <div class="col-lg-12 m-b30">
                 <div class="widget-box">
                     <div class="wc-title">
@@ -21,9 +26,7 @@
                     </div>
                     <!-- Debugging context -->
                     {% if courses %}
-                    <div class="widget-inner text-right p-5">
-                        <a href="{% url 'course:course_create' %}" class="btn green radius-xl">Create a Course</a>
-                    </div>
+                    
                     <div class="widget-inner">
                         {% for course in courses %}
                         <div class="card-courses-list admin-courses">
@@ -74,7 +77,6 @@
                             </div>
                         </div>
                         {% endfor %}
-                        
                     </div>
                     {% else %}
                     <div class="widget-inner text-center p-5">
@@ -85,6 +87,7 @@
                     {% endif %}
                 </div>
             </div>
+            
             <!-- Your Profile Views Chart END-->
         </div>
     </div>

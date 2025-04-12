@@ -30,10 +30,7 @@
 					 <div class="row d-flex flex-row-reverse">
 						<div class="col-lg-3 col-md-4 col-sm-12 m-b30">
 							<div class="course-detail-bx">
-								<div class="course-price">
-									<del>$190</del>
-									<h4 class="price">$120</h4>
-								</div>
+								
 								{% if request.user.is_authenticated %}
 									{% if request.user == course.owner %}
 										<div class="course-buy-now text-center">
@@ -41,6 +38,10 @@
 										</div>
 									{% else %}
 										{% if not is_student %}
+										<div class="course-price">
+											<del>$190</del>
+											<h4 class="price">$120</h4>
+										</div>
 											<div class="course-buy-now text-center">
 												<form method="post">
 													{% csrf_token %}
@@ -144,21 +145,43 @@
 							<div class="m-b30" id="curriculum">
 								<h4>Curriculum</h4>
 								<ul class="curriculum-list">
-											<ul>
-												{% for topic in course.course_topics.all %}
-													<li>
-														<div class="curriculum-list-box">
-															<span><a href="{% url "course:topic_detail" topic.id %}">Lesson {{ forloop.counter }}</a></span> {{ topic.name|title }}
-														</div>
-														<span>120 minutes</span>
-													</li>
-												{% empty %}
+									{% if is_student or is_instructor %}
+									<ul>
+										{% for topic in course.course_topics.all %}
+											<li>
 												<div class="curriculum-list-box">
-													<h7>THERE ARE NO TOPICS FOR THIS COURSE YET</h7>
+													<span><a href="{% url "course:topic_detail" topic.id %}">Lesson {{ forloop.counter }}</a></span> {{ topic.name|title }}
 												</div>
-												{% endfor %}
-											</ul>
-										
+												<span>120 minutes</span>
+											</li>
+										{% empty %}
+										<div class="curriculum-list-box">
+											<h7>THERE ARE NO TOPICS FOR THIS COURSE YET</h7>
+										</div>
+										{% endfor %}
+									</ul>
+									{% else %}
+										<ul>
+											{% for topic in course.course_topics.all %}
+												<li>
+													<div class="curriculum-list-box">
+														<span>
+															<li style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #ddd;">
+																<span>Lesson {{ forloop.counter }}</span>
+																<span style="flex-grow: 1; text-align: center;">{{ topic.name|title }}</span>
+																<i class="fa fa-lock" style="color: #2a98f1;"></i>
+															</li>
+														</span>
+													</div>
+													<span>120 minutes</span>
+												</li>
+											{% empty %}
+											<div class="curriculum-list-box">
+												<h7>THERE ARE NO TOPICS FOR THIS COURSE YET</h7><i class="fa fa-lock" style="float: right;"></i>
+											</div>
+											{% endfor %}
+										</ul>
+									{% endif %}
 								</ul>
 							</div>
 							<div class="" id="instructor">
