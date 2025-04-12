@@ -11,13 +11,16 @@ from .views import (index,
                     CourseModuleUpdateView,
                     ContentCreateUpdateView,
                     topic_detail,
-                    ContentDeleteView)
+                    ContentDeleteView,
+                    CourseListView)
 
 
 app_name = 'course'
 
 urlpatterns = [
     path('', index, name='index'),
+    path('courses/', CourseListView.as_view(), name='course_list'),
+
     path('home/', ManageCourseListView.as_view(), name='home'),
     path('course/create/', CourseCreateView.as_view(), name='course_create'),
     path('course/<slug:course_slug>/', course_detail, name='course'),

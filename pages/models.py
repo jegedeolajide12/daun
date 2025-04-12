@@ -25,7 +25,7 @@ class Faculty(models.Model):
 class Course(models.Model):
     students = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='courses_joined', blank=True)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='courses_created', on_delete=models.CASCADE)
-    faculty = models.ForeignKey(Faculty, related_name='facuty_courses', on_delete=models.CASCADE)
+    faculty = models.ForeignKey(Faculty, related_name='faculty_courses', on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
     slug = models.SlugField(max_length=200, unique=True)
     code = models.CharField(max_length=6, null=True, blank=True)

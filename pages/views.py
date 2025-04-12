@@ -222,12 +222,9 @@ def topic_detail(request, topic_id):
 
 class CourseListView(TemplateResponseMixin, View):
     model = Course
-    template_name = 'courses/course/course_list.html'
+    template_name = 'courses/course_list.html'
     
-    def get(self, request, faculty=None):
-        faculties = Faculty.objects.annotate(total_courses=Count('faculty_courses'))
-        courses = Course.objects.annotate(total_topics=Count('course_topics'))
-        if faculty:
-            faculty = get_object_or_404(Faculty, slug=faculty)
-            courses = courses.filter(faculty=faculty)
-        return self.render_to_response({'faculties':faculties, 'faculty':faculty, 'courses':courses})
+    def get(self, request, *args, **kwargs):
+        faculties = Faculty.objects.all()
+        courses = Course.objects.all()
+        return self.render_to_response({'faculties':faculties, 'courses':courses})

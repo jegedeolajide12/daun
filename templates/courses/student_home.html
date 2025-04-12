@@ -7,27 +7,27 @@
         <div class="page-banner ovbl-dark" style="background-image:url('{% static "assets/images/banner/banner3.jpg" %}');">
             <div class="container">
                 <div class="page-banner-entry">
-                    <h1 class="text-white">Our Courses</h1>
-				 </div>
+                    <h1 class="text-white">Your Courses</h1>
+                </div>
             </div>
         </div>
-		<!-- Breadcrumb row -->
-		<div class="breadcrumb-row">
-			<div class="container">
-				<ul class="list-inline">
-					<li><a href="#">Home</a></li>
-					<li>Our Courses</li>
-				</ul>
-			</div>
-		</div>
-		<!-- Breadcrumb row END -->
+        <!-- Breadcrumb row -->
+        <div class="breadcrumb-row">
+            <div class="container">
+                <ul class="list-inline">
+                    <li><a href="#">Home</a></li>
+                    <li>Your Courses</li>
+                </ul>
+            </div>
+        </div>
+        <!-- Breadcrumb row END -->
         <!-- inner page banner END -->
-		<div class="content-block">
+        <div class="content-block">
             <!-- About Us -->
-			<div class="section-area section-sp1">
+            <div class="section-area section-sp1">
                 <div class="container">
-					 <div class="row">
-						<div class="col-lg-3 col-md-4 col-sm-12 m-b30">
+                    <div class="row">
+                    	<div class="col-lg-3 col-md-4 col-sm-12 m-b30">
 							<div class="widget courses-search-bx placeani">
 								<div class="form-group">
 									<div class="input-group">
@@ -36,69 +36,72 @@
 									</div>
 								</div>
 							</div>
-							<div class="widget widget_archive">
+                            <div class="widget widget_archive">
                                 <h5 class="widget-title style-1">All Faculties</h5>
                                 <ul>
-									{% for faculty in faculties %}
-                                	    <li class="active"><a href="#">{{ faculty.name|title }}</a></li>
+                                    <!-- "All" option -->
+                                    <li class="{% if not faculty %}active{% endif %}">
+                                        <a href="{% url 'student:student_home' %}">All</a>
+                                    </li>
+                                    <!-- Faculties -->
+                                    {% for faculty in faculties %}
+                                        <li class="{% if faculty == faculty %}active{% endif %}">
+                                            <a href="{% url 'student:student_courses_by_faculty' faculty.slug %}">{{ faculty.name|title }}</a>
+                                        </li>
                                     {% endfor %}
                                 </ul>
                             </div>
-							<div class="widget">
-								<a href="#"><img src="{% static "assets/images/adv/adv.jpg" %}" alt=""/></a>
-							</div>
-						</div>
-						<div class="col-lg-9 col-md-8 col-sm-12">
-							<div class="row">
+                        </div>
+                        <!-- Main Content -->
+                        <div class="col-lg-9 col-md-8 col-sm-12">
+                            <div class="row">
+                                <!-- Courses -->
                                 {% for course in courses %}
-								<div class="col-md-6 col-lg-4 col-sm-6 m-b30">
-									<div class="cours-bx">
-										<div class="action-box">
-											<img src="{{ course.cover_image.url }}" alt="">
-											<a href="#" class="btn">Read More</a>
-										</div>
-										<div class="info-bx text-center">
-											<h5><a href="{% url "course:course" course.slug %}">{{ course.name|upper }}</a></h5>
-											<span>Faculty of {{ course.faculty|title }}</span>
-										</div>
-										<div class="cours-more-info">
-											<div class="review">
-												<span>3 Review</span>
-												<ul class="cours-star">
-													<li class="active"><i class="fa fa-star"></i></li>
-													<li class="active"><i class="fa fa-star"></i></li>
-													<li class="active"><i class="fa fa-star"></i></li>
-													<li><i class="fa fa-star"></i></li>
-													<li><i class="fa fa-star"></i></li>
-												</ul>
-											</div>
-											<div class="price">
-												<del>$190</del>
-												<h5>$120</h5>
-											</div>
-										</div>
-									</div>
-								</div>
-								{% endfor %}
-								<div class="col-lg-12 m-b20">
-									<div class="pagination-bx rounded-sm gray clearfix">
-										<ul class="pagination">
-											<li class="previous"><a href="#"><i class="ti-arrow-left"></i> Prev</a></li>
-											<li class="active"><a href="#">1</a></li>
-											<li><a href="#">2</a></li>
-											<li><a href="#">3</a></li>
-											<li class="next"><a href="#">Next <i class="ti-arrow-right"></i></a></li>
-										</ul>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
+                                    <div class="col-md-6 col-lg-4 col-sm-6 m-b30">
+                                        <div class="cours-bx">
+                                            <div class="action-box">
+                                                <img src="{{ course.cover_image.url }}" alt="">
+                                                <a href="{% url 'course:course' course.slug %}" class="btn">Read More</a>
+                                            </div>
+                                            <div class="info-bx text-center">
+                                                <h5><a href="{% url 'course:course' course.slug %}">{{ course.name|upper }}</a></h5>
+                                                <span>Faculty of {{ course.faculty.name|title }}</span>
+                                            </div>
+                                            <div class="cours-more-info">
+                                                <div class="review">
+                                                    <span>3 Review</span>
+                                                    <ul class="cours-star">
+                                                        <li class="active"><i class="fa fa-star"></i></li>
+                                                        <li class="active"><i class="fa fa-star"></i></li>
+                                                        <li class="active"><i class="fa fa-star"></i></li>
+                                                        <li><i class="fa fa-star"></i></li>
+                                                        <li><i class="fa fa-star"></i></li>
+                                                    </ul>
+                                                </div>
+                                                <div class="price">
+                                                    <del>$190</del>
+                                                    <h5>$120</h5>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% empty %}
+                                    <div class="col-md-12 col-lg-12 col-sm-12 m-b30">
+                                        <div class="alert alert-warning">
+                                            You are not enrolled in any course yet.
+                                            <div class="text-end mt-3">
+                                                <a href="{% url 'course:course_list' %}" class="btn btn-primary">Explore Courses Now</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-		<!-- contact area END -->
-		
+        <!-- contact area END -->
     </div>
     <!-- Content END-->
 {% endblock %}
