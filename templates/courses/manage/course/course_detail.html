@@ -17,7 +17,7 @@
 			<div class="container">
 				<ul class="list-inline">
 					<li><a href="{% url "course:home" %}">Home</a></li>
-					<li>Courses Details</li>
+					<li>Course Details</li>
 				</ul>
 			</div>
 		</div>
@@ -48,6 +48,13 @@
 													<button type="submit" class="btn radius-xl text-uppercase">Enroll</button>
 												</form>
 											</div>
+										{% else %}
+											<div class="course-buy-now text-center">
+												<!-- Trigger the modal -->
+                                                <button type="button" id="unenrollButton" class="btn radius-xl text-uppercase">Unenroll</button>
+											</div>
+																						
+											
 										{% endif %}
 									{% endif %}
 								{% endif %}
@@ -387,6 +394,20 @@
     <!-- Footer END ==== -->
     <button class="back-to-top fa fa-chevron-up" ></button>
 </div>
+<div id="unenrollModal" class="modal">
+	<div class="modal-content">
+		<span class="close">&times;</span>
+		<h2>Confirm Unenrollment</h2>
+		<p>Are you sure you want to unenroll from this course?</p>
+		<div class="modal-actions" style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+			<form action="{% url 'course:course_unenroll' course.slug %}" method="post" style="margin: 0;">
+				{% csrf_token %}
+				<button type="submit" class="btn btn-danger" style="width: 100%;">Yes, Unenroll</button>
+			</form>
+			<button class="btn btn-secondary" id="cancelUnenroll" style="width: 50%;">Cancel</button>
+		</div>
+	</div>
+</div>
 </main>
 {% endblock %}
-<script src="{% static "asset/js/admin.js" %}"></script>
+

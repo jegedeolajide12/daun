@@ -12,7 +12,8 @@ from .views import (index,
                     ContentCreateUpdateView,
                     topic_detail,
                     ContentDeleteView,
-                    CourseListView)
+                    CourseListView,
+                    course_unenroll)
 
 
 app_name = 'course'
@@ -32,5 +33,6 @@ urlpatterns = [
     path('topic/<int:topic_id>/view/', topic_detail, name='topic_detail'),
     path('content/<int:content_id>/delete', ContentDeleteView.as_view(), name='content_delete'),
     
+    path('courses/<slug:course_slug>/unenroll/', course_unenroll, name='course_unenroll'),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

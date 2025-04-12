@@ -204,6 +204,15 @@ def course_detail(request, course_slug):
     context = {'course': course, 'enroll_form': enroll_form, 'owner': owner, 'is_student': is_student}
     return render(request, 'courses/manage/course/course_detail.html', context)
 
+def course_unenroll(request, course_slug):
+    course = get_object_or_404(Course, slug=course_slug)
+    if request.method == 'POST':
+        course.students.remove(request.user)  # Unenroll the user from the course
+        messages.success(request, "You have successfully unenrolled from the course!")
+        return redirect('course:course', course_slug=course.slug)
+
+    context = {'course': course}
+    return render(request, 'courses/manage/course/course_detail.html', context)
 
 def topic_detail(request, topic_id):
     topic = get_object_or_404(Topic, id=topic_id)
