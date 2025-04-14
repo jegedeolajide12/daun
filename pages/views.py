@@ -125,13 +125,23 @@ class OwnerCourseCreateMixin(OwnerCourseMixin, CreateView):
     template_name = 'courses/manage/course/create_course.html'
     permission_required = 'pages.add_course'
 
+    
     def form_valid(self, form):
+        form.instance.owner = self.request.user
+        form.instance.slug = slugify(form.instance.name)
         try:
-            form.instance.owner = self.request.user # Set the owner to the current user
-            form.instance.slug = slugify(form.instance.name)
+            return super().form_valid(form)
         except IntegrityError:
-            messages.error(self.request, "A Course with this name already exists. Please choose a different name")
-            return self.render_to_response(self.get_context_data(form=form))
+            messages.error(self.request, "A course with this name already exists. Please choose a different name.")
+            form.add_error('name', "A course with this name already exists.")
+            return self.form_invalid(form)  # This returns a response
+
+        # ✅ Always end with a return, though this line will never be reached.
+        return super().form_invalid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, "There was an error with your submission. Please correct the errors below.")
+        return super().form_invalid(form)
 
 
 class OwnerCourseEditMixin(OwnerCourseMixin, OwnerEditMixin):
@@ -153,22 +163,6 @@ class ManageCourseListView(OwnerCourseMixin, ListView):
 class CourseCreateView(OwnerCourseCreateMixin):
     permission_required = 'pages.add_course'
 
-    def form_valid(self, form):
-        form.instance.owner = self.request.user
-        form.instance.slug = slugify(form.instance.name)
-        try:
-            return super().form_valid(form)
-        except IntegrityError:
-            messages.error(self.request, "A course with this name already exists. Please choose a different name.")
-            form.add_error('name', "A course with this name already exists.")
-            return self.form_invalid(form)  # This returns a response
-
-        # ✅ Always end with a return, though this line will never be reached.
-        return super().form_invalid(form)
-
-    def form_invalid(self, form):
-        messages.error(self.request, "There was an error with your submission. Please correct the errors below.")
-        return super().form_invalid(form)
 
 
 class CourseUpdateView(OwnerCourseEditMixin, UpdateView):
