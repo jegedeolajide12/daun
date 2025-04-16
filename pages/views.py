@@ -13,6 +13,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMix
 from django.contrib.contenttypes.models import ContentType
 from django.forms.models import modelform_factory
 from django.apps import apps
+from django.contrib.auth.models import Group
 
 from students.forms import CourseEnrollForm
 
@@ -149,7 +150,8 @@ class OwnerCourseEditMixin(OwnerCourseMixin, OwnerEditMixin):
 
 def index(request):
     courses = Course.objects.all()
-    context = {'courses':courses}
+    is_instructor = request.user.groups.filter(name='Instructors').exists()
+    context = {'courses':courses,'is_instructor':is_instructor}
     return render(request, 'courses/index.html', context)
 
 class ManageCourseListView(OwnerCourseMixin, ListView):
@@ -228,6 +230,8 @@ class CourseListView(TemplateResponseMixin, View):
     template_name = 'courses/course_list.html'
     
     def get(self, request, *args, **kwargs):
+        instructors_group = Group.objects.get(name='Instructors').user_set.all()
         faculties = Faculty.objects.all()
         courses = Course.objects.all()
-        return self.render_to_response({'faculties':faculties, 'courses':courses})
+        is_instructor = self.request.user.groups.filter(name='Instructors').exists()
+        return self.render_to_response({'faculties':faculties, 'courses':courses,'is_instructor':is_instructor})
