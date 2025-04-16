@@ -259,8 +259,8 @@
 <script src="{% static 'assets/js/contact.js' %}"></script>
 <script src="{% static 'assets/vendors/switcher/switcher.js' %}"></script>
 <!-- Revolution Slider core JS -->
-<script src="{% static "assets/vendors/revolution/js/jquery.themepunch.tools.min.js" %}"></script>
-<script src="{% static "assets/vendors/revolution/js/jquery.themepunch.revolution.min.js" %}"></script>
+<script src="{% static 'assets/vendors/revolution/js/jquery.themepunch.tools.min.js' %}"></script>
+<script src="{% static 'assets/vendors/revolution/js/jquery.themepunch.revolution.min.js' %}"></script>
 <script>
 	jQuery(document).ready(function() {
 		var ttrevapi;
@@ -347,8 +347,36 @@
 			});
 		}
 	});	
-	</script>
-
+</script>
+<script>
+    const modal = document.getElementById("unenrollModal");
+    const openBtn = document.querySelector("#unenrollBtn"); // Add this id to the button
+    const closeBtn = modal.querySelector(".close");
+    const cancelBtn = document.getElementById("cancelUnenroll");
+  
+    // Show modal
+    openBtn.addEventListener("click", () => {
+      modal.classList.add("show");
+    });
+  
+    // Close modal with (x)
+    closeBtn.addEventListener("click", () => {
+      modal.classList.remove("show");
+    });
+  
+    // Close modal with "Cancel" button
+    cancelBtn.addEventListener("click", () => {
+      modal.classList.remove("show");
+    });
+  
+    // Optional: click outside modal to close
+    window.addEventListener("click", (e) => {
+      if (e.target === modal) {
+        modal.classList.remove("show");
+      }
+    });
+  </script>
+  
 </body>
 
 </html>

@@ -3405,6 +3405,11 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#391800', end
     background-color: rgba(0, 0, 0, 0.5); /* Black background with opacity */
 }
 
+/* When visible */
+.modal.show {
+    display: block;
+}
+
 /* Modal content */
 .modal-content {
     background-color: #fff;
