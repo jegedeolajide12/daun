@@ -78,8 +78,9 @@
                             </li>
                     
                             {% if request.user.is_authenticated %}
-                                <!-- Notifications -->
-                                <li>
+                                
+                                 <!-- Notifications -->
+                                 <li>
                                     <a href="" title="Notifications" style="position: relative;">
                                         <i class="fa fa-bell" style="font-size: 18px; color: navy;"></i>
                                         <!-- Red dot badge -->
@@ -88,18 +89,7 @@
                                         </span>
                                     </a>
                                 </li>
-                    
-                                <!-- Messages -->
-                                <li>
-                                    <a href="" title="Messages" style="position: relative;">
-                                        <i class="fa fa-envelope" style="font-size: 18px; color: navy;"></i>
-                                        <!-- Red dot badge -->
-                                        <span style="position: absolute; top: -6px; right: -8px; background: red; color: white; font-size: 10px; border-radius: 50%; padding: 2px 5px;">
-                                            1
-                                        </span>
-                                    </a>
-                                </li>
-                    
+
                                 <!-- Avatar Dropdown -->
                                 <li class="has-sub-menu" style="position: relative;">
                                     <a href="javascript:;" style="display: flex; align-items: center; gap: 8px;">
@@ -111,11 +101,11 @@
                                     <ul class="sub-menu">
                                         <li><a href="">Dashboard</a></li>
                                         <li><a href="">Profile</a></li>
-                                        <li><a href="">Logout</a></li>
+                                        <li><a href="javascript:;" id="logoutBtn">Logout</a></li>
                                     </ul>
                                 </li>
                             {% else %}
-                                <li><a href="{% url 'login' %}">Login</a></li>
+                                <li><a href="{% url 'account_login' %}">Login</a></li>
                             {% endif %}
                         </ul>
                     </div>
@@ -243,6 +233,21 @@
 {% block content %}
 
 {% endblock %}
+
+<!-- Logout Confirmation Modal -->
+<div id="logoutModal" class="modal">
+    <div class="modal-content">
+        <h2>Confirm Logout</h2>
+        <p>Are you sure you want to logout?</p>
+        <div class="modal-actions" style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+            <form action="{% url 'account_logout' %}" method="post" style="flex: 1; text-align: center;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger" style="width: 100%;">Yes, Logout</button>
+            </form></form>
+            <button class="btn btn-secondary" id="cancelLogout" style="flex: 1;">Cancel</button>
+        </div>
+    </div>
+</div>
 
 <script src="{% static 'assets/js/jquery.min.js' %}"></script>
 <script src="{% static 'assets/vendors/bootstrap/js/popper.min.js' %}"></script>
@@ -377,8 +382,35 @@
         modal.classList.remove("show");
       }
     });
-  </script>
-  
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const logoutModal = document.getElementById("logoutModal");
+        const logoutBtn = document.getElementById("logoutBtn");
+        const cancelLogoutBtn = document.getElementById("cancelLogout");
+
+        if (logoutBtn) {
+            // Show modal
+            logoutBtn.addEventListener("click", () => {
+                logoutModal.style.display = "block";
+            });
+        }
+
+        if (cancelLogoutBtn) {
+            // Close modal with "Cancel" button
+            cancelLogoutBtn.addEventListener("click", () => {
+                logoutModal.style.display = "none";
+            });
+        }
+
+        // Optional: click outside modal to close
+        window.addEventListener("click", (e) => {
+            if (e.target === logoutModal) {
+                logoutModal.style.display = "none";
+            }
+        });
+    });
+</script>
 </body>
 
 </html>
