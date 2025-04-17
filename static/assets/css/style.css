@@ -294,6 +294,49 @@
 		padding:0 5px;
 	}
 }
+
+/* Topbar Right Styles */
+.topbar-right ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.topbar-right li {
+    position: relative;
+}
+
+.topbar-right .sub-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    padding: 10px 0;
+    display: none;
+    z-index: 1000;
+    min-width: 150px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.topbar-right li.has-sub-menu:hover .sub-menu {
+    display: block;
+}
+
+.topbar-right .sub-menu li {
+    padding: 5px 20px;
+}
+
+.topbar-right .sub-menu li a {
+    color: #333;
+    display: block;
+    text-decoration: none;
+}
+
+.topbar-right .sub-menu li a:hover {
+    background: #f4f4f4;
+}
+
 /*=================================
 	3. HEADER LOGO
 =================================*/
@@ -549,6 +592,35 @@
     position: absolute;
     top: 0px;
     width: 6px;
+}
+/* Sub-menu styles */
+.sub-menu {
+    display: none;
+    position: absolute;
+    background-color: white;
+    list-style: none;
+    padding: 10px 0;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    min-width: 160px;
+}
+
+li:hover > .sub-menu {
+    display: block;
+}
+
+.sub-menu li {
+    padding: 8px 20px;
+}
+
+.sub-menu li a {
+    color: #333;
+    text-decoration: none;
+    display: block;
+}
+
+.sub-menu li a:hover {
+    background-color: #f5f5f5;
 }
 /*=================================
 	5. MEGA MENU

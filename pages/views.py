@@ -185,6 +185,8 @@ def course_detail(request, course_slug):
     course = get_object_or_404(Course.objects.annotate(total_topics=Count('course_topics')), slug__iexact=course_slug)
     owner = course.owner
     is_student = course.students.filter(id=request.user.id).exists()
+    is_instructor = request.user.groups.filter(name="Instructors").exists()
+    is_admin = request.user.groups.filter(name="Admin")
 
     if request.method == 'POST':
         # Handle form submission
@@ -197,7 +199,7 @@ def course_detail(request, course_slug):
         # Initialize the enrollment form with the current course
         enroll_form = CourseEnrollForm(initial={'course': course})
 
-    context = {'course': course, 'enroll_form': enroll_form, 'owner': owner, 'is_student': is_student}
+    context = {'course': course, 'enroll_form': enroll_form, 'owner': owner, 'is_student': is_student, 'is_admin':is_admin, 'is_instructor': is_instructor}
     return render(request, 'courses/manage/course/course_detail.html', context)
 
 def course_unenroll(request, course_slug):

@@ -68,21 +68,57 @@
                         </ul>
                     </div>
                     <div class="topbar-right">
-                        <ul>
+                        <ul style="display: flex; align-items: center; gap: 20px;">
+                            <!-- Language Switcher -->
                             <li>
                                 <select class="header-lang-bx">
                                     <option data-icon="flag flag-uk">English UK</option>
                                     <option data-icon="flag flag-us">English US</option>
                                 </select>
                             </li>
+                    
                             {% if request.user.is_authenticated %}
-                                <li><a href="{% url 'account_logout' %}">Logout</a></li>
-                                <li><a href="#">@{{ request.user.username }}</a></li>
+                                <!-- Notifications -->
+                                <li>
+                                    <a href="" title="Notifications" style="position: relative;">
+                                        <i class="fa fa-bell" style="font-size: 18px; color: navy;"></i>
+                                        <!-- Red dot badge -->
+                                        <span style="position: absolute; top: -6px; right: -8px; background: red; color: white; font-size: 10px; border-radius: 50%; padding: 2px 5px;">
+                                            3
+                                        </span>
+                                    </a>
+                                </li>
+                    
+                                <!-- Messages -->
+                                <li>
+                                    <a href="" title="Messages" style="position: relative;">
+                                        <i class="fa fa-envelope" style="font-size: 18px; color: navy;"></i>
+                                        <!-- Red dot badge -->
+                                        <span style="position: absolute; top: -6px; right: -8px; background: red; color: white; font-size: 10px; border-radius: 50%; padding: 2px 5px;">
+                                            1
+                                        </span>
+                                    </a>
+                                </li>
+                    
+                                <!-- Avatar Dropdown -->
+                                <li class="has-sub-menu" style="position: relative;">
+                                    <a href="javascript:;" style="display: flex; align-items: center; gap: 8px;">
+                                        <div style="width: 30px; height: 30px; background-color: navy; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                                            {{ request.user.username|slice:":1"|upper }}
+                                        </div>
+                                        <i class="fa fa-chevron-down" style="color: navy;"></i>
+                                    </a>
+                                    <ul class="sub-menu">
+                                        <li><a href="">Dashboard</a></li>
+                                        <li><a href="">Profile</a></li>
+                                        <li><a href="">Logout</a></li>
+                                    </ul>
+                                </li>
                             {% else %}
-                                <li><a href="{% url 'account_login' %}">Login</a></li>
-                                <li><a href="{% url 'account_signup' %}">Register</a></li>
+                                <li><a href="{% url 'login' %}">Login</a></li>
                             {% endif %}
                         </ul>
+                    </div>
                     </div>
                 </div>
             </div>
@@ -143,55 +179,13 @@
                             {% else %}
                                 <li class="active"><a href="{% url "course:index" %}">Home </a></li>
                             {% endif %}
-                            <li><a href="javascript:;">Pages <i class="fa fa-chevron-down"></i></a>
-                                <ul class="sub-menu">
-                                    <li><a href="javascript:;">About<i class="fa fa-angle-right"></i></a>
-                                        <ul class="sub-menu">
-                                            <li><a href="about-1.html">About 1</a></li>
-                                            <li><a href="about-2.html">About 2</a></li>
-                                        </ul>
-                                    </li>
-                                    <li><a href="javascript:;">Event<i class="fa fa-angle-right"></i></a>
-                                        <ul class="sub-menu">
-                                            <li><a href="event.html">Event</a></li>
-                                            <li><a href="events-details.html">Events Details</a></li>
-                                        </ul>
-                                    </li>
-                                    <li><a href="javascript:;">FAQ's<i class="fa fa-angle-right"></i></a>
-                                        <ul class="sub-menu">
-                                            <li><a href="faq-1.html">FAQ's 1</a></li>
-                                            <li><a href="faq-2.html">FAQ's 2</a></li>
-                                        </ul>
-                                    </li>
-                                    <li><a href="javascript:;">Contact Us<i class="fa fa-angle-right"></i></a>
-                                        <ul class="sub-menu">
-                                            <li><a href="contact-1.html">Contact Us 1</a></li>
-                                            <li><a href="contact-2.html">Contact Us 2</a></li>
-                                        </ul>
-                                    </li>
-                                    <li><a href="portfolio.html">Portfolio</a></li>
-                                    <li><a href="profile.html">Profile</a></li>
-                                    <li><a href="membership.html">Membership</a></li>
-                                    <li><a href="error-404.html">404 Page</a></li>
-                                </ul>
+                            <li>
+                                <a href="{% url "course:course_list" %}">Explore Courses</a>
                             </li>
-                            <li class="add-mega-menu"><a href="javascript:;">Our Courses <i class="fa fa-chevron-down"></i></a>
-                                <ul class="sub-menu add-menu">
-                                    <li class="add-menu-left">
-                                        <h5 class="menu-adv-title">Our Courses</h5>
-                                        <ul>
-                                            <li><a href="courses.html">Courses </a></li>
-                                            <li><a href="courses-details.html">Courses Details</a></li>
-                                            <li><a href="profile.html">Instructor Profile</a></li>
-                                            <li><a href="event.html">Upcoming Event</a></li>
-                                            <li><a href="membership.html">Membership</a></li>
-                                        </ul>
-                                    </li>
-                                    <li class="add-menu-right">
-                                        <img src="{% static 'assets/images/adv/adv.jpg' %}" alt=""/>
-                                    </li>
-                                </ul>
+                            <li>
+                                <a href="{% url "student:student_home" %}">Enrolled Courses </a>
                             </li>
+                            
                             <li><a href="javascript:;">Blog <i class="fa fa-chevron-down"></i></a>
                                 <ul class="sub-menu">
                                     <li><a href="blog-classic-grid.html">Blog Classic</a></li>
@@ -206,6 +200,13 @@
                             {% else %}
                                 <li><a href="{% url 'account:instructor_application' %}">Apply as an Instructor</a></li>
                             {% endif %}
+                            <li><a href="javascript:;">Support <i class="fa fa-chevron-down"></i></a>
+                                <ul class="sub-menu">
+                                    <li><a href="blog-classic-grid.html">Profile</a></li>
+                                    <li><a href="blog-classic-sidebar.html">FAQ</a></li>
+                                    <li><a href="blog-list-sidebar.html">Contact Us</a></li>
+                                </ul>
+                            </li>
                         </ul>
                         <div class="nav-social-link">
                             <a href="javascript:;"><i class="fa fa-facebook"></i></a>

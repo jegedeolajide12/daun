@@ -152,18 +152,48 @@
 								<h4>Curriculum</h4>
 								<ul class="curriculum-list">
 											<ul>
-												{% for topic in course.course_topics.all %}
-													<li>
-														<div class="curriculum-list-box">
-															<span><a href="{% url "course:topic_detail" topic.id %}">Lesson {{ forloop.counter }}</a></span> {{ topic.name|title }}
-														</div>
-														<span>120 minutes</span>
-													</li>
-												{% empty %}
-												<div class="curriculum-list-box">
-													<h7>THERE ARE NO TOPICS FOR THIS COURSE YET</h7>
-												</div>
-												{% endfor %}
+												{% if is_student or is_instructor %}
+													{% for topic in course.course_topics.all %}
+														<li>
+															<div class="curriculum-list-box">
+																<span><a href="{% url "course:topic_detail" topic.id %}">Lesson {{ forloop.counter }}</a></span> {{ topic.name|title }}
+															</div>
+															<span>120 minutes</span>
+														</li>
+													{% empty %}
+													<div class="curriculum-list-box">
+														<h7>THERE ARE NO TOPICS FOR THIS COURSE YET</h7>
+													</div>
+													{% endfor %}
+												{% elif is_admin %}
+													{% for topic in course.course_topics.all %}
+														<li>
+															<div class="curriculum-list-box">
+																<span><a href="{% url "course:topic_detail" topic.id %}">Lesson {{ forloop.counter }}</a></span> {{ topic.name|title }}
+															</div>
+															<span>120 minutes</span>
+														</li>
+													{% empty %}
+													<div class="curriculum-list-box">
+														<h7>THERE ARE NO TOPICS FOR THIS COURSE YET</h7>
+													</div>
+													{% endfor %}
+												{% else %}
+													{% for topic in course.course_topics.all %}
+														<li>
+															<div class="curriculum-list-box">
+																<span>Lesson {{ forloop.counter }}</span> {{ topic.name|title }}
+																<span style="float: right;"><i class="fa fa-lock"></i></span>
+															</div>
+															<span>120 minutes</span>
+														</li>
+													{% empty %}
+													<div class="curriculum-list-box">
+														<h7 title="You need to enroll to access this topic">THERE ARE NO TOPICS FOR THIS COURSE YET</h7>
+														<span style="float: right;" title="You need to enroll to access this topic"><i class="fa fa-lock"></i></span>
+													</div>
+													{% endfor %}
+												{% endif %}
 											</ul>
 										
 								</ul>
