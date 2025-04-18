@@ -8,6 +8,7 @@ urlpatterns = [
     path('account/', include('accounts.urls', namespace='account')),
     path("", include("pages.urls", namespace='course')),
     path("students/", include("students.urls", namespace='student')),
+    path('activity/', include('actstream.urls')),
 ]
 
 if settings.DEBUG:

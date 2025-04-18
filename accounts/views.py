@@ -13,6 +13,7 @@ from datetime import timedelta
 from .forms import InstructorApplicationForm, CustomUserChangeForm
 from .models import CustomUser, InstructorApplication
 
+from actstream.models import Action
 from pages.models import Course
 from allauth.account.views import SignupView
 
@@ -97,6 +98,7 @@ def admin_dashboard(request):
     is_instructor = request.user.groups.filter(name="Instructors").exists()
     is_admin = request.user.groups.filter(name="Admin").exists()
     user = get_user_model()
+    actions = Action.objects.all()
     
     # Count total courses
     courses_count = Course.objects.count()
@@ -129,6 +131,7 @@ def admin_dashboard(request):
 
     # Context for the template
     context = {
+        'actions': actions,
         'applications': applications,
         'is_instructor': is_instructor,
         'is_admin': is_admin,

@@ -15,10 +15,12 @@ from django.forms.models import modelform_factory
 from django.apps import apps
 from django.contrib.auth.models import Group
 
+from actstream import action
 from students.forms import CourseEnrollForm
 
 from .models import Course, Content, Topic, Video, Faculty
 from .forms import CourseForm, ModuleFormSet
+
 
 
 class CourseModuleUpdateView(TemplateResponseMixin, View):
@@ -193,6 +195,7 @@ def course_detail(request, course_slug):
         enroll_form = CourseEnrollForm(request.POST)
         if enroll_form.is_valid():
             course.students.add(request.user)  # Enroll the user in the course
+            action.send(request.user, verb='Enrolled in', target=course)
             messages.success(request, "You have successfully enrolled in the course!")
             return redirect('course:course', course_slug=course.slug)
     else:
@@ -206,6 +209,7 @@ def course_unenroll(request, course_slug):
     course = get_object_or_404(Course, slug=course_slug)
     if request.method == 'POST':
         course.students.remove(request.user)  # Unenroll the user from the course
+        action.send(request.user, verb='Unenrolled from', target=course)
         messages.success(request, "You have successfully unenrolled from the course!")
         return redirect('course:course', course_slug=course.slug)
 
