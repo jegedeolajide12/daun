@@ -337,6 +337,119 @@
     background: #f4f4f4;
 }
 
+/* Notification Menu Styles */
+.notification-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 130%;
+    background-color: #fff;
+    width: 280px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.notification-menu li {
+    border-bottom: 1px solid #eee;
+}
+
+.notification-menu li:last-child {
+    border-bottom: none;
+}
+
+.notification-menu li a {
+    display: block;
+    padding: 12px 15px;
+    color: #333;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.notification-menu li a:hover {
+    background-color: #f5f5f5;
+}
+
+/* Notification Dropdown Styles */
+.ttr-header-submenu.noti-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 300px;
+    background: #fff;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    z-index: 1000;
+    overflow: hidden;
+}
+
+.ttr-notify-header {
+    padding: 15px;
+    background: #f4f6f9;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+}
+
+.ttr-notify-text-top {
+    display: block;
+    font-weight: bold;
+    color: navy;
+}
+
+.ttr-notify-text {
+    font-size: 12px;
+    color: #666;
+}
+
+.noti-box-list ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.noti-box-list li {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 15px;
+    border-bottom: 1px solid #eee;
+    align-items: center;
+}
+
+.notification-icon {
+    margin-right: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: #eee;
+    border-radius: 50%;
+}
+
+.notification-text {
+    flex: 1;
+    font-size: 14px;
+    color: #333;
+}
+
+.notification-time {
+    font-size: 12px;
+    color: #aaa;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.fa-close {
+    color: red;
+    cursor: pointer;
+}
+
 /*=================================
 	3. HEADER LOGO
 =================================*/

@@ -2,11 +2,18 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.contrib import messages
 from django.contrib.auth.models import Group
+from django.db.models.functions import TruncMonth
+from django.db.models import Count
+from django.utils.timezone import now
+from django.contrib.auth import get_user_model
+import calendar
+import json
+from datetime import timedelta
 
 from .forms import InstructorApplicationForm, CustomUserChangeForm
 from .models import CustomUser, InstructorApplication
 
-
+from pages.models import Course
 from allauth.account.views import SignupView
 
 def is_admin(user):
@@ -80,12 +87,56 @@ def reject_application(request, application_id):
         messages.success(request, "Instructor application rejected successfully.")
     except InstructorApplication.DoesNotExist:
         messages.error(request, "Instructor application not found.")
-    return redirect('account:dashboard')
+    return redirect('account:dashboard') 
 
-@user_passes_test(lambda user: is_instructor(user) or is_admin(user))
 def admin_dashboard(request):
+    # Fetch instructor applications
     applications = InstructorApplication.objects.filter(is_verified=False)
-    context = {'applications': applications}
+    
+    # Check user roles
+    is_instructor = request.user.groups.filter(name="Instructors").exists()
+    is_admin = request.user.groups.filter(name="Admin").exists()
+    user = get_user_model()
+    
+    # Count total courses
+    courses_count = Course.objects.count()
+    
+    # Analytics for user registrations by the last 6 months
+    six_months_ago = now() - timedelta(days=6 * 30)  # Approximation for 6 months
+    user_data = (
+        user.objects.filter(date_joined__gte=six_months_ago)
+        .annotate(month=TruncMonth('date_joined'))
+        .values('month')
+        .annotate(count=Count('id'))
+        .order_by('month')
+    )
+
+    # Prepare labels and data for the last 6 months
+    labels = []
+    data = []
+    current_date = now()
+
+    # Generate the last 6 months dynamically
+    for i in range(6):
+        month_date = current_date - timedelta(days=i * 30)  # Approximation for each month
+        month = month_date.month
+        year = month_date.year
+
+        # Get the user count for the specific month
+        month_data = next((entry for entry in user_data if entry['month'].month == month and entry['month'].year == year), None)
+        labels.insert(0, calendar.month_name[month])  # Add month name to labels
+        data.insert(0, month_data['count'] if month_data else 0)  # Add count or 0 if no data
+
+    # Context for the template
+    context = {
+        'applications': applications,
+        'is_instructor': is_instructor,
+        'is_admin': is_admin,
+        'courses_count': courses_count,
+        'labels': json.dumps(labels),  # Pass labels as JSON
+        'data': json.dumps(data),      # Pass data as JSON
+    }
+    
     return render(request, 'account/admin/dashboard.html', context)
 
 def mail_inbox(request):

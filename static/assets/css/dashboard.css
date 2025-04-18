@@ -746,14 +746,14 @@
 	color:#fff;
 	font-weight:500;
 }
-.wc-stats {
-	display: block;
-	margin-top: 10px; /* adds space between description and stats */
-	font-size: 1.5rem;
-	font-weight: bold;
-	text-align: center; /* aligns the text to the center */
+.wc-stats{
+	font-size:24px;
+	line-height:28px;
+	font-weight:500;
+	position:absolute;
+	right:20px;
+	top:20px;
 }
-
 .wc-des{
 	font-size:12px;
 	line-height:18px;

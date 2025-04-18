@@ -90,7 +90,8 @@ Theme Version:	1.0.0
 				}
 				
 				var displayGraph = function() {
-					if(!checkSelectorExistence('#chart')){return;}
+					if (!checkSelectorExistence('#chart')) { return; }
+
 					Chart.defaults.global.defaultFontFamily = "rubik";
 					Chart.defaults.global.defaultFontColor = '#999';
 					Chart.defaults.global.defaultFontSize = '12';
@@ -102,16 +103,15 @@ Theme Version:	1.0.0
 
 						// The data for our dataset
 						data: {
-							labels: ["January", "February", "March", "April", "May", "June"],
-							// Information about the dataset
+							labels: chartLabels, // Use dynamic labels
 							datasets: [{
-								label: "Views",
+								label: "Users",
 								backgroundColor: 'rgba(0,0,0,0.05)',
 								borderColor: '#4c1864',
 								borderWidth: "3",
-								data: [196,132,215,362,210,252],
+								data: chartData, // Use dynamic data
 								pointRadius: 4,
-								pointHoverRadius:4,
+								pointHoverRadius: 4,
 								pointHitRadius: 10,
 								pointBackgroundColor: "#fff",
 								pointHoverBackgroundColor: "#fff",
@@ -121,45 +121,40 @@ Theme Version:	1.0.0
 
 						// Configuration options
 						options: {
-
 							layout: {
-							  padding: 0,
+								padding: 0,
 							},
-
 							legend: { display: false },
-							title:  { display: false },
-
+							title: { display: false },
 							scales: {
 								yAxes: [{
 									scaleLabel: {
 										display: false
 									},
 									gridLines: {
-										 borderDash: [6, 6],
-										 color: "#ebebeb",
-										 lineWidth: 1,
+										borderDash: [6, 6],
+										color: "#ebebeb",
+										lineWidth: 1,
 									},
 								}],
 								xAxes: [{
-									scaleLabel: { display: false },  
-									gridLines:  { display: false },
+									scaleLabel: { display: false },
+									gridLines: { display: false },
 								}],
 							},
-
 							tooltips: {
-							  backgroundColor: '#333',
-							  titleFontSize: 12,
-							  titleFontColor: '#fff',
-							  bodyFontColor: '#fff',
-							  bodyFontSize: 12,
-							  displayColors: false,
-							  xPadding: 10,
-							  yPadding: 10,
-							  intersect: false
+								backgroundColor: '#333',
+								titleFontSize: 12,
+								titleFontColor: '#fff',
+								bodyFontColor: '#fff',
+								bodyFontSize: 12,
+								displayColors: false,
+								xPadding: 10,
+								yPadding: 10,
+								intersect: false
 							}
 						},
-				});
-				
+					});
 				}
 				
 				return {
