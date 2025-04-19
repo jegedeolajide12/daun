@@ -21,6 +21,7 @@ class Faculty(models.Model):
     
     def __str__(self):
         return self.name
+
     
 class Course(models.Model):
     students = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='courses_joined', blank=True)
@@ -91,4 +92,55 @@ class Video(ItemBase):
 
     def has_video(self):
         return bool(self.file or self.url)
+
+class TaskType(models.TextChoices):
+    QUIZ = 'quiz', 'Quiz'
+    ASSIGNMENT = 'assignment', 'Assignment'
+    EXAM = 'exam', 'Exam'
+    PROJECT = 'project', 'Project'
+
+class Task(models.Model):
+    title = models.CharField(max_length=255)
+    slug = models.SlugField(max_length=255, unique=True, null=True, blank=True)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='course_tasks')
+    start_date = models.DateTimeField()
+    due_date = models.DateTimeField(null=True, blank=True)
+    type = models.CharField(max_length=20, choices=TaskType.choices, default=TaskType.QUIZ)
+    description = models.TextField()
+
+    def __str__(self):
+        return f'{self.title} - {self.course.name}'
+    def save(self, *args, **kwargs):
+        students = self.course.students.all()
+        user_tasks = [
+            UserTask.objects.create(user=student, task=self) for student in students
+        ]
+        UserTask.objects.bulk_create(user_tasks)
+        if not self.slug:
+            self.slug = slugify(self.title)
+        super().save(*args, **kwargs)
+
+
+class UserTask(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='user_tasks')
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='user_tasks')
+    is_completed = models.BooleanField(default=False)
+    score = models.IntegerField(null=True, blank=True)
+
+    def __str__(self):
+        return f'{self.user.username} - {self.task.title}'
+
+class Submission(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='submissions')
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='submissions')
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    file = models.FileField(upload_to='submissions', null=True, blank=True)
+    content = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return f'Submission by {self.user.username} for {self.task.title}'
+
+    def clean(self):
+        if not self.file and not self.content:
+            raise ValidationError('Either a file or content must be provided.')
 

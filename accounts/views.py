@@ -14,7 +14,7 @@ from .forms import InstructorApplicationForm, CustomUserChangeForm
 from .models import CustomUser, InstructorApplication
 
 from actstream.models import Action
-from pages.models import Course
+from pages.models import Course,Task, UserTask
 from allauth.account.views import SignupView
 
 def is_admin(user):
@@ -100,8 +100,24 @@ def admin_dashboard(request):
     user = get_user_model()
     actions = Action.objects.all()
     
+    created_courses = Course.objects.filter(owner=request.user)
     # Count total courses
     courses_count = Course.objects.count()
+    tasks = Task.objects.all()
+    tasks_count = Task.objects.count()
+    user_tasks = UserTask.objects.all()
+    user_tasks_count = UserTask.objects.count()
+
+
+    formatted_tasks = [
+        {
+            "title": task.title,
+            "start": task.start_date.isoformat(),
+            "end": task.due_date.isoformat() if task.due_date else None,
+            "type": task.get_type_display(),
+        }
+        for task in tasks
+    ]
     
     # Analytics for user registrations by the last 6 months
     six_months_ago = now() - timedelta(days=6 * 30)  # Approximation for 6 months
@@ -131,11 +147,16 @@ def admin_dashboard(request):
 
     # Context for the template
     context = {
+        'created_courses': created_courses,
         'actions': actions,
         'applications': applications,
         'is_instructor': is_instructor,
         'is_admin': is_admin,
         'courses_count': courses_count,
+        'tasks_count': tasks_count,
+        'user_tasks_count': user_tasks_count,
+        'user_task_list': user_tasks,
+        'tasks': json.dumps(formatted_tasks),  # Pass tasks as JSON
         'labels': json.dumps(labels),  # Pass labels as JSON
         'data': json.dumps(data),      # Pass data as JSON
     }

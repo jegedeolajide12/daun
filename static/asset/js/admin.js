@@ -156,6 +156,28 @@ Theme Version:	1.0.0
 						},
 					});
 				}
+
+				var initializeCalendar = function() {
+					if (!checkSelectorExistence('#calendar')) {
+						return;
+					}
+				
+					$('#calendar').fullCalendar({
+						header: {
+							left: 'prev,next today',
+							center: 'title',
+							right: 'month,agendaWeek,agendaDay,listWeek'
+						},
+						defaultDate: moment().format('YYYY-MM-DD'), // Set to today's date
+						navLinks: true, // Can click day/week names to navigate views
+						weekNumbers: true,
+						weekNumbersWithinDays: true,
+						weekNumberCalculation: 'ISO',
+						editable: true,
+						eventLimit: true, // Allow "more" link when too many events
+						events: calendarEvents, // Use dynamic events data
+					});
+				}
 				
 				return {
 					initialHelper:function(){
@@ -165,6 +187,7 @@ Theme Version:	1.0.0
 						materialButton();
 						headerSubMenu();
 						displayGraph();
+						initializeCalendar();
 					}
 				}
 				

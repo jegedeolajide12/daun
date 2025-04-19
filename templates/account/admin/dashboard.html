@@ -12,8 +12,8 @@
 				</ul>
 			</div>	
 			<!-- Card -->
-			<div class="row">
-				{% if is_admin %}
+			{% if is_admin %}
+				<div class="row">
 					<div class="col-md-6 col-lg-3 col-xl-3 col-sm-6 col-12">
 						<div class="widget-card widget-bg1">					 
 							<div class="wc-item">
@@ -49,8 +49,8 @@
 								<span class="wc-des">
 									Total monthly revenue
 								</span>
-								<span class="wc-stats counter">
-									772 
+								<span class="wc-stats">
+									₦772,540.47
 								</span>		
 								
 							</div>				      
@@ -73,149 +73,241 @@
 						</div>
 					</div>
 				</div>
-			{% endif %}
-			<!-- Card END -->
-			<div class="row">
-				<!-- Your Profile Views Chart -->
-				<div class="col-lg-8 m-b30">
-					<div class="widget-box">
-						<div class="wc-title">
-							<h4>Your Profile Views</h4>
-						</div>
-						<div class="widget-inner">
-							<canvas id="chart" width="100" height="45"></canvas>
-						</div>
+				<!-- Card END -->
+				<div class="row text-center">
+					<div class="col-md-3 col-sm-6 col-6 mb-3">
+						<a href="{% url 'course:course_create' %}" class="btn btn-primary btn-block text-truncate" title="Create New Course">Create New Course</a>
+					</div>
+					<div class="col-md-3 col-sm-6 col-6 mb-3">
+						<a href="#" class="btn btn-primary btn-block text-truncate" title="Create a New Faculty">Create a New Faculty</a>
+					</div>
+					<div class="col-md-3 col-sm-6 col-6 mb-3">
+						<a href="#" class="btn btn-primary btn-block text-truncate" title="View all Instructors">View all Instructors</a>
+					</div>
+					<div class="col-md-3 col-sm-6 col-6 mb-3">
+						<a href="#" class="btn btn-primary btn-block text-truncate" title="Create new Certificate">Create new Certificate</a>
 					</div>
 				</div>
-				<!-- Your Profile Views Chart END-->
-				<div class="col-lg-4 m-b30">
-					<div class="widget-box">
-						<div class="wc-title">
-							<h4>Notifications</h4>
+				<div class="row">
+					<!-- Your Profile Views Chart -->
+					<div class="col-lg-8 m-b30">
+						<div class="widget-box">
+							<div class="wc-title">
+								<h4>Monthly Registered Users</h4>
+							</div>
+							<div class="widget-inner">
+								<canvas id="chart" width="100" height="45"></canvas>
+							</div>
 						</div>
-						<div class="widget-inner">
-							<div class="noti-box-list">
-								<ul>
-									{% for action in actions %}
+					</div>
+					<!-- Your Profile Views Chart END-->
+					<div class="col-lg-4 m-b30">
+						<div class="widget-box">
+							<div class="wc-title">
+								<h4>Notifications</h4>
+							</div>
+							<div class="widget-inner">
+								<div class="noti-box-list">
+									<ul>
+										{% for action in actions %}
+											<li>
+												<span class="notification-icon dashbg-gray">
+													<i class="fa fa-check"></i>
+												</span>
+												<span class="notification-text">
+													<span>{{ action.actor }}</span> {{ action.verb }} "{{ action.target }}"
+												</span>
+												<span class="notification-time">
+													<a href="#" class="fa fa-close"></a>
+													<span> {{ action.timestamp.time }}</span>
+												</span>
+											</li>
+										{% endfor %}
+									</ul>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-6 m-b30">
+						<div class="widget-box">
+							<div class="wc-title">
+								<h4>New Instructor Applications</h4>
+							</div>
+							<div class="widget-inner">
+								<div class="new-user-list">
+									<ul>
+										{% for application in applications %}
 										<li>
-											<span class="notification-icon dashbg-gray">
-												<i class="fa fa-check"></i>
+											{% if application.user.profile_picture %}
+												<span class="new-users-pic">
+													<img src="{{ application.user.profile_picture.url }}" alt=""/>
+												</span>
+											{% endif%}
+											<span class="new-users-text">
+												<a href="#" class="new-users-name">{{ application.user.username }}</a>
+												<span class="new-users-info">{{ application.user.email }} </span>
 											</span>
-											<span class="notification-text">
-												<span>{{ action.actor }}</span> {{ action.verb }} {{ action.target }}
+											<span class="new-users-btn">
+												<a href="{% url "account:verify_application" application.id %}" class="btn button-sm outline">Approve</a>
 											</span>
-											<span class="notification-time">
-												<a href="#" class="fa fa-close"></a>
-												<span> {{ action.timestamp.time }}</span>
+											<span class="new-users-btn">
+												<a href="{% url "account:reject_application" application.id %}" class="btn button-sm outline">Reject</a>
 											</span>
 										</li>
 									{% endfor %}
-								</ul>
+									</ul>
+								</div>
 							</div>
 						</div>
 					</div>
-				</div>
-				<div class="col-lg-6 m-b30">
-					<div class="widget-box">
-						<div class="wc-title">
-							<h4>New Instructor Applications</h4>
-						</div>
-						<div class="widget-inner">
-							<div class="new-user-list">
-								<ul>
-									{% for application in applications %}
-									<li>
-										{% if application.user.profile_picture %}
-											<span class="new-users-pic">
-												<img src="{{ application.user.profile_picture.url }}" alt=""/>
+					<div class="col-lg-6 m-b30">
+						<div class="widget-box">
+							<div class="wc-title">
+								<h4>Payments</h4>
+							</div>
+							<div class="widget-inner">
+								<div class="orders-list">
+									<ul>
+										<li>
+											<span class="orders-title">
+												<a href="#" class="orders-title-name">Anna Strong </a>
+												<span class="orders-info">Order #02357 | Date 12/08/2019</span>
 											</span>
-										{% endif%}
-										<span class="new-users-text">
-											<a href="#" class="new-users-name">{{ application.user.username }}</a>
-											<span class="new-users-info">{{ application.user.email }} </span>
-										</span>
-										<span class="new-users-btn">
-											<a href="{% url "account:verify_application" application.id %}" class="btn button-sm outline">Approve</a>
-										</span>
-										<span class="new-users-btn">
-											<a href="{% url "account:reject_application" application.id %}" class="btn button-sm outline">Reject</a>
-										</span>
-									</li>
-								{% endfor %}
-								</ul>
+											<span class="orders-btn">
+												<a href="#" class="btn button-sm red">Unpaid</a>
+											</span>
+										</li>
+										<li>
+											<span class="orders-title">
+												<a href="#" class="orders-title-name">Revenue</a>
+												<span class="orders-info">Order #02357 | Date 12/08/2019</span>
+											</span>
+											<span class="orders-btn">
+												<a href="#" class="btn button-sm red">Unpaid</a>
+											</span>
+										</li>
+										<li>
+											<span class="orders-title">
+												<a href="#" class="orders-title-name">Anna Strong </a>
+												<span class="orders-info">Order #02357 | Date 12/08/2019</span>
+											</span>
+											<span class="orders-btn">
+												<a href="#" class="btn button-sm green">Paid</a>
+											</span>
+										</li>
+										<li>
+											<span class="orders-title">
+												<a href="#" class="orders-title-name">Revenue</a>
+												<span class="orders-info">Order #02357 | Date 12/08/2019</span>
+											</span>
+											<span class="orders-btn">
+												<a href="#" class="btn button-sm green">Paid</a>
+											</span>
+										</li>
+										<li>
+											<span class="orders-title">
+												<a href="#" class="orders-title-name">Anna Strong </a>
+												<span class="orders-info">Order #02357 | Date 12/08/2019</span>
+											</span>
+											<span class="orders-btn">
+												<a href="#" class="btn button-sm green">Paid</a>
+											</span>
+										</li>
+									</ul>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-8 mb-4">
+						<div class="widget-box">
+							<div class="wc-title">
+								<h4>Courses You've Created</h4>
+							</div>
+							<div class="widget-inner">
+								<div class="courses-list">
+									<ul class="list-unstyled">
+										{% for course in created_courses %}
+										<li class="d-flex align-items-center py-2 border-bottom">
+											{% if course.cover_image %}
+											<div class="course-cover mr-3">
+												<img src="{{ course.cover_image.url }}" alt="{{ course.title }}"
+													 style="width: 60px; height: 60px; object-fit: cover; border-radius: 5px;">
+											</div>
+											{% endif %}
+											<div class="course-details flex-grow-1">
+												<h5 class="mb-1">
+													<a href="" class="text-primary">{{ course.name|title }}</a>
+												</h5>
+												<p class="mb-0 text-muted small">
+													Created on: {{ course.created|date:"M d, Y" }} · 
+													{{ course.students.count }} Students · 
+													{{ course.course_topics.count }} Topics
+												</p>
+											</div>
+											<div class="text-end ml-3">
+												<a href="" class="btn btn-sm btn-outline-primary">Edit</a>
+											</div>
+										</li>
+										{% empty %}
+										<p class="text-muted text-center my-4">You haven't created any courses yet.</p>
+										{% endfor %}
+									</ul>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-4 m-b30">
+						<div class="widget-box">
+							<div class="wc-title">
+								<h4>To-Do List</h4>
+							</div>
+							<div class="widget-inner">
+								<div class="noti-box-list">
+									<ul class="list-unstyled">
+										{% for task in user_task_list %}
+										<li class="d-flex align-items-start py-3 border-bottom">
+											<!-- Icon with soft background -->
+											{% if task.task.is_completed %}	
+												<div class="mr-3">
+													<span class="d-inline-flex justify-content-center align-items-center rounded-circle bg-light text-success" style="width: 40px; height: 40px;">
+														<i class="fa fa-check"></i>
+													</span>
+												</div>
+											{% else %}
+												<div class="mr-3">
+													<span class="d-inline-flex justify-content-center align-items-center rounded-circle bg-light text-danger" style="width: 40px; height: 40px;">
+														<i class="fa fa-times"></i>
+													</span>
+												</div>
+											{% endif %}
+											<!-- Task Info -->
+											<div class="flex-grow-1">
+												<p class="mb-1 font-weight-bold text-dark">{{ task.task.title }}</p>
+												<div class="text-muted small">
+													<i class="fa fa-calendar mr-1"></i> <strong>Due date:</strong> {{ task.task.due_date|date:"M d, Y h:i A" }}
+												</div>
+											</div>
+										</li>
+										{% empty %}
+										<li class="text-center text-muted py-4">You have no pending tasks.</li>
+										{% endfor %}
+									</ul>									
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-12 m-b30">
+						<div class="widget-box">
+							<div class="wc-title">
+								<h4>Basic Calendar</h4>
+							</div>
+							<div class="widget-inner">
+								<div id="calendar"></div>
 							</div>
 						</div>
 					</div>
 				</div>
-				<div class="col-lg-6 m-b30">
-					<div class="widget-box">
-						<div class="wc-title">
-							<h4>Orders</h4>
-						</div>
-						<div class="widget-inner">
-							<div class="orders-list">
-								<ul>
-									<li>
-										<span class="orders-title">
-											<a href="#" class="orders-title-name">Anna Strong </a>
-											<span class="orders-info">Order #02357 | Date 12/08/2019</span>
-										</span>
-										<span class="orders-btn">
-											<a href="#" class="btn button-sm red">Unpaid</a>
-										</span>
-									</li>
-									<li>
-										<span class="orders-title">
-											<a href="#" class="orders-title-name">Revenue</a>
-											<span class="orders-info">Order #02357 | Date 12/08/2019</span>
-										</span>
-										<span class="orders-btn">
-											<a href="#" class="btn button-sm red">Unpaid</a>
-										</span>
-									</li>
-									<li>
-										<span class="orders-title">
-											<a href="#" class="orders-title-name">Anna Strong </a>
-											<span class="orders-info">Order #02357 | Date 12/08/2019</span>
-										</span>
-										<span class="orders-btn">
-											<a href="#" class="btn button-sm green">Paid</a>
-										</span>
-									</li>
-									<li>
-										<span class="orders-title">
-											<a href="#" class="orders-title-name">Revenue</a>
-											<span class="orders-info">Order #02357 | Date 12/08/2019</span>
-										</span>
-										<span class="orders-btn">
-											<a href="#" class="btn button-sm green">Paid</a>
-										</span>
-									</li>
-									<li>
-										<span class="orders-title">
-											<a href="#" class="orders-title-name">Anna Strong </a>
-											<span class="orders-info">Order #02357 | Date 12/08/2019</span>
-										</span>
-										<span class="orders-btn">
-											<a href="#" class="btn button-sm green">Paid</a>
-										</span>
-									</li>
-								</ul>
-							</div>
-						</div>
-					</div>
-				</div>
-				<div class="col-lg-12 m-b30">
-					<div class="widget-box">
-						<div class="wc-title">
-							<h4>Basic Calendar</h4>
-						</div>
-						<div class="widget-inner">
-							<div id="calendar"></div>
-						</div>
-					</div>
-				</div>
-			</div>
+			{% endif %}
 		</div>
 	</main>
 	<div class="ttr-overlay"></div>
