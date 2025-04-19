@@ -8,7 +8,7 @@ from django.utils.timezone import now
 from django.contrib.auth import get_user_model
 import calendar
 import json
-from datetime import timedelta
+from datetime import timedelta, date
 
 from .forms import InstructorApplicationForm, CustomUserChangeForm
 from .models import CustomUser, InstructorApplication
@@ -91,6 +91,7 @@ def reject_application(request, application_id):
     return redirect('account:dashboard') 
 
 def admin_dashboard(request):
+    #admin
     # Fetch instructor applications
     applications = InstructorApplication.objects.filter(is_verified=False)
     
@@ -145,6 +146,8 @@ def admin_dashboard(request):
         labels.insert(0, calendar.month_name[month])  # Add month name to labels
         data.insert(0, month_data['count'] if month_data else 0)  # Add count or 0 if no data
 
+    #instructors
+    
     # Context for the template
     context = {
         'created_courses': created_courses,
@@ -159,7 +162,9 @@ def admin_dashboard(request):
         'tasks': json.dumps(formatted_tasks),  # Pass tasks as JSON
         'labels': json.dumps(labels),  # Pass labels as JSON
         'data': json.dumps(data),      # Pass data as JSON
+        'today': date.today()
     }
+
     
     return render(request, 'account/admin/dashboard.html', context)
 
