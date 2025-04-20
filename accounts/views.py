@@ -102,6 +102,8 @@ def admin_dashboard(request):
     actions = Action.objects.all()
     
     created_courses = Course.objects.filter(owner=request.user)
+    enrolled_courses = Course.objects.filter(students=request.user)
+    user_courses = list(enrolled_courses) + list(created_courses)
     # Count total courses
     courses_count = Course.objects.count()
     tasks = Task.objects.all()
@@ -151,6 +153,8 @@ def admin_dashboard(request):
     # Context for the template
     context = {
         'created_courses': created_courses,
+        'enrolled_courses': enrolled_courses,
+        'user_courses': user_courses,
         'actions': actions,
         'applications': applications,
         'is_instructor': is_instructor,

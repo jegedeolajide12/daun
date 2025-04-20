@@ -448,7 +448,7 @@
                             <div class="widget-inner">
                                 <div class="courses-list">
                                     <ul class="list-unstyled">
-                                        {% for course in created_courses|slice:7 %}
+                                        {% for course in user_courses|slice:7 %}
                                         <li class="d-flex align-items-center py-2 border-bottom">
                                             {% if course.cover_image %}
                                             <div class="course-cover mr-3">
