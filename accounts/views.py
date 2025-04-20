@@ -106,7 +106,7 @@ def admin_dashboard(request):
     courses_count = Course.objects.count()
     tasks = Task.objects.all()
     tasks_count = Task.objects.count()
-    user_tasks = UserTask.objects.all()
+    user_tasks = UserTask.objects.filter(user=request.user)
     user_tasks_count = UserTask.objects.count()
 
 
