@@ -341,69 +341,207 @@
 						</div>
 					</div>
 				</div>
-			{% elif is_instructor %}
-			<div class="row">
-				<div class="col-md-6 col-lg-3 col-xl-3 col-sm-6 col-12">
-					<div class="widget-card widget-bg1">					 
-						<div class="wc-item">
-							<h4 class="wc-title">Total Students</h4>
-							<span class="wc-des">Total courses students : (4000)</span>
-							<span class="wc-stats"><span class="counter">20,000</span></span>		
-						</div>				      
-					</div>
-				</div>
-				
-				<div class="col-md-6 col-lg-3 col-xl-3 col-sm-6 col-12">
-					<div class="widget-card widget-bg2">					 
-						<div class="wc-item">
-							<h4 class="wc-title">
-								Total Created Courses
-							</h4>
-							<span class="wc-des">
-								All Courses
-							</span>
-							<span class="wc-stats counter">
-								{{ courses_count }}
-							</span>		
-							
-						</div>				      
-					</div>
-				</div>
-				<div class="col-md-6 col-lg-3 col-xl-3 col-sm-6 col-12">
-					<div class="widget-card widget-bg3">					 
-						<div class="wc-item">
-							<h4 class="wc-title">
-								Revenue 
-							</h4>
-							<span class="wc-des">
-								Total monthly revenue
-							</span>
-							<span class="wc-stats">
-								₦772,540.47
-							</span>		
-							
-						</div>				      
-					</div>
-				</div>
-				<div class="col-md-6 col-lg-3 col-xl-3 col-sm-6 col-12">
-					<div class="widget-card widget-bg4">					 
-						<div class="wc-item">
-							<h4 class="wc-title">
-								Best Performing Course
-							</h4>
-							<span class="wc-des">
-								500
-							</span>
-							<span class="wc-stats counter">
-								350 
-							</span>		
-							
-						</div>				      
-					</div>
-				</div>
-			</div>
-			
-			{% endif %}
+				{% elif is_instructor %}
+                <!-- Instructor Block -->
+                <div class="row">
+                    <div class="col-md-6 col-lg-3 col-xl-3 col-sm-6 col-12">
+                        <div class="widget-card widget-bg1">					 
+                            <div class="wc-item">
+                                <h4 class="wc-title">Your Students</h4>
+                                <span class="wc-des">Total monthly Enrollments</span>
+                                <span class="wc-stats counter">{{ monthly_enrollment_count }}</span>		
+                            </div>				      
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 col-lg-3 col-xl-3 col-sm-6 col-12">
+                        <div class="widget-card widget-bg2">					 
+                            <div class="wc-item">
+                                <h4 class="wc-title">Your Courses</h4>
+                                <span class="wc-des">All Created Courses</span>
+                                <span class="wc-stats counter">{{ created_courses|length }}</span>		
+                            </div>				      
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-lg-3 col-xl-3 col-sm-6 col-12">
+                        <div class="widget-card widget-bg3">					 
+                            <div class="wc-item">
+                                <h4 class="wc-title">Revenue</h4>
+                                <span class="wc-des">Your total monthly revenue</span>
+                                <span class="wc-stats">₦{{ monthly_revenue|default:"0.00" }}</span>		
+                            </div>				      
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-lg-3 col-xl-3 col-sm-6 col-12">
+                        <div class="widget-card widget-bg4">					 
+                            <div class="wc-item">
+                                <h4 class="wc-title">Assignments to Review</h4>
+                                <span class="wc-des">Pending student submissions</span>
+                                <span class="wc-stats counter">{{ assignments_to_review|length }}</span>		
+                            </div>				      
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row text-center">
+                    <div class="col-md-4 col-sm-6 col-6 mb-3">
+                        <a href="#" class="btn btn-primary btn-block text-truncate" title="Create New Course">Create New Course</a>
+                    </div>
+                    <div class="col-md-4 col-sm-6 col-6 mb-3">
+                        <a href="#" class="btn btn-primary btn-block text-truncate" title="Manage My Students">Manage My Students</a>
+                    </div>
+                    <div class="col-md-4 col-sm-6 col-6 mb-3">
+                        <a href="#" class="btn btn-primary btn-block text-truncate" title="Upload New Assignment">Upload Assignment</a>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Chart -->
+                    <div class="col-lg-8 m-b30">
+                        <div class="widget-box">
+                            <div class="wc-title">
+                                <h4>Monthly Enrollments</h4>
+                            </div>
+                            <div class="widget-inner">
+                                <canvas id="instructorChart" width="100" height="45"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Notifications -->
+                    <div class="col-lg-4 m-b30">
+                        <div class="widget-box">
+                            <div class="wc-title">
+                                <h4>Notifications</h4>
+                            </div>
+                            <div class="widget-inner">
+                                <div class="noti-box-list">
+                                    <ul>
+                                        {% for note in instructor_notifications %}
+                                            <li>
+                                                <span class="notification-icon dashbg-gray">
+                                                    <i class="fa fa-bell"></i>
+                                                </span>
+                                                <span class="notification-text">
+                                                    {{ note.message }}
+                                                </span>
+                                                <span class="notification-time">
+                                                    <span>{{ note.timestamp|time }}</span>
+                                                </span>
+                                            </li>
+                                        {% empty %}
+                                            <li class="text-muted text-center py-4">No new notifications</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Your Courses -->
+                    <div class="col-lg-8 mb-4">
+                        <div class="widget-box">
+                            <div class="wc-title">
+                                <h4>Your Courses</h4>
+                            </div>
+                            <div class="widget-inner">
+                                <div class="courses-list">
+                                    <ul class="list-unstyled">
+                                        {% for course in created_courses|slice:7 %}
+                                        <li class="d-flex align-items-center py-2 border-bottom">
+                                            {% if course.cover_image %}
+                                            <div class="course-cover mr-3">
+                                                <img src="{{ course.cover_image.url }}" alt="{{ course.title }}"
+                                                     style="width: 60px; height: 60px; object-fit: cover; border-radius: 5px;">
+                                            </div>
+                                            {% endif %}
+                                            <div class="course-details flex-grow-1">
+                                                <h5 class="mb-1">
+                                                    <a href="#" class="text-primary">{{ course.name|title }}</a>
+                                                </h5>
+                                                <p class="mb-0 text-muted small">
+                                                    Created on: {{ course.created|date:"M d, Y" }} · 
+                                                    {{ course.students.count }} Students · 
+                                                    {{ course.course_topics.count }} Topics
+                                                </p>
+                                            </div>
+                                            <div class="text-end ml-3">
+                                                <a href="#" class="btn btn-sm btn-outline-primary">Edit</a>
+                                            </div>
+                                        </li>
+                                        {% empty %}
+                                        <p class="text-muted text-center my-4">You haven't created any courses yet.</p>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- To-Do List -->
+                    <div class="col-lg-4 m-b30">
+                        <div class="widget-box">
+                            <div class="wc-title">
+                                <h4>To-Do List</h4>
+                            </div>
+                            <div class="widget-inner">
+                                <div class="noti-box-list">
+                                    <ul class="list-unstyled">
+                                        {% for task in user_task_list|slice:5 %}
+                                        <li class="d-flex align-items-start py-3 border-bottom">
+                                            <div class="mr-3">
+                                                <span class="d-inline-flex justify-content-center align-items-center rounded-circle bg-light text-primary" style="width: 40px; height: 40px;">
+                                                    <i class="fa fa-tasks"></i>
+                                                </span>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <p class="mb-1 font-weight-bold text-dark mb-0">{{ task.task.title }} in {{ task.task.course.name }}</p>
+                                                    <span class="badge badge-info text-capitalize">{{ task.task.type }}</span>
+                                                </div>
+                                                <div class="text-muted small d-flex justify-content-between">
+                                                    <div>
+                                                        <i class="fa fa-calendar-alt mr-1"></i>
+                                                        Due: {{ task.task.due_date|date:"M d, Y h:i A" }}
+                                                    </div>
+                                                    <div>
+                                                        {% if task.is_completed %}
+                                                            <span class="badge badge-success">Completed</span>
+                                                        {% elif task.task.due_date < today %}
+                                                            <span class="badge badge-danger">Overdue</span>
+                                                        {% else %}
+                                                            <span class="badge badge-warning">Pending</span>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                                <div class="mt-1">
+                                                    <a href="#" class="text-primary small">View Task <i class="fa fa-arrow-right"></i></a>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        {% empty %}
+                                        <li class="text-center text-muted py-4">You have no pending tasks.</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Calendar -->
+                    <div class="col-lg-12 m-b30">
+                        <div class="widget-box">
+                            <div class="wc-title">
+                                <h4>Basic Calendar</h4>
+                            </div>
+                            <div class="widget-inner">
+                                <div id="calendar"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
 		</div>
 	</main>
 	<div class="ttr-overlay"></div>

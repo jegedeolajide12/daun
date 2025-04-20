@@ -172,7 +172,7 @@
 			<!--logo start -->
 			<div class="ttr-logo-box">
 				<div>
-					<a href="index.html" class="ttr-logo">
+					<a href="{% url "student:student_home" %}" class="ttr-logo">
 						<img alt="" class="ttr-logo-mobile" src="{% static "asset/images/logo-mobile.png" %}" width="30" height="30">
 						<img alt="" class="ttr-logo-desktop" src="{% static "asset/images/logo-white.png" %}" width="160" height="27">
 					</a>
@@ -182,9 +182,6 @@
 			<div class="ttr-header-menu">
 				<!-- header left menu start -->
 				<ul class="ttr-header-navigation">
-					<li>
-						<a href="{% url "course:home" %}" class="ttr-material-button ttr-submenu-toggle">HOME</a>
-					</li>
 					<li style="flex: 1; text-align: center; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); color: white;">
 						{% if request.user.first_name %}
 							<span style="font-size: 18px; font-weight: bold;">Hello {{ request.user.first_name }} 👋</span>
