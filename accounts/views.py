@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required,user_passes_test
 from django.contrib import messages
 from django.contrib.auth.models import Group
 from django.db.models.functions import TruncMonth
-from django.db.models import Count
+from django.db.models import Count, Avg
 from django.utils.timezone import now
 from django.contrib.auth import get_user_model
 import calendar

@@ -226,31 +226,50 @@
 							<div class="widget-inner">
 								<div class="courses-list">
 									<ul class="list-unstyled">
-										{% for course in created_courses|slice:7 %}
-										<li class="d-flex align-items-center py-2 border-bottom">
-											{% if course.cover_image %}
-											<div class="course-cover mr-3">
-												<img src="{{ course.cover_image.url }}" alt="{{ course.title }}"
-													 style="width: 60px; height: 60px; object-fit: cover; border-radius: 5px;">
+										{% for course in user_courses|slice:7 %}
+                                        <li class="d-flex align-items-center py-2 border-bottom">
+                                            {% if course.cover_image %}
+                                            <div class="course-cover mr-3">
+                                                <img src="{{ course.cover_image.url }}" alt="{{ course.title }}"
+                                                     style="width: 60px; height: 60px; object-fit: cover; border-radius: 5px;">
+                                            </div>
+                                            {% endif %}
+                                            <div class="course-details flex-grow-1">
+                                                <h5 class="mb-1">
+                                                    <a href="#" class="text-primary">{{ course.name|title }}</a>
+                                                </h5>
+                                                <p class="mb-0 text-muted small">
+                                                    Created on: {{ course.created|date:"M d, Y" }} · 
+                                                    {{ course.students.count }} Students · 
+                                                    {{ course.course_topics.count }} Topics
+                                                </p>
+                                            </div>
+											{% if course in enrolled_courses %}
+											<div class="badge ml-2">
+												<a href="#" class="btn button-sm green radius-xl">ENROLLED</a>
 											</div>
-											{% endif %}
-											<div class="course-details flex-grow-1">
-												<h5 class="mb-1">
-													<a href="" class="text-primary">{{ course.name|title }}</a>
-												</h5>
-												<p class="mb-0 text-muted small">
-													Created on: {{ course.created|date:"M d, Y" }} · 
-													{{ course.students.count }} Students · 
-													{{ course.course_topics.count }} Topics
-												</p>
+											<li class="d-flex align-items-center py-2 border-bottom">
+												<div class="progress flex-grow-1 mr-3" style="height: 20px;">
+													<div class="progress-bar bg-success" role="progressbar" style="width: {{ progress }}%;" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100">
+														<span style="color: {% if progress >= 75 %}white{% elif progress >= 50 %}orange{% else %}red{% endif %};">
+															{{ progress }}% Completed
+														</span>
+													</div>
+												</div>
+											</li>
+											{% else %}
+											<div class="badge ml-2">
+												<a href="#" class="btn button-sm red radius-xl">YOUR COURSE</a>
 											</div>
 											<div class="text-end ml-3">
-												<a href="" class="btn btn-sm btn-outline-primary">Edit</a>
-											</div>
-										</li>
-										{% empty %}
-										<p class="text-muted text-center my-4">You haven't created any courses yet.</p>
-										{% endfor %}
+                                                <a href="#" class="btn btn-sm btn-outline-primary">Edit</a>
+                                            </div>
+											{% endif %}
+                                            
+                                        </li>
+                                        {% empty %}
+                                        <p class="text-muted text-center my-4">You haven't created any courses yet.</p>
+                                        {% endfor %}
 									</ul>
 								</div>
 							</div>
@@ -470,7 +489,15 @@
 											<div class="badge ml-2">
 												<a href="#" class="btn button-sm green radius-xl">ENROLLED</a>
 											</div>
-											
+											<li class="d-flex align-items-center py-2 border-bottom">
+												<div class="progress flex-grow-1 mr-3" style="height: 20px;">
+													<div class="progress-bar bg-success" role="progressbar" style="width: {{ progress }}%;" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100">
+														<span style="color: {% if progress >= 75 %}white{% elif progress >= 50 %}orange{% else %}red{% endif %};">
+															{{ progress }}% Completed
+														</span>
+													</div>
+												</div>
+											</li>
 											{% else %}
 											<div class="badge ml-2">
 												<a href="#" class="btn button-sm red radius-xl">YOUR COURSE</a>
@@ -726,11 +753,11 @@
 											</tr>
 										</thead>
 										<tbody>
-											{% for grade in recent_grades %}
+											{% for task in user_task_list %}
 											<tr>
-												<td>{{ grade.course.code }}</td>
-												<td>{{ grade.assessment_title }}</td>
-												<td>{{ grade.score }}%</td>
+												<td>{{ task.task.course.code }}</td>
+												<td>{{ task.task.type|upper }}</td>
+												<td>{{ task.score }}%</td>
 												<td>{{ grade.date_graded|date:"M d, Y" }}</td>
 											</tr>
 											{% empty %}
@@ -837,12 +864,16 @@
 									<h4>GPA Tracker</h4>
 								</div>
 								<div class="widget-inner">
-									<h5>Current GPA: <span class="text-primary">{{ gpa }}</span></h5>
-									<div class="progress" style="height: 20px;">
-										<div class="progress-bar bg-info" role="progressbar" style="width: 80%;" aria-valuenow="80" aria-valuemin="0" aria-valuemax="5">
-											{{ gpa }}/5.00
+									<p class="text-muted">Track your GPA progress over time.</p>
+									{% for task in user_task_list %}
+										<span class="text-muted">Course: {{ task.task.course.name }}</span><br>
+										<h5>Current GPA: <span class="text-primary">{{ task.get_gpa }}</span></h5>
+										<div class="progress" style="height: 20px;">
+											<div class="progress-bar bg-info" role="progressbar" style="width: {{ task.get_gpa }}%;" aria-valuenow="{{ task.get_gpa}}" aria-valuemin="0" aria-valuemax="5">
+												{{ task.get_gpa }}/5.000
+											</div>
 										</div>
-									</div>
+									{% endfor %}
 								</div>
 							</div>
 						</div>

@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Avg
 from django.contrib.auth import get_user_model
 from django.utils.text import slugify
 from django.core.exceptions import ValidationError
@@ -101,7 +102,7 @@ class TaskType(models.TextChoices):
 
 class Task(models.Model):
     title = models.CharField(max_length=255)
-    slug = models.SlugField(max_length=255, unique=True, null=True, blank=True)
+    slug = models.SlugField(max_length=255, null=True, blank=True)
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='course_tasks')
     start_date = models.DateTimeField()
     due_date = models.DateTimeField(null=True, blank=True)
@@ -111,14 +112,17 @@ class Task(models.Model):
     def __str__(self):
         return f'{self.title} - {self.course.name}'
     def save(self, *args, **kwargs):
-        students = self.course.students.all()
-        user_tasks = [
-            UserTask.objects.create(user=student, task=self) for student in students
-        ]
-        UserTask.objects.bulk_create(user_tasks)
+        # Save the Task instance first to ensure it has a primary key
         if not self.slug:
             self.slug = slugify(self.title)
         super().save(*args, **kwargs)
+
+        # Now create UserTask objects for all students in the course
+        students = self.course.students.all()
+        user_tasks = [
+            UserTask(user=student, task=self) for student in students
+        ]
+        UserTask.objects.bulk_create(user_tasks)
 
 
 class UserTask(models.Model):
@@ -126,6 +130,52 @@ class UserTask(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='user_tasks')
     is_completed = models.BooleanField(default=False)
     score = models.IntegerField(null=True, blank=True)
+    
+    class Meta:
+        unique_together = ('user', 'task')
+        ordering = ['task__due_date']
+
+
+    def get_average_score(self):
+        return UserTask.objects.filter(task=self.task).aggregate(Avg('score'))['score__avg']
+
+    def get_gpa(self, user=None):
+        if user is None:
+            user = self.user
+        graded_tasks = user.user_tasks.filter(score__isnull=False)
+
+        if not graded_tasks.exists():
+            return 0.0  # No GPA yet
+
+        total_quality_points = 0
+        total_units = 0
+
+        for task_score in graded_tasks:
+            score = task_score.score
+            unit = 3  # assumed course unit
+
+            if score >= 70:
+                grade_point = 5
+            elif score >= 60:
+                grade_point = 4
+            elif score >= 50:
+                grade_point = 3
+            elif score >= 45:
+                grade_point = 2
+            elif score >= 40:
+                grade_point = 1
+            else:
+                grade_point = 0
+
+            total_quality_points += grade_point * unit
+            total_units += unit
+
+        if total_units == 0:
+            return 0.0
+
+        return round(total_quality_points / total_units, 2)
+
+
 
     def __str__(self):
         return f'{self.user.username} - {self.task.title}'
