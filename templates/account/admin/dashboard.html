@@ -466,12 +466,20 @@
                                                     {{ course.course_topics.count }} Topics
                                                 </p>
                                             </div>
+											{% if course in enrolled_courses %}
+											<div class="badge ml-2">
+												<a href="#" class="btn button-sm green radius-xl">ENROLLED</a>
+											</div>
+											
+											{% else %}
 											<div class="badge ml-2">
 												<a href="#" class="btn button-sm red radius-xl">YOUR COURSE</a>
 											</div>
-                                            <div class="text-end ml-3">
+											<div class="text-end ml-3">
                                                 <a href="#" class="btn btn-sm btn-outline-primary">Edit</a>
                                             </div>
+											{% endif %}
+                                            
                                         </li>
                                         {% empty %}
                                         <p class="text-muted text-center my-4">You haven't created any courses yet.</p>

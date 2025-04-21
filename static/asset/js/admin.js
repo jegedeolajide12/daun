@@ -157,6 +157,73 @@ Theme Version:	1.0.0
 					});
 				}
 
+				var displayInstructorGraph = function() {
+					if (!checkSelectorExistence('#instructorChart')) { return; }
+				
+					var InstructorCtx = document.getElementById('instructorChart').getContext('2d');
+					Chart.defaults.global.defaultFontFamily = "rubik";
+					Chart.defaults.global.defaultFontColor = '#999';
+					Chart.defaults.global.defaultFontSize = '12';
+				
+					var instructorChart = new Chart(InstructorCtx, {
+						type: 'line',
+
+						// The data for our dataset
+						data: {
+							labels: instructorLabels, // Use dynamic labels
+							datasets: [{
+								label: "Monthly Enrollments",
+								backgroundColor: 'rgba(0,0,0,0.05)',
+								borderColor: '#4c1864',
+								borderWidth: "3",
+								data: instructorData, // Use dynamic data
+								pointRadius: 4,
+								pointHoverRadius: 4,
+								pointHitRadius: 10,
+								pointBackgroundColor: "#fff",
+								pointHoverBackgroundColor: "#fff",
+								pointBorderWidth: "3",
+							}]
+						},
+
+						// Configuration options
+						options: {
+							layout: {
+								padding: 0,
+							},
+							legend: { display: false },
+							title: { display: false },
+							scales: {
+								yAxes: [{
+									scaleLabel: {
+										display: false
+									},
+									gridLines: {
+										borderDash: [6, 6],
+										color: "#ebebeb",
+										lineWidth: 1,
+									},
+								}],
+								xAxes: [{
+									scaleLabel: { display: false },
+									gridLines: { display: false },
+								}],
+							},
+							tooltips: {
+								backgroundColor: '#333',
+								titleFontSize: 12,
+								titleFontColor: '#fff',
+								bodyFontColor: '#fff',
+								bodyFontSize: 12,
+								displayColors: false,
+								xPadding: 10,
+								yPadding: 10,
+								intersect: false
+							}
+						},
+					});
+				}
+
 				var initializeCalendar = function() {
 					if (!checkSelectorExistence('#calendar')) {
 						return;
@@ -187,6 +254,7 @@ Theme Version:	1.0.0
 						materialButton();
 						headerSubMenu();
 						displayGraph();
+						displayInstructorGraph();
 						initializeCalendar();
 					}
 				}

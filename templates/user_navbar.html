@@ -418,6 +418,10 @@
     console.log("Chart Data:", JSON.parse('{{ data|safe }}'));
 </script>
 <script>
+    console.log("Chart Labels:", JSON.parse('{{ instructor_labels|safe }}'));
+    console.log("Chart Data:", JSON.parse('{{ instructor_data|safe }}'));
+</script>
+<script>
 	$(document).ready(function() {
   
 	  $('#calendar').fullCalendar({
@@ -443,6 +447,10 @@
 </script>
 <script>
 	var calendarEvents = JSON.parse('{{ tasks|safe }}');
+</script>
+<script>
+	var instructorLabels = JSON.parse('{{ instructor_labels|safe }}');
+    var instructorData = JSON.parse('{{ instructor_data|safe }}'); 
 </script>
 </body>
 

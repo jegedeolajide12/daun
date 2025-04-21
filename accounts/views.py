@@ -114,12 +114,12 @@ def admin_dashboard(request):
 
     formatted_tasks = [
         {
-            "title": task.title,
-            "start": task.start_date.isoformat(),
-            "end": task.due_date.isoformat() if task.due_date else None,
-            "type": task.get_type_display(),
+            "title": task.task.title,
+            "start": task.task.start_date.isoformat(),
+            "end": task.task.due_date.isoformat() if task.task.due_date else None,
+            "type": task.task.get_type_display(),
         }
-        for task in tasks
+        for task in user_tasks
     ]
     
     # Analytics for user registrations by the last 6 months
@@ -131,6 +131,8 @@ def admin_dashboard(request):
         .annotate(count=Count('id'))
         .order_by('month')
     )
+
+
 
     # Prepare labels and data for the last 6 months
     labels = []
@@ -149,10 +151,31 @@ def admin_dashboard(request):
         data.insert(0, month_data['count'] if month_data else 0)  # Add count or 0 if no data
 
     #instructors
+    # Analytics for instructor enrollments by the last 6 months
+    instructor_data = (
+        Course.objects.filter(owner__groups__name="Instructors", created__gte=six_months_ago)
+        .annotate(month=TruncMonth('created'))
+        .values('month')
+        .annotate(count=Count('id'))
+        .order_by('month')
+    )
+
+    # Prepare labels and data for instructor enrollments
+    instructor_labels = []
+    instructor_data_values = []
+
+    for i in range(6):
+        month_date = current_date - timedelta(days=i * 30)  # Approximation for each month
+        month = month_date.month
+        year = month_date.year
+
+        # Get the course count for the specific month
+        month_data = next((entry for entry in instructor_data if entry['month'].month == month and entry['month'].year == year), None)
+        instructor_labels.insert(0, calendar.month_name[month])  # Add month name to labels
+        instructor_data_values.insert(0, month_data['count'] if month_data else 0)  # Add count or 0 if no data
+
     
-    # Context for the template
     context = {
-        'created_courses': created_courses,
         'enrolled_courses': enrolled_courses,
         'user_courses': user_courses,
         'actions': actions,
@@ -166,6 +189,8 @@ def admin_dashboard(request):
         'tasks': json.dumps(formatted_tasks),  # Pass tasks as JSON
         'labels': json.dumps(labels),  # Pass labels as JSON
         'data': json.dumps(data),      # Pass data as JSON
+        'instructor_labels': json.dumps(instructor_labels),  # Pass instructor labels as JSON
+        'instructor_data': json.dumps(instructor_data_values),  # Pass instructor data as JSON
         'today': date.today()
     }
 
