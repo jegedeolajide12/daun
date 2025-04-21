@@ -577,7 +577,292 @@
                         </div>
                     </div>
                 </div>
-            {% endif %}
+				{% else %}
+				<!-- Student Block -->
+					<div class="row">
+						<div class="col-md-6 col-lg-3 col-xl-3 col-sm-6 col-12">
+							<div class="widget-card widget-bg1">					 
+								<div class="wc-item">
+									<h4 class="wc-title">Enrolled Courses</h4>
+									<span class="wc-des">Courses you're learning</span>
+									<span class="wc-stats counter">{{ enrolled_courses|length }}</span>		
+								</div>				      
+							</div>
+						</div>
+						
+						<div class="col-md-6 col-lg-3 col-xl-3 col-sm-6 col-12">
+							<div class="widget-card widget-bg2">					 
+								<div class="wc-item">
+									<h4 class="wc-title">Completed Courses</h4>
+									<span class="wc-des">Courses you finished</span>
+									<span class="wc-stats counter">{{ completed_courses|length }}</span>		
+								</div>				      
+							</div>
+						</div>
+
+						<div class="col-md-6 col-lg-3 col-xl-3 col-sm-6 col-12">
+							<div class="widget-card widget-bg3">					 
+								<div class="wc-item">
+									<h4 class="wc-title">Certificates</h4>
+									<span class="wc-des">Earned Certificates</span>
+									<span class="wc-stats counter">{{ certificates|length }}</span>		
+								</div>				      
+							</div>
+						</div>
+
+						<div class="col-md-6 col-lg-3 col-xl-3 col-sm-6 col-12">
+							<div class="widget-card widget-bg4">					 
+								<div class="wc-item">
+									<h4 class="wc-title">Pending Tasks</h4>
+									<span class="wc-des">Assignments & Quizzes</span>
+									<span class="wc-stats counter">{{ pending_tasks|length }}</span>		
+								</div>				      
+							</div>
+						</div>
+					</div>
+
+					<div class="row text-center">
+						<div class="col-md-4 col-sm-6 col-6 mb-3">
+							<a href="#" class="btn btn-primary btn-block text-truncate" title="Browse Courses">Browse Courses</a>
+						</div>
+						<div class="col-md-4 col-sm-6 col-6 mb-3">
+							<a href="#" class="btn btn-primary btn-block text-truncate" title="My Assignments">My Assignments</a>
+						</div>
+						<div class="col-md-4 col-sm-6 col-6 mb-3">
+							<a href="#" class="btn btn-primary btn-block text-truncate" title="My Certificates">My Certificates</a>
+						</div>
+					</div>
+
+					<div class="row">
+						<!-- Chart -->
+					
+						<!-- Notifications -->
+						<div class="col-lg-4 m-b30">
+							<div class="widget-box">
+								<div class="wc-title">
+									<h4>Notifications</h4>
+								</div>
+								<div class="widget-inner">
+									<div class="noti-box-list">
+										<ul>
+											{% for note in student_notifications %}
+												<li>
+													<span class="notification-icon dashbg-gray">
+														<i class="fa fa-bell"></i>
+													</span>
+													<span class="notification-text">
+														{{ note.message }}
+													</span>
+													<span class="notification-time">
+														<span>{{ note.timestamp|time }}</span>
+													</span>
+												</li>
+											{% empty %}
+												<li class="text-muted text-center py-4">No new notifications</li>
+											{% endfor %}
+										</ul>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<!-- Enrolled Courses -->
+						<div class="col-lg-8 mb-4">
+							<div class="widget-box">
+								<div class="wc-title">
+									<h4>Enrolled Courses</h4>
+								</div>
+								<div class="widget-inner">
+									<ul class="list-unstyled">
+										{% for course in enrolled_courses|slice:7 %}
+											<li class="d-flex align-items-center py-2 border-bottom">
+												{% if course.cover_image %}
+												<div class="course-cover mr-3">
+													<img src="{{ course.cover_image.url }}" alt="{{ course.name }}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 5px;">
+												</div>
+												{% endif %}
+												<div class="course-details flex-grow-1">
+													<h5 class="mb-1">
+														<a href="#" class="text-primary">{{ course.name|title }}</a>
+													</h5>
+													<p class="mb-0 text-muted small">
+														Instructor: {{ course.instructor.get_full_name }} · 
+														{{ course.course_topics.count }} Topics
+													</p>
+												</div>
+												<div class="badge ml-2">
+													<a href="#" class="btn button-sm green radius-xl">CONTINUE</a>
+												</div>
+											</li>
+											<li class="d-flex align-items-center py-2 border-bottom">
+												<div class="progress flex-grow-1 mr-3" style="height: 20px;">
+													<div class="progress-bar bg-success" role="progressbar" style="width: {{ progress }}%;" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100">
+														<span style="color: {% if progress >= 75 %}white{% elif progress >= 50 %}orange{% else %}red{% endif %};">
+															{{ progress }}% Completed
+														</span>
+													</div>
+												</div>
+											</li>
+										{% empty %}
+											<p class="text-muted text-center my-4">You're not enrolled in any course yet.</p>
+										{% endfor %}
+									</ul>
+								</div>
+							</div>
+						</div>
+						<div class="col-lg-8 mb-4">
+							<div class="widget-box">
+								<div class="wc-title">
+									<h4>Recent Grades</h4>
+								</div>
+								<div class="widget-inner">
+									<table class="table table-striped">
+										<thead>
+											<tr>
+												<th>Course</th>
+												<th>Assessment</th>
+												<th>Score</th>
+												<th>Date</th>
+											</tr>
+										</thead>
+										<tbody>
+											{% for grade in recent_grades %}
+											<tr>
+												<td>{{ grade.course.code }}</td>
+												<td>{{ grade.assessment_title }}</td>
+												<td>{{ grade.score }}%</td>
+												<td>{{ grade.date_graded|date:"M d, Y" }}</td>
+											</tr>
+											{% empty %}
+											<tr><td colspan="4" class="text-center text-muted">No grades yet</td></tr>
+											{% endfor %}
+										</tbody>
+									</table>
+								</div>
+							</div>
+							
+						</div>
+
+						<!-- To-Do List -->
+						<div class="col-lg-4 m-b30">
+							<div class="widget-box">
+								<div class="wc-title">
+									<h4>To-Do List</h4>
+								</div>
+								<div class="widget-inner">
+									<ul class="list-unstyled">
+										{% for task in user_task_list|slice:5 %}
+											<li class="d-flex align-items-start py-3 border-bottom">
+												<div class="mr-3">
+													<span class="d-inline-flex justify-content-center align-items-center rounded-circle bg-light text-primary" style="width: 40px; height: 40px;">
+														{% if task.task.type == "quiz" %}
+															<i class="fa fa-question-circle"></i>
+														{% elif task.task.type == "project" %}
+															<i class="fa fa-folder-open"></i>
+														{% elif task.task.type == "assignment" %}
+															<i class="fa fa-file-alt"></i>
+														{% else %}
+															<i class="fa fa-tasks"></i>
+														{% endif %}
+													</span>
+												</div>
+												<div class="flex-grow-1">
+													<div class="d-flex justify-content-between align-items-center">
+														<p class="mb-1 font-weight-bold text-dark mb-0">{{ task.task.title }} in {{ task.task.course.code }}</p>
+														{% if task.task.type == "quiz" %}
+															<span class="badge badge-info text-capitalize">Quiz</span>
+														{% elif task.task.type == "project" %}
+															<span class="badge badge-success text-capitalize">Project</span>
+														{% elif task.task.type != "assignment" %}
+															<span class="badge badge-secondary text-capitalize">{{ task.task.type }}</span>
+														{% endif %}
+													</div>
+													<div class="text-muted small d-flex justify-content-between">
+														<div>
+															<i class="fa fa-calendar-alt mr-1"></i>
+															Due: {{ task.task.due_date|date:"M d, Y h:i A" }}
+															{% if task.task.due_date > today %}
+																<span class="text-success ml-2">({{ task.task.due_date|timesince:today }} left)</span>
+															{% endif %}
+														</div>
+														<div>
+															{% if task.is_completed %}
+																<span class="badge badge-success">Completed</span>
+															{% elif task.task.due_date < today %}
+																<span class="badge badge-danger">Overdue</span>
+															{% else %}
+																<span class="badge badge-warning">Pending</span>
+															{% endif %}
+														</div>
+													</div>
+													<div class="mt-1">
+														<a href="#" class="text-primary small">View Task <i class="fa fa-arrow-right"></i></a>
+													</div>
+												</div>
+											</li>
+										{% empty %}
+											<li class="text-center text-muted py-4">You have no pending tasks.</li>
+										{% endfor %}
+									</ul>
+								</div>
+							</div>
+						</div>
+
+						<!-- Leaderboard -->
+						<div class="col-lg-8 mb-4">
+							<div class="widget-box">
+								<div class="wc-title">
+									<h4>Leaderboard</h4>
+								</div>
+								<div class="widget-inner">
+									<ol class="list-group list-group-numbered">
+										{% for student in leaderboard %}
+										<li class="list-group-item d-flex justify-content-between align-items-center">
+											<span>
+												{{ student.user.get_full_name }} {% if student.user == request.user %}<strong>(You)</strong>{% endif %}
+											</span>
+											<span class="badge badge-primary badge-pill">{{ student.total_score }} pts</span>
+										</li>
+										{% endfor %}
+									</ol>
+								</div>
+							</div>
+							
+						</div>
+
+						<!--GPA TRACKER-->
+						<div class="col-lg-4 m-b30">
+							<div class="widget-box">
+								<div class="wc-title">
+									<h4>GPA Tracker</h4>
+								</div>
+								<div class="widget-inner">
+									<h5>Current GPA: <span class="text-primary">{{ gpa }}</span></h5>
+									<div class="progress" style="height: 20px;">
+										<div class="progress-bar bg-info" role="progressbar" style="width: 80%;" aria-valuenow="80" aria-valuemin="0" aria-valuemax="5">
+											{{ gpa }}/5.00
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						
+
+						<!-- Calendar -->
+						<div class="col-lg-12 m-b30">
+							<div class="widget-box">
+								<div class="wc-title">
+									<h4>Basic Calendar</h4>
+								</div>
+								<div class="widget-inner">
+									<div id="calendar"></div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+				{% endif %}
+				
 		</div>
 	</main>
 	<div class="ttr-overlay"></div>

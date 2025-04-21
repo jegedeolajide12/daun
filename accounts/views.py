@@ -174,10 +174,17 @@ def admin_dashboard(request):
         instructor_labels.insert(0, calendar.month_name[month])  # Add month name to labels
         instructor_data_values.insert(0, month_data['count'] if month_data else 0)  # Add count or 0 if no data
 
+    #STUDENTS
+    for enrollment in enrolled_courses:
+        total_tasks = Task.objects.filter(course=enrollment).count()
+        completed = user_tasks.filter(task__course=enrollment, is_completed=True).count()
+        progress = int((completed/total_tasks) * 100) if total_tasks > 0 else 0
+
     
     context = {
         'enrolled_courses': enrolled_courses,
         'user_courses': user_courses,
+        'progress': progress,
         'actions': actions,
         'applications': applications,
         'is_instructor': is_instructor,
