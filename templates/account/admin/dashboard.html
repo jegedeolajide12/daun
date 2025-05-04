@@ -904,7 +904,7 @@
         <span class="close" id="closeModalBtn">&times;</span>
         <h2>Create New Faculty</h2>
         
-        <form method="POST" action="">
+        <form method="POST" action="{% url 'course:faculty_create' %}">
             {% csrf_token %}
             <input type="text" name="name" placeholder="Faculty Name" required><br><br>
             
