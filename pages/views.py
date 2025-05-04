@@ -27,11 +27,10 @@ class FacultyCreateView(CreateView):
     form_class = FacultyForm
     template_name = 'courses/manage/faculty/create_faculty.html'
     success_url = reverse_lazy('course:home')
-
+    permission_required = 'pages.add_faculty'
     def form_valid(self, form):
-        form.instance.owner = self.request.user
+        form.instance.slug = slugify(form.instance.name)
         return super().form_valid(form)
-
 
 
 class CourseModuleUpdateView(TemplateResponseMixin, View):

@@ -2,7 +2,7 @@ from django import forms
 
 from django.forms.models import inlineformset_factory
 
-from .models import Course, Topic
+from .models import Course, Topic, Faculty
 
 ModuleFormSet = inlineformset_factory(Course, Topic, fields=['name', 'description'], extra=2, can_delete=True)
 
@@ -37,7 +37,7 @@ class CourseForm(forms.ModelForm):
 
 class FacultyForm(forms.ModelForm):
     class Meta:
-        model = Course
+        model = Faculty
         fields = ['name']
         widgets = {
             'name': forms.Select(attrs={

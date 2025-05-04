@@ -27,9 +27,11 @@
                     <div class="widget-inner">
                         {% for course in courses %}
                         <div class="card-courses-list admin-courses">
-                            <div class="card-courses-media">
-                                <img src="{{ course.cover_image.url }}" alt=""/>
-                            </div>
+                            {% if course.cover_image %}
+                                <div class="card-courses-media">
+                                    <img src="{{ course.cover_image.url }}" alt=""/>
+                                </div>
+                            {% endif %}
                             <div class="card-courses-full-dec">
                                 <div class="card-courses-title">
                                     <a href="{% url "course:course" course.slug %}"><h4>{{ course.name|upper }}</h4></a>
