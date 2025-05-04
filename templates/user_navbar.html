@@ -354,43 +354,36 @@
 	   $('input[type="file"]').imageuploadify();
     });
 </script>
-<!-- Modal JavaScript -->
 <script>
-    // Get the modal
-    var modal = document.getElementById("unenrollModal");
+    document.addEventListener("DOMContentLoaded", function () {
+        var modal = document.getElementById("unenrollModal");
+        var unenrollButton = document.getElementById("unenrollButton");
+        var closeButton = document.querySelector(".close");
+        var cancelButton = document.getElementById("cancelUnenroll");
 
-    // Get the button that opens the modal
-    var unenrollButton = document.getElementById("unenrollButton");
+        if (modal && unenrollButton && closeButton && cancelButton) {
+            unenrollButton.addEventListener("click", function (event) {
+                event.preventDefault();
+                modal.style.display = "flex";
+            });
 
-    // Get the <span> element that closes the modal
-    var closeButton = document.querySelector(".close");
+            closeButton.addEventListener("click", function () {
+                modal.style.display = "none";
+            });
 
-    // Get the cancel button
-    var cancelButton = document.getElementById("cancelUnenroll");
+            cancelButton.addEventListener("click", function () {
+                modal.style.display = "none";
+            });
 
-    // When the user clicks the unenroll button, open the modal
-    unenrollButton.addEventListener("click", function (event) {
-        event.preventDefault(); // Prevent the form from submitting
-        modal.style.display = "flex"; // Show the modal
-    });
-
-    // When the user clicks on <span> (x), close the modal
-    closeButton.addEventListener("click", function () {
-        modal.style.display = "none"; // Hide the modal
-    });
-
-    // When the user clicks the cancel button, close the modal
-    cancelButton.addEventListener("click", function () {
-        modal.style.display = "none"; // Hide the modal
-    });
-
-    // When the user clicks anywhere outside of the modal, close it
-    window.addEventListener("click", function (event) {
-        if (event.target == modal) {
-            modal.style.display = "none"; // Hide the modal
+            window.addEventListener("click", function (event) {
+                if (event.target === modal) {
+                    modal.style.display = "none";
+                }
+            });
         }
     });
 </script>
+
 <script>
 	const video = document.getElementById("myVideo");
 	const canvas = document.getElementById("thumbnailCanvas");

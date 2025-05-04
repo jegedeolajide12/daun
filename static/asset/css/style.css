@@ -3297,19 +3297,23 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#391800', end
     height: 100%;
     overflow: auto;
     background-color: rgba(0, 0, 0, 0.5); /* Black background with opacity */
-    padding: 20px; /* Add padding for small screens */
+}
+
+/* When visible */
+.modal.show {
+    display: block;
 }
 
 /* Modal content */
 .modal-content {
     background-color: #fff;
-    margin: auto;
+    margin: 15% auto;
     padding: 20px;
     border-radius: 8px;
-    width: 50%; /* Default width */
-    max-width: 500px; /* Maximum width */
+    width: 30%;
     text-align: center;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+	animation: fadeIn 0.4s;
 }
 
 /* Close button */
@@ -3333,7 +3337,6 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#391800', end
     margin-top: 20px;
 }
 
-/* Buttons */
 .modal-actions .btn {
     margin: 5px;
     padding: 10px 20px;
@@ -3361,15 +3364,15 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#391800', end
     background-color: #999;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-    .modal-content {
-        width: 90%; /* Full width for small screens */
-        padding: 15px; /* Adjust padding */
+/* Optional animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
     }
-
-    .modal-actions .btn {
-        width: 100%; /* Full width buttons for small screens */
-        margin: 10px 0; /* Add spacing between buttons */
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
+

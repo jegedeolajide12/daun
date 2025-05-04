@@ -18,7 +18,6 @@ class StudentHomePage(ListView):
     template_name = 'courses/student_home.html'
     context_object_name = 'courses'
     def get_context_data(self, **kwargs):
-        instructor_group = Group.objects.get(name="Instructors").user_set.all()
         context = super().get_context_data(**kwargs)
         context['courses'] = self.request.user.courses_joined.all()
         context['faculties'] = Faculty.objects.all()

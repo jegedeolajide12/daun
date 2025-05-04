@@ -34,3 +34,14 @@ class CourseForm(forms.ModelForm):
                 'placeholder': 'Enter Course Code',
             }),
         }
+
+class FacultyForm(forms.ModelForm):
+    class Meta:
+        model = Course
+        fields = ['name']
+        widgets = {
+            'name': forms.Select(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter Faculty Name',
+            }),
+        }

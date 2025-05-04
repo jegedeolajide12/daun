@@ -25,7 +25,7 @@ class Faculty(models.Model):
 
     
 class Course(models.Model):
-    students = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='courses_joined', blank=True)
+    students = models.ManyToManyField(settings.AUTH_USER_MODEL, through='Enrollment', related_name='courses_joined', blank=True)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='courses_created', on_delete=models.CASCADE)
     faculty = models.ForeignKey(Faculty, related_name='faculty_courses', on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
@@ -38,7 +38,11 @@ class Course(models.Model):
     class Meta:
         ordering = ['-created']
     
-    
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.name
 
@@ -179,6 +183,12 @@ class UserTask(models.Model):
 
     def __str__(self):
         return f'{self.user.username} - {self.task.title}'
+    
+class Enrollment(models.Model):
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    date_enrolled = models.DateTimeField(auto_now_add=True)
+
 
 class Submission(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='submissions')

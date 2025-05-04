@@ -19,7 +19,18 @@ from actstream import action
 from students.forms import CourseEnrollForm
 
 from .models import Course, Content, Topic, Video, Faculty
-from .forms import CourseForm, ModuleFormSet
+from .forms import CourseForm, ModuleFormSet, FacultyForm
+
+
+class FacultyCreateView(CreateView):
+    model = Faculty
+    form_class = FacultyForm
+    template_name = 'courses/manage/faculty/create_faculty.html'
+    success_url = reverse_lazy('course:home')
+
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
 
 
 
@@ -236,7 +247,6 @@ class CourseListView(TemplateResponseMixin, View):
     template_name = 'courses/course_list.html'
     
     def get(self, request, *args, **kwargs):
-        instructors_group = Group.objects.get(name='Instructors').user_set.all()
         faculties = Faculty.objects.all()
         courses = Course.objects.all()
         is_instructor = self.request.user.groups.filter(name='Instructors').exists()

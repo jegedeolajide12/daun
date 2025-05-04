@@ -79,7 +79,7 @@
 						<a href="{% url 'course:course_create' %}" class="btn btn-primary btn-block text-truncate" title="Create New Course">Create New Course</a>
 					</div>
 					<div class="col-md-3 col-sm-6 col-6 mb-3">
-						<a href="#" class="btn btn-primary btn-block text-truncate" title="Create a New Faculty">Create a New Faculty</a>
+						<a href="#" class="btn btn-primary btn-block text-truncate" title="Create a New Faculty" data-toggle="modal" data-target="#facultyModal">Create a New Faculty</a>
 					</div>
 					<div class="col-md-3 col-sm-6 col-6 mb-3">
 						<a href="#" class="btn btn-primary btn-block text-truncate" title="View all Instructors">View all Instructors</a>
@@ -368,7 +368,7 @@
                             <div class="wc-item">
                                 <h4 class="wc-title">Your Students</h4>
                                 <span class="wc-des">Total monthly Enrollments</span>
-                                <span class="wc-stats counter">{{ monthly_enrollment_count }}</span>		
+                                <span class="wc-stats counter">{{ avg_monthly_student_enrollment }}</span>		
                             </div>				      
                         </div>
                     </div>
@@ -897,4 +897,24 @@
 		</div>
 	</main>
 	<div class="ttr-overlay"></div>
+
+<!-- Modal -->
+<div id="facultyModal" class="modal">
+    <div class="modal-content">
+        <span class="close" id="closeModalBtn">&times;</span>
+        <h2>Create New Faculty</h2>
+        
+        <form method="POST" action="">
+            {% csrf_token %}
+            <input type="text" name="name" placeholder="Faculty Name" required><br><br>
+            
+            <div class="modal-actions">
+                <button type="submit" class="btn btn-danger">Create</button>
+                <button type="button" class="btn btn-secondary" id="cancelModalBtn">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
 {% endblock %}

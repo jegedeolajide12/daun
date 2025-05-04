@@ -151,12 +151,12 @@ def admin_dashboard(request):
         data.insert(0, month_data['count'] if month_data else 0)  # Add count or 0 if no data
 
     #instructors
-    # Analytics for instructor enrollments by the last 6 months
+    # Analytics for students enrollments in the instructor's course by the last 6 months
     instructor_data = (
-        Course.objects.filter(owner__groups__name="Instructors", created__gte=six_months_ago)
-        .annotate(month=TruncMonth('created'))
+        Course.objects.filter(owner=request.user, students__isnull=False, created__gte=six_months_ago)
+        .annotate(month=TruncMonth('students__date_joined'))
         .values('month')
-        .annotate(count=Count('id'))
+        .annotate(count=Count('students', distinct=True))
         .order_by('month')
     )
 
@@ -174,7 +174,16 @@ def admin_dashboard(request):
         instructor_labels.insert(0, calendar.month_name[month])  # Add month name to labels
         instructor_data_values.insert(0, month_data['count'] if month_data else 0)  # Add count or 0 if no data
 
+    avg_monthly_student_enrollment = (
+        Course.objects.filter(owner=request.user, students__isnull=False)
+        .annotate(month=TruncMonth('students__date_joined'))
+        .values('month')
+        .annotate(count=Count('students'))
+        .aggregate(avg_enrollment=Avg('count'))['avg_enrollment'] or 0
+    )
+
     #STUDENTS
+    progress = 0  # Initialize progress
     for enrollment in enrolled_courses:
         total_tasks = Task.objects.filter(course=enrollment).count()
         completed = user_tasks.filter(task__course=enrollment, is_completed=True).count()
@@ -183,6 +192,7 @@ def admin_dashboard(request):
     
     context = {
         'enrolled_courses': enrolled_courses,
+        avg_monthly_student_enrollment: avg_monthly_student_enrollment,
         'user_courses': user_courses,
         'progress': progress,
         'actions': actions,
