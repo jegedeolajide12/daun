@@ -21,17 +21,14 @@ from students.forms import CourseEnrollForm
 from .models import Course, Content, Topic, Video, Faculty
 from .forms import CourseForm, ModuleFormSet, FacultyForm
 
-
-class FacultyCreateView(CreateView):
-    model = Faculty
-    form_class = FacultyForm
-    template_name = 'courses/manage/faculty/create_faculty.html'
-    success_url = reverse_lazy('course:home')
-    permission_required = 'pages.add_faculty'
-    def form_valid(self, form):
-        form.instance.slug = slugify(form.instance.name)
-        return super().form_valid(form)
-
+def create_faculty(request):
+    if request.method == "POST":
+        form = FacultyForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Faculty created successfully!")
+    return redirect('course:home')
+    
 
 class CourseModuleUpdateView(TemplateResponseMixin, View):
     template_name = 'courses/manage/module/formset.html'

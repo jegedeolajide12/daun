@@ -79,7 +79,7 @@
 						<a href="{% url 'course:course_create' %}" class="btn btn-primary btn-block text-truncate" title="Create New Course">Create New Course</a>
 					</div>
 					<div class="col-md-3 col-sm-6 col-6 mb-3">
-						<a href="#" class="btn btn-primary btn-block text-truncate" title="Create a New Faculty" data-toggle="modal" data-target="#facultyModal">Create a New Faculty</a>
+						<a href="#" class="btn btn-primary btn-block text-truncate" id="openFacultyModal" title="Create a New Faculty" data-toggle="modal" data-target="#facultyModal">Create a New Faculty</a>
 					</div>
 					<div class="col-md-3 col-sm-6 col-6 mb-3">
 						<a href="#" class="btn btn-primary btn-block text-truncate" title="View all Instructors">View all Instructors</a>
@@ -895,26 +895,29 @@
 				{% endif %}
 				
 		</div>
+
 	</main>
 	<div class="ttr-overlay"></div>
 
+		
 <!-- Modal -->
 <div id="facultyModal" class="modal">
     <div class="modal-content">
-        <span class="close" id="closeModalBtn">&times;</span>
-        <h2>Create New Faculty</h2>
-        
-        <form method="POST" action="{% url 'course:faculty_create' %}">
-            {% csrf_token %}
-            <input type="text" name="name" placeholder="Faculty Name" required><br><br>
+        <span id="closeFacultyModal" class="close">&times;</span>
+        <h2>Create a New Faculty</h2>
+        <form method="POST" action="{% url "course:create_faculty" %}">
+			{% csrf_token %}
+            <div class="form-group">
+                <label for="facultyName">Faculty Name</label>
+                <input type="text" id="id_name" name="name" placeholder="Enter faculty name" required>
+            </div>
             
             <div class="modal-actions">
-                <button type="submit" class="btn btn-danger">Create</button>
-                <button type="button" class="btn btn-secondary" id="cancelModalBtn">Cancel</button>
+                <button id="cancelFacultyModal" class="btn btn-secondary" type="button">Cancel</button>
+                <button class="btn btn-danger" type="submit">Save Faculty</button>
             </div>
         </form>
     </div>
 </div>
-
 
 {% endblock %}

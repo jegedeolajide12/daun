@@ -14,7 +14,8 @@ from .views import (index,
                     ContentDeleteView,
                     CourseListView,
                     course_unenroll,
-                    FacultyCreateView,)
+                    create_faculty,
+                    )
 
 
 app_name = 'course'
@@ -22,10 +23,9 @@ app_name = 'course'
 urlpatterns = [
     path('', index, name='index'),
     path('courses/', CourseListView.as_view(), name='course_list'),
-
+    path('faculty/create/', create_faculty, name='create_faculty'),
     path('home/', ManageCourseListView.as_view(), name='home'),
     path('course/create/', CourseCreateView.as_view(), name='course_create'),
-    path('faculty/create/', FacultyCreateView.as_view(), name='faculty_create'),
     path('course/<slug:course_slug>/', course_detail, name='course'),
     path('courses/<slug:slug>/edit/', CourseUpdateView.as_view(), name='course_update'),
     path('courses/<slug:slug>/delete/',CourseDeleteView.as_view(), name='course_delete'),

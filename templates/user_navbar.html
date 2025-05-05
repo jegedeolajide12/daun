@@ -355,34 +355,34 @@
     });
 </script>
 <script>
-	const facultyModal = document.getElementById("facultyModal");
-	const openFacultyBtn = document.getElementById("openFacultyModal");
-	const closeFacultyBtn = document.getElementById("closeFacultyModal");
-	const cancelFacultyBtn = document.getElementById("cancelFacultyModal");
-  
+	const modal = document.getElementById("facultyModal");
+	const openBtn = document.getElementById("openFacultyModal"); // Your trigger button
+	const closeBtn = document.getElementById("closeFacultyModal");
+	const cancelBtn = document.getElementById("cancelFacultyModal");
+
 	// Show modal
-	openFacultyBtn.addEventListener("click", () => {
-	  facultyModal.classList.add("show");
+	openBtn.addEventListener("click", () => {
+		modal.classList.add("show");
 	});
-  
-	// Close modal with (x)
-	closeFacultyBtn.addEventListener("click", () => {
-	  facultyModal.classList.remove("show");
+
+	// Close with X
+	closeBtn.addEventListener("click", () => {
+		modal.classList.remove("show");
 	});
-  
-	// Close modal with Cancel button
-	cancelFacultyBtn.addEventListener("click", () => {
-	  facultyModal.classList.remove("show");
+
+	// Close with cancel button
+	cancelBtn.addEventListener("click", () => {
+		modal.classList.remove("show");
 	});
-  
-	// Close modal when clicking outside the content
+
+	// Optional: close when clicking outside the modal
 	window.addEventListener("click", (e) => {
-	  if (e.target === facultyModal) {
-		facultyModal.classList.remove("show");
-	  }
+		if (e.target === modal) {
+			modal.classList.remove("show");
+		}
 	});
 </script>
-  
+
 <script>
 	const video = document.getElementById("myVideo");
 	const canvas = document.getElementById("thumbnailCanvas");
@@ -444,6 +444,41 @@
 	var instructorLabels = JSON.parse('{{ instructor_labels|safe }}');
     var instructorData = JSON.parse('{{ instructor_data|safe }}'); 
 </script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const modal = document.getElementById("facultyModal");
+        const openBtn = document.getElementById("openFacultyModal");
+        const closeBtn = document.getElementById("closeFacultyModal");
+        const cancelBtn = document.getElementById("cancelFacultyModal");
+
+        if (modal && openBtn && closeBtn && cancelBtn) {
+            // Show modal
+            openBtn.addEventListener("click", () => {
+                modal.classList.add("show");
+            });
+
+            // Close with X
+            closeBtn.addEventListener("click", () => {
+                modal.classList.remove("show");
+            });
+
+            // Close with Cancel button
+            cancelBtn.addEventListener("click", () => {
+                modal.classList.remove("show");
+            });
+
+            // Optional: Close when clicking outside the modal
+            window.addEventListener("click", (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove("show");
+                }
+            });
+        } else {
+            console.error("One or more modal-related elements are missing in the DOM.");
+        }
+    });
+</script>
+
 </body>
 
 <!-- Mirrored from educhamp.themetrades.com/demo/admin/courses.html by HTTrack Website Copier/3.x [XR&CO'2014], Fri, 22 Feb 2019 13:11:35 GMT -->

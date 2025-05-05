@@ -15,6 +15,7 @@ from .models import CustomUser, InstructorApplication
 
 from actstream.models import Action
 from pages.models import Course,Task, UserTask
+from pages.forms import FacultyForm
 from allauth.account.views import SignupView
 
 def is_admin(user):
@@ -91,6 +92,14 @@ def reject_application(request, application_id):
     return redirect('account:dashboard') 
 
 def admin_dashboard(request):
+    if request.method == 'POST':
+        form = FacultyForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('account:dashboard')  # or wherever you want
+    else:
+        form = FacultyForm()
+    
     #admin
     # Fetch instructor applications
     applications = InstructorApplication.objects.filter(is_verified=False)

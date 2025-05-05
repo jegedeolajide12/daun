@@ -3285,6 +3285,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#391800', end
     background-color: #d9edf7;
     border-color: #bce8f1;
 }
+/* Modal container */
 .modal {
     display: none;
     position: fixed;
@@ -3363,6 +3364,17 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#391800', end
 
 .modal-actions .btn-secondary:hover {
     background-color: #999;
+}
+/* Responsive for mobile */
+@media (max-width: 480px) {
+	.modal-content {
+		width: 95%;
+		padding: 15px;
+	}
+	
+	.modal-actions {
+		flex-direction: column;
+	}
 }
 
 /* Optional animation */
