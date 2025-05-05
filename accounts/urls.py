@@ -9,6 +9,7 @@ from .views import (admin_dashboard,
                     instructor_application,
                     verify_application,
                     reject_application,
+                    instructors_list
                     ) 
 
 app_name = 'account'
@@ -20,6 +21,7 @@ urlpatterns = [
     path('user/mail/compose', mail_compose, name='mail_compose'),
     path('user/admin/dashboard/', admin_dashboard, name='dashboard'),
     path('user/instructor/application/', instructor_application, name='instructor_application'),
+    path('user/instructor/list/', instructors_list, name='instructors_list'),
     path('user/instructor/verify/<int:application_id>/', verify_application, name='verify_application'),
     path('user/instructor/reject/<int:application_id>/', reject_application, name='reject_application'),
 ]

@@ -27,7 +27,7 @@ def create_faculty(request):
         if form.is_valid():
             form.save()
             messages.success(request, "Faculty created successfully!")
-    return redirect('course:home')
+    return redirect('account:dashboard')
     
 
 class CourseModuleUpdateView(TemplateResponseMixin, View):

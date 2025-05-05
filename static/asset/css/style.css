@@ -3389,3 +3389,44 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#391800', end
     }
 }
 
+.instructor-card {
+	transition: all 0.3s ease;
+	background: transparent;
+}
+
+.instructor-card:hover {
+	transform: translateY(-5px);
+}
+
+.instructor-thumbnail {
+	width: 120px;
+	height: 120px;
+	margin: 0 auto;
+}
+
+.instructor-thumbnail img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.instructor-bio {
+	font-size: 0.9rem;
+	line-height: 1.5;
+	min-height: 60px;
+}
+
+.rating {
+	font-size: 1rem;
+}
+
+@media (max-width: 767px) {
+	.instructor-thumbnail {
+		width: 90px;
+		height: 90px;
+	}
+	
+	.instructor-bio {
+		min-height: auto;
+	}
+}

@@ -23,6 +23,11 @@ def is_admin(user):
 def is_instructor(user):
     return user.groups.filter(name='Instructors').exists()
 
+def instructors_list(request):
+    # Fetch all instructors
+    instructors = CustomUser.objects.filter(groups__name='Instructors')
+    return render(request, 'account/admin/instructors_list.html', {'instructors': instructors})
+
 
 @login_required
 def instructor_application(request):
