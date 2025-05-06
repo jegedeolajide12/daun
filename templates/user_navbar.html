@@ -25,7 +25,7 @@
 	<link rel="shortcut icon" type="image/x-icon" href="{% static "asset/images/favicon.png" %}" />
 	
 	<!-- PAGE TITLE HERE ============================================= -->
-	<title>EduChamp : Education HTML Template </title>
+	<title>{% block title %} {% endblock %}</title>
 	
 	<!-- MOBILE SPECIFIC ============================================= -->
 	<meta name="viewport" content="width=device-width, initial-scale=1">
@@ -40,6 +40,7 @@
 	<link rel="stylesheet" type="text/css" href="{% static "asset/vendors/calendar/fullcalendar.css" %}">
 	<link rel="stylesheet" type="text/css" href="{% static "asset/vendors/summernote/summernote.css" %}">
 	<link rel="stylesheet" type="text/css" href="{% static "asset/vendors/file-upload/imageuploadify.min.css" %}">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 	
 	<!-- TYPOGRAPHY ============================================= -->
 	<link rel="stylesheet" type="text/css" href="{% static "asset/css/typography.css" %}">

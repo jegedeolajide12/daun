@@ -27,7 +27,7 @@ class CustomUserChangeForm(UserChangeForm):
         fields = ('email', 'username',)
 
 
-class RatingForm(forms.ModelForm):
+class InstructorRatingForm(forms.ModelForm):
     class Meta:
         model = InstructorRating
         fields = ['rating', 'comment']

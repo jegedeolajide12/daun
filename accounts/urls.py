@@ -9,7 +9,8 @@ from .views import (admin_dashboard,
                     instructor_application,
                     verify_application,
                     reject_application,
-                    instructors_list
+                    instructors_list,
+                    instructor_profile
                     ) 
 
 app_name = 'account'
@@ -22,6 +23,7 @@ urlpatterns = [
     path('user/admin/dashboard/', admin_dashboard, name='dashboard'),
     path('user/instructor/application/', instructor_application, name='instructor_application'),
     path('user/instructor/list/', instructors_list, name='instructors_list'),
+    path('user/instructor/profile/<int:instructor_id>/', instructor_profile, name='instructor_profile'),
     path('user/instructor/verify/<int:application_id>/', verify_application, name='verify_application'),
     path('user/instructor/reject/<int:application_id>/', reject_application, name='reject_application'),
 ]

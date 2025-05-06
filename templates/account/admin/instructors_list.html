@@ -55,7 +55,7 @@
                                     {{ instructor.bio|truncatewords:20|default:"No bio available" }}
                                 </p>
                                 
-                                <a href="" class="btn btn-outline-primary btn-sm">
+                                <a href="{% url "account:instructor_profile" instructor.id %}" class="btn btn-outline-primary btn-sm">
                                     View Profile
                                 </a>
                             </div>

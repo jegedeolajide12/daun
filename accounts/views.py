@@ -10,8 +10,8 @@ import calendar
 import json
 from datetime import timedelta, date
 
-from .forms import InstructorApplicationForm, CustomUserChangeForm
-from .models import CustomUser, InstructorApplication
+from .forms import InstructorApplicationForm, CustomUserChangeForm, InstructorRatingForm
+from .models import CustomUser, InstructorApplication, InstructorRating
 
 from actstream.models import Action
 from pages.models import Course,Task, UserTask
@@ -23,8 +23,40 @@ def is_admin(user):
 def is_instructor(user):
     return user.groups.filter(name='Instructors').exists()
 
+@login_required
+def instructor_profile(request, instructor_id):
+    instructor = CustomUser.objects.get(id=instructor_id)
+    ratings = InstructorRating.objects.filter(instructor=instructor)
+    average_rating = instructor.average_rating
+    total_ratings = instructor.total_ratings
+    user_rating = ratings.filter(student=request.user).first()
+    
+    if user_rating:
+        form = InstructorRatingForm(instance=user_rating)
+    else:
+        form = InstructorRatingForm()
+
+    if request.method == 'POST':
+        form = InstructorRatingForm(request.POST)
+        if form.is_valid():
+            rating, created = InstructorRating.objects.get_or_create(
+                instructor=instructor,
+                student=request.user,
+                defaults={'rating': form.cleaned_data['rating'], 
+                          'comment': form.cleaned_data['comment']}
+            )
+            return redirect('student:student_home')
+    else:
+        form = InstructorRatingForm()
+
+    return render(request, 'account/admin/instructor_profile.html', {
+        'instructor': instructor,
+        'average_rating': average_rating,
+        'total_ratings': total_ratings,
+        'form': form
+    })
+
 def instructors_list(request):
-    # Fetch all instructors
     instructors = CustomUser.objects.filter(groups__name='Instructors')
     return render(request, 'account/admin/instructors_list.html', {'instructors': instructors})
 
