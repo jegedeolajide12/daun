@@ -45,7 +45,7 @@
 											<a class="nav-link active" data-toggle="tab" href="#courses"><i class="ti-book"></i>Courses</a>
 										</li>
 										<li class="nav-item">
-											<a class="nav-link" data-toggle="tab" href="#quiz-results"><i class="ti-bookmark-alt"></i>Quiz Results </a>
+											<a class="nav-link" data-toggle="tab" href="#review-instructor"><i class="far fa-star"></i>Rate this Instructor </a>
 										</li>
 										<li class="nav-item">
 											<a class="nav-link" data-toggle="tab" href="#edit-profile"><i class="ti-pencil-alt"></i>Edit Profile</a>
@@ -121,14 +121,14 @@
 											</div>
 										</div>
 									</div>
-									<div class="tab-pane fade active" id="quiz-results">
+									<div class="tab-pane fade" id="review-instructor">
 										<div class="rating-container animate__animated animate__fadeIn">
 											<div class="rating-header text-center mb-4">
 												<h3 class="mb-2 display-5 font-weight-bold text-gradient-primary">Rate This Course</h3>
 												<p class="text-muted lead">Your opinion lights up our learning galaxy 🌟</p>
 											</div>
 											
-											<form id="rating-form" method="post" action="/submit-rating/" class="rating-form">
+											<form id="rating-form" method="post" action="{% url "account:rate_instructor" instructor.id %}" class="rating-form">
 												{% csrf_token %}
 												
 												<!-- Star Rating -->
@@ -143,7 +143,7 @@
 														{% endfor %}
 														<div class="rating-result">
 															<span id="rating-text">0</span><small>/5</small>
-															<div id="rating-emoji" class="emoji-bubble">👈 Pick a star!</div>
+															<div id="rating-emoji" class="emoji-bubble">Pick a star</div>
 														</div>
 													</div>
 												</div>
@@ -152,9 +152,9 @@
 												<div class="form-group mb-4">
 													<label for="feedback" class="h5">Share your cosmic thoughts</label>
 													<div class="floating-textarea">
-														<textarea name="feedback" id="feedback" class="form-control" rows="5" 
+														<textarea name="comment" id="feedback" class="form-control" rows="5" 
 																  placeholder=" "></textarea>
-														<label class="floating-label">What stellar aspects stood out? Any black holes we should fix?</label>
+														<label class="floating-label">What stood out? Any issues?</label>
 														<div class="character-count"><span id="char-count">0</span>/500</div>
 													</div>
 												</div>
@@ -162,7 +162,7 @@
 												<!-- Submit Button -->
 												<div class="form-group text-center mt-5">
 													<button type="submit" class="btn btn-glow-primary btn-lg px-5 py-3">
-														<i class="fas fa-rocket mr-2"></i>Launch Review
+														<i class="fas fa-rocket mr-2"></i>Submit Review
 													</button>
 												</div>
 											</form>
@@ -171,7 +171,7 @@
 										</div>
 									</div>
 									
-									<div class="tab-pane" id="edit-profile">
+									<div class="tab-pane fade" id="edit-profile">
 										<div class="profile-head">
 											<h3>Edit Profile</h3>
 										</div>

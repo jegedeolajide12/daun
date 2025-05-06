@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.contrib import messages
 from django.contrib.auth.models import Group
@@ -22,6 +22,27 @@ def is_admin(user):
     return user.groups.filter(name='Admin').exists()
 def is_instructor(user):
     return user.groups.filter(name='Instructors').exists()
+
+@login_required
+def rate_instructor(request, instructor_id):
+    instructor = get_object_or_404(CustomUser, id=instructor_id)
+    
+    if request.method == 'POST':
+        form = InstructorRatingForm(request.POST)
+        if form.is_valid():
+            rating, created = InstructorRating.objects.update_or_create(
+                instructor=instructor,
+                student=request.user,
+                defaults={
+                    'rating': form.cleaned_data['rating'],
+                    'comment': form.cleaned_data['comment']
+                }
+            )
+            return redirect('instructor_profile', instructor_id=instructor.id)
+    else:
+        form = InstructorRatingForm()
+    
+    return redirect('instructor_profile', instructor_id=instructor.id)
 
 @login_required
 def instructor_profile(request, instructor_id):

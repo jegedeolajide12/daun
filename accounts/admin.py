@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Group
 
-from .models import CustomUser,InstructorApplication
+from .models import CustomUser,InstructorApplication, InstructorRating
 from .forms import InstructorApplicationForm, CustomUserChangeForm
 
 
@@ -30,6 +30,17 @@ class InstructorAdmin(UserAdmin):
     ordering = ('username',)
 
 admin.site.register(CustomUser, InstructorAdmin)
+
+@admin.register(InstructorRating)
+class InstructorRatingAdmin(admin.ModelAdmin):
+    list_display = ('instructor', 'student', 'rating', 'comment', 'created_at')
+    list_filter = ('rating', 'created_at')
+    search_fields = ('instructor__username', 'user__username', 'comment')
+    ordering = ('-created_at',)
+
+    def instructor(self, obj):
+        return obj.instructor.username
+    instructor.short_description = 'Instructor'
 
 
 @admin.register(InstructorApplication)
