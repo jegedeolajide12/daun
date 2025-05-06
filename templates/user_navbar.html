@@ -385,6 +385,105 @@
 </script>
 
 <script>
+    // Enhanced Interactive Effects
+    document.addEventListener('DOMContentLoaded', function() {
+        // Star rating interaction
+        const stars = document.querySelectorAll('.rating-stars input');
+        const ratingText = document.getElementById('rating-text');
+        const ratingEmoji = document.getElementById('rating-emoji');
+        const emojiMap = {
+            1: '😞 Terrible',
+            2: '😕 Not great',
+            3: '😐 Average',
+            4: '😊 Very good',
+            5: '🤩 Excellent!'
+        };
+        
+        stars.forEach(star => {
+            star.addEventListener('change', function() {
+                ratingText.textContent = this.value;
+                ratingEmoji.textContent = emojiMap[this.value];
+                ratingEmoji.style.opacity = 1;
+                
+                // Trigger confetti for 5-star rating
+                if (this.value == 5) {
+                    createConfetti();
+                }
+            });
+            
+            star.addEventListener('mouseover', function() {
+                const hoverValue = this.value;
+                ratingEmoji.textContent = emojiMap[hoverValue];
+                ratingEmoji.style.opacity = 0.7;
+            });
+            
+            star.addEventListener('mouseout', function() {
+                const checkedStar = document.querySelector('.rating-stars input:checked');
+                if (checkedStar) {
+                    ratingEmoji.textContent = emojiMap[checkedStar.value];
+                } else {
+                    ratingEmoji.textContent = '👈 Pick a star!';
+                }
+            });
+        });
+        
+        // Character counter for feedback
+        const feedback = document.getElementById('feedback');
+        const charCount = document.getElementById('char-count');
+        
+        feedback.addEventListener('input', function() {
+            charCount.textContent = this.value.length;
+        });
+        
+        // Confetti effect
+        function createConfetti() {
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+            const container = document.querySelector('.confetti-container');
+            
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.top = '-10px';
+                confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                
+                container.appendChild(confetti);
+                
+                const animation = confetti.animate([
+                    { top: '-10px', opacity: 1 },
+                    { top: '100%', opacity: 0 }
+                ], {
+                    duration: 1000 + Math.random() * 2000,
+                    easing: 'cubic-bezier(0.1, 0.8, 0.3, 1)'
+                });
+                
+                animation.onfinish = () => confetti.remove();
+            }
+        }
+        
+        // Form submission
+        const form = document.getElementById('rating-form');
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Here you would normally submit the form
+            // For demo purposes, we'll show a success effect
+            if (document.querySelector('.rating-stars input:checked')) {
+                createConfetti();
+                setTimeout(() => {
+                    alert('Thanks for your rating! 🚀');
+                    form.reset();
+                    ratingText.textContent = '0';
+                    ratingEmoji.textContent = '👈 Pick a star!';
+                    charCount.textContent = '0';
+                }, 1000);
+            } else {
+                alert('Please select a star rating!');
+            }
+        });
+    });
+</script>
+<script>
 	const video = document.getElementById("myVideo");
 	const canvas = document.getElementById("thumbnailCanvas");
 	const img = document.getElementById("thumbnail");
