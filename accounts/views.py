@@ -26,9 +26,14 @@ def is_admin(user):
 def is_instructor(user):
     return user.groups.filter(name='Instructors').exists()
 
+
 @login_required
 def rate_instructor(request, instructor_id):
     instructor = get_object_or_404(CustomUser, id=instructor_id, groups__name='Instructors')
+    
+    if request.user == instructor:
+        messages.error(request, "You cannot rate yourself.")
+        return JsonResponse({'error': "You cannot rate yourself."}, status=400)
     
     if request.method == 'POST':
         form = InstructorRatingForm(request.POST)
@@ -42,7 +47,7 @@ def rate_instructor(request, instructor_id):
                 }
             )
 
-            return JsonResponse({'message':"Your rating has been submitted successfully."})
+            return JsonResponse({'message': "Your rating has been submitted successfully."})
         else:
             return JsonResponse({'error': form.errors}, status=400)
     else:
@@ -53,6 +58,7 @@ def rate_instructor(request, instructor_id):
 @login_required
 def instructor_profile(request, instructor_id):
     instructor = CustomUser.objects.get(id=instructor_id)
+    is_account_owner = request.user == instructor
     ratings = instructor.ratings_recieved.all()
     average_rating = instructor.average_rating
     total_ratings = instructor.total_ratings
@@ -90,7 +96,8 @@ def instructor_profile(request, instructor_id):
         'average_rating': average_rating,
         'total_ratings': total_ratings,
         'form': form,
-        'profile_form': profile_form
+        'profile_form': profile_form,
+        'is_account_owner': is_account_owner,
     })
 
 def instructors_list(request):

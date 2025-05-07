@@ -47,9 +47,11 @@
 										<li class="nav-item">
 											<a class="nav-link" data-toggle="tab" href="#review-instructor"><i class="far fa-star"></i>Rate this Instructor </a>
 										</li>
+										{% if is_account_owner %}
 										<li class="nav-item">
 											<a class="nav-link" data-toggle="tab" href="#edit-profile"><i class="ti-pencil-alt"></i>Edit Profile</a>
 										</li>
+										{% endif %}
 										<li class="nav-item">
 											<a class="nav-link" data-toggle="tab" href="#change-password"><i class="ti-lock"></i>Change Password</a>
 										</li>
@@ -177,19 +179,20 @@
 														<span class="display-4 font-weight-bold">{{ instructor.average_rating|default:"0"|floatformat:1 }}</span>
 														<small>/5</small>
 														<div class="stars">
-															{% with ''|center:instructor.average_rating|default:0 as range %}
-																{% for _ in range %}
-																	<i class="fas fa-star text-warning"></i>
+															{% with rating=instructor.average_rating|default:0 %}
+																{% for i in "12345" %}
+																	{% if forloop.counter <= rating|floatformat:0 %}
+																		<i class="fas fa-star text-warning"></i>
+																	{% else %}
+																		{% if forloop.counter0 < rating and rating|floatformat:1|slice:"-1" == "5" %}
+																			<i class="fas fa-star-half-alt text-warning"></i>
+																		{% else %}
+																			<i class="far fa-star text-warning"></i>
+																		{% endif %}
+																	{% endif %}
 																{% endfor %}
 															{% endwith %}
-															{% if instructor.average_rating < 5 %}
-																{% with ''|center:instructor.remaining_rating as range %}
-																	{% for _ in range %}
-																		<i class="far fa-star text-warning"></i>
-																	{% endfor %}
-																{% endwith %}
-															{% endif %}
-															<small class="text-muted ml-2">({{ instructor.rating_count }} reviews)</small>
+															<small class="text-muted ml-2">({{ instructor.rating_count|default:0 }} reviews)</small>
 														</div>
 													</div>
 												</div>
@@ -225,7 +228,7 @@
 											</div>
 										</div>
 									</div>
-									
+									{% if is_account_owner %}
 									<div class="tab-pane fade" id="edit-profile">
 										<div class="profile-edit-container">
 											<!-- Header -->
@@ -399,6 +402,7 @@
 											</form>
 										</div>
 									</div>
+									{% endif %}
 									<div class="tab-pane" id="change-password">
 										<div class="profile-head">
 											<h3>Change Password</h3>
