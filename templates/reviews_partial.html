@@ -1,0 +1,28 @@
+<!-- templates/reviews_partial.html -->
+<div class="average-rating">
+    <span class="display-4 font-weight-bold">{{ instructor.average_rating|floatformat:1 }}</span>
+    <small>/5</small>
+    <div class="stars">
+        {% with ''|center:instructor.average_rating as range %}
+            {% for _ in range %}
+                <i class="fas fa-star text-warning"></i>
+            {% endfor %}
+        {% endwith %}
+        {% if instructor.average_rating < 5 %}
+            {% with ''|center:instructor.remaining_rating as range %}
+                {% for _ in range %}
+                    <i class="far fa-star text-warning"></i>
+                {% endfor %}
+            {% endwith %}
+        {% endif %}
+        <small class="text-muted ml-2">({{ ratings_received.count }} reviews)</small>
+    </div>
+</div>
+
+<div class="review-list">
+    {% for rating in ratings_received %}
+    <div class="review-card">
+        <!-- Your review card content -->
+    </div>
+    {% endfor %}
+</div>

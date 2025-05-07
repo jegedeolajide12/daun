@@ -8,9 +8,12 @@ from django.utils.timezone import now
 from django.contrib.auth import get_user_model
 import calendar
 import json
+from django.http import JsonResponse
 from datetime import timedelta, date
 
-from .forms import InstructorApplicationForm, CustomUserChangeForm, InstructorRatingForm
+from .forms import (InstructorApplicationForm, 
+                    CustomUserChangeForm, 
+                    InstructorRatingForm)
 from .models import CustomUser, InstructorApplication, InstructorRating
 
 from actstream.models import Action
@@ -25,7 +28,7 @@ def is_instructor(user):
 
 @login_required
 def rate_instructor(request, instructor_id):
-    instructor = get_object_or_404(CustomUser, id=instructor_id)
+    instructor = get_object_or_404(CustomUser, id=instructor_id, groups__name='Instructors')
     
     if request.method == 'POST':
         form = InstructorRatingForm(request.POST)
@@ -38,43 +41,56 @@ def rate_instructor(request, instructor_id):
                     'comment': form.cleaned_data['comment']
                 }
             )
-            return redirect('instructor_profile', instructor_id=instructor.id)
+
+            return JsonResponse({'message':"Your rating has been submitted successfully."})
+        else:
+            return JsonResponse({'error': form.errors}, status=400)
     else:
         form = InstructorRatingForm()
     
-    return redirect('instructor_profile', instructor_id=instructor.id)
+    return redirect('account:instructor_profile', instructor_id=instructor.id)
 
 @login_required
 def instructor_profile(request, instructor_id):
     instructor = CustomUser.objects.get(id=instructor_id)
-    ratings = InstructorRating.objects.filter(instructor=instructor)
+    ratings = instructor.ratings_recieved.all()
     average_rating = instructor.average_rating
     total_ratings = instructor.total_ratings
-    user_rating = ratings.filter(student=request.user).first()
-    
-    if user_rating:
-        form = InstructorRatingForm(instance=user_rating)
-    else:
-        form = InstructorRatingForm()
 
+    # Initialize both forms
     if request.method == 'POST':
-        form = InstructorRatingForm(request.POST)
-        if form.is_valid():
-            rating, created = InstructorRating.objects.get_or_create(
-                instructor=instructor,
-                student=request.user,
-                defaults={'rating': form.cleaned_data['rating'], 
-                          'comment': form.cleaned_data['comment']}
-            )
-            return redirect('student:student_home')
+        if 'rating' in request.POST:  # Check if the rating form is submitted
+            form = InstructorRatingForm(request.POST)
+            profile_form = CustomUserChangeForm(instance=request.user)  # Keep the profile form unchanged
+            if form.is_valid():
+                rating, created = InstructorRating.objects.get_or_create(
+                    instructor=instructor,
+                    student=request.user,
+                    defaults={
+                        'rating': form.cleaned_data['rating'],
+                        'comment': form.cleaned_data['comment']
+                    }
+                )
+                messages.success(request, "Your rating has been submitted successfully!")
+                return redirect('account:instructor_profile', instructor_id=instructor.id)
+        elif 'first_name' in request.POST:  # Check if the profile form is submitted
+            profile_form = CustomUserChangeForm(request.POST, request.FILES, instance=request.user)
+            form = InstructorRatingForm()  # Keep the rating form unchanged
+            if profile_form.is_valid():
+                profile_form.save()
+                messages.success(request, "Your profile has been updated successfully!")
+                return redirect('account:instructor_profile', instructor_id=instructor.id)
     else:
         form = InstructorRatingForm()
+        profile_form = CustomUserChangeForm(instance=request.user)
 
     return render(request, 'account/admin/instructor_profile.html', {
         'instructor': instructor,
+        'ratings': ratings,
         'average_rating': average_rating,
         'total_ratings': total_ratings,
-        'form': form
+        'form': form,
+        'profile_form': profile_form
     })
 
 def instructors_list(request):

@@ -90,7 +90,7 @@ DATABASES = {
         "NAME": BASE_DIR / "db.sqlite3",
     }
 }
-
+MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 # For Docker/PostgreSQL usage uncomment this and comment the DATABASES config above
 # DATABASES = {
 #     "default": {

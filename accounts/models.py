@@ -6,10 +6,21 @@ from django.db.models import Avg
 
 
 class CustomUser(AbstractUser):
-    profile_picture = models.ImageField(upload_to='accounts/profile_pictures', null=True, blank=True)
-    date_of_birth = models.DateField(null=True, blank=True)
-    phone_number = models.CharField(max_length=14, null=True, blank=True)
+    address = models.CharField(max_length=200, blank=True, null=True)
     bio = models.TextField(blank=True, null=True)
+    city = models.CharField(max_length=100, blank=True, null=True)
+    company = models.CharField(max_length=100, blank=True, null=True)
+    country = models.CharField(max_length=100, blank=True, null=True)
+    date_of_birth = models.DateField(null=True, blank=True)
+    github = models.URLField(blank=True, null=True)
+    instagram = models.URLField(blank=True)
+    linkedin = models.URLField(blank=True, null=True)
+    occupation = models.CharField(max_length=100, blank=True, null=True)
+    phone_number = models.CharField(max_length=14, null=True, blank=True)
+    postal_code = models.CharField(max_length=20, blank=True, null=True)
+    profile_picture = models.ImageField(upload_to='accounts/profile_pictures', null=True, blank=True)
+    state = models.CharField(max_length=100, blank=True, null=True)
+    twitter = models.URLField(blank=True, null=True)
     
     @property
     def average_rating(self):
@@ -21,13 +32,17 @@ class CustomUser(AbstractUser):
         return self.ratings_recieved.count()
     
     @property
+    def remaining_rating(self):
+        return 5 - self.average_rating if self.average_rating < 5 else 0
+    
+    @property
     def full_name(self):
         return f"{self.first_name} {self.last_name}" if self.first_name and self.last_name else self.username
 
     
 
     def __str__(self):
-        return self.email
+        return f"{self.full_name}'s Profile"
     
 CustomUser = get_user_model()
 
@@ -54,7 +69,7 @@ class InstructorRating(models.Model):
         verbose_name_plural = 'Instructor Ratings'
     
     def __str__(self):
-        return f"{self.username} rated {self.instructor.username} - {self.rating}/5"
+        return f"{self.student.username} rated {self.instructor.username} - {self.rating}/5"
 
 
 

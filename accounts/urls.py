@@ -11,7 +11,7 @@ from .views import (admin_dashboard,
                     reject_application,
                     instructors_list,
                     instructor_profile,
-                    rate_instructor
+                    rate_instructor,
                     ) 
 
 app_name = 'account'
@@ -22,6 +22,7 @@ urlpatterns = [
     path('user/mail/drafts', mail_draft, name='mail_draft'),
     path('user/mail/compose', mail_compose, name='mail_compose'),
     path('user/admin/dashboard/', admin_dashboard, name='dashboard'),
+
     path('user/instructor/application/', instructor_application, name='instructor_application'),
     path('user/instructor/list/', instructors_list, name='instructors_list'),
     path('user/instructor/profile/<int:instructor_id>/', instructor_profile, name='instructor_profile'),

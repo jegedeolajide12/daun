@@ -123,17 +123,18 @@
 									</div>
 									<div class="tab-pane fade" id="review-instructor">
 										<div class="rating-container animate__animated animate__fadeIn">
+											<!-- Rating Form Section -->
 											<div class="rating-header text-center mb-4">
-												<h3 class="mb-2 display-5 font-weight-bold text-gradient-primary">Rate This Course</h3>
+												<h3 class="mb-2 display-5 font-weight-bold text-gradient-primary">Rate This Instructor</h3>
 												<p class="text-muted lead">Your opinion lights up our learning galaxy 🌟</p>
 											</div>
 											
-											<form id="rating-form" method="post" action="{% url "account:rate_instructor" instructor.id %}" class="rating-form">
+											<form id="rating-form" method="post" action="{% url 'account:rate_instructor' instructor.id %}" class="rating-form mb-5">
 												{% csrf_token %}
 												
 												<!-- Star Rating -->
 												<div class="form-group mb-4">
-													<label class="d-block mb-3 h5">How would you rate this course?</label>
+													<label class="d-block mb-3 h5">How would you rate this instructor?</label>
 													<div class="rating-stars">
 														{% for i in "54321" %}
 														<input type="radio" id="star{{i}}" name="rating" value="{{i}}"/>
@@ -152,8 +153,7 @@
 												<div class="form-group mb-4">
 													<label for="feedback" class="h5">Share your cosmic thoughts</label>
 													<div class="floating-textarea">
-														<textarea name="comment" id="feedback" class="form-control" rows="5" 
-																  placeholder=" "></textarea>
+														<textarea name="comment" id="feedback" class="form-control" rows="5" placeholder=" "></textarea>
 														<label class="floating-label">What stood out? Any issues?</label>
 														<div class="character-count"><span id="char-count">0</span>/500</div>
 													</div>
@@ -168,124 +168,236 @@
 											</form>
 											
 											<div class="confetti-container"></div>
+											
+											<!-- Instructor Reviews Section -->
+											<div class="instructor-reviews mt-5">
+												<div class="d-flex justify-content-between align-items-center mb-4">
+													<h3 class="mb-0">Student Reviews</h3>
+													<div class="average-rating">
+														<span class="display-4 font-weight-bold">{{ instructor.average_rating|default:"0"|floatformat:1 }}</span>
+														<small>/5</small>
+														<div class="stars">
+															{% with ''|center:instructor.average_rating|default:0 as range %}
+																{% for _ in range %}
+																	<i class="fas fa-star text-warning"></i>
+																{% endfor %}
+															{% endwith %}
+															{% if instructor.average_rating < 5 %}
+																{% with ''|center:instructor.remaining_rating as range %}
+																	{% for _ in range %}
+																		<i class="far fa-star text-warning"></i>
+																	{% endfor %}
+																{% endwith %}
+															{% endif %}
+															<small class="text-muted ml-2">({{ instructor.rating_count }} reviews)</small>
+														</div>
+													</div>
+												</div>
+												
+												{% if ratings %}
+													<div class="review-list">
+														{% for rating in ratings %}
+														<div class="review-card mb-4 p-4 border rounded">
+															<div class="d-flex justify-content-between mb-3">
+																<div class="user-info">
+																	<h5 class="mb-1">{{ rating.student.get_full_name|default:rating.student.username }}</h5>
+																	<div class="stars">
+																		{% for i in "12345" %}
+																			{% if rating.rating >= forloop.counter %}
+																				<i class="fas fa-star text-warning"></i>
+																			{% else %}
+																				<i class="far fa-star text-warning"></i>
+																			{% endif %}
+																		{% endfor %}
+																		<span class="text-muted ml-2">{{ rating.created_at|date:"M d, Y" }}</span>
+																	</div>
+																</div>
+															</div>
+															<p class="mb-0">{{ rating.comment }}</p>
+														</div>
+														{% endfor %}
+													</div>
+												{% else %}
+													<div class="alert alert-info text-center">
+														No reviews yet. Be the first to review this instructor!
+													</div>
+												{% endif %}
+											</div>
 										</div>
 									</div>
 									
 									<div class="tab-pane fade" id="edit-profile">
-										<div class="profile-head">
-											<h3>Edit Profile</h3>
+										<div class="profile-edit-container">
+											<!-- Header -->
+											<div class="profile-edit-header">
+												<h2 class="profile-edit-title">Edit Profile</h2>
+												<p class="profile-edit-subtitle">Update your personal information</p>
+											</div>
+									
+											<!-- Messages -->
+											{% if messages %}
+											<div class="alert-messages">
+												{% for message in messages %}
+												<div class="alert alert-{{ message.tags }}">
+													{{ message }}
+												</div>
+												{% endfor %}
+											</div>
+											{% endif %}
+									
+											<!-- Edit Form -->
+											<form class="profile-edit-form" method="POST" enctype="multipart/form-data">
+												{% csrf_token %}
+												
+												<!-- Section 1: Personal Details -->
+												<div class="form-section">
+													<h3 class="section-title"><span class="section-number">1</span>Personal Details</h3>
+													
+													<div class="form-row">
+														<div class="form-group col-md-6">
+															<label>First Name</label>
+															{{ profile_form.first_name }}
+															{{ profile_form.first_name.errors }}
+														</div>
+														<div class="form-group col-md-6">
+															<label>Last Name</label>
+															{{ profile_form.last_name }}
+															{{ profile_form.last_name.errors }}
+														</div>
+													</div>
+													
+													<div class="form-group">
+														<label>Email</label>
+														{{ profile_form.email }}
+														{{ profile_form.email.errors }}
+													</div>
+													
+													<div class="form-row">
+														<div class="form-group col-md-6">
+															<label>Profile Photo</label>
+															{% if profile_form.instance.profile_picture %}
+																<div class="current-avatar mb-2">
+																	<img src="{{ profile_form.instance.profile_picture.url }}" alt="Current profile photo" class="avatar-preview">
+																</div>
+															{% endif %}
+															{{ profile_form.profile_picture }}
+															{{ profile_form.profile_picture.errors }}
+														</div>
+														<div class="form-group col-md-6">
+															<label>Birth Date</label>
+															{{ profile_form.date_of_birth }}
+															{{ profile_form.date_of_birth.errors }}
+														</div>
+													</div>
+													
+													<div class="form-group">
+														<label>Bio</label>
+														{{ profile_form.bio }}
+														{{ profile_form.bio.errors }}
+													</div>
+												</div>
+									
+												<!-- Section 2: Professional Info -->
+												<div class="form-section">
+													<h3 class="section-title"><span class="section-number">2</span>Professional Information</h3>
+													
+													<div class="form-row">
+														<div class="form-group col-md-6">
+															<label>Occupation</label>
+															{{ profile_form.occupation }}
+															{{ profile_form.occupation.errors }}
+														</div>
+														<div class="form-group col-md-6">
+															<label>Company</label>
+															{{ profile_form.company }}
+															{{ profile_form.company.errors }}
+														</div>
+													</div>
+													
+													<div class="form-group">
+														<label>Phone Number</label>
+														{{ profile_form.phone_number }}
+														{{ profile_form.phone_number.errors }}
+													</div>
+												</div>
+									
+												<!-- Section 3: Address -->
+												<div class="form-section">
+													<h3 class="section-title"><span class="section-number">3</span>Address</h3>
+													
+													<div class="form-group">
+														<label>Street Address</label>
+														{{ profile_form.address }}
+														{{ profile_form.address.errors }}
+													</div>
+													
+													<div class="form-row">
+														<div class="form-group col-md-6">
+															<label>City</label>
+															{{ profile_form.city }}
+															{{ profile_form.city.errors }}
+														</div>
+														<div class="form-group col-md-6">
+															<label>State/Province</label>
+															{{ profile_form.state }}
+															{{ profile_form.state.errors }}
+														</div>
+													</div>
+													
+													<div class="form-row">
+														<div class="form-group col-md-6">
+															<label>Postal Code</label>
+															{{ profile_form.postal_code }}
+															{{ profile_form.postal_code.errors }}
+														</div>
+														<div class="form-group col-md-6">
+															<label>Country</label>
+															{{ profile_form.country }}
+															{{ profile_form.country.errors }}
+														</div>
+													</div>
+												</div>
+									
+												<!-- Section 4: Social Links -->
+												<div class="form-section">
+													<h3 class="section-title"><span class="section-number">4</span>Social Profiles</h3>
+													
+													<div class="form-group with-icon">
+														<label><i class="fab fa-linkedin"></i> LinkedIn</label>
+														{{ profile_form.linkedin }}
+														{{ profile_form.linkedin.errors }}
+													</div>
+													
+													<div class="form-group with-icon">
+														<label><i class="fab fa-twitter"></i> Twitter</label>
+														{{ profile_form.twitter }}
+														{{ profile_form.twitter.errors }}
+													</div>
+													
+													<div class="form-group with-icon">
+														<label><i class="fab fa-github"></i> GitHub</label>
+														{{ profile_form.github }}
+														{{ profile_form.github.errors }}
+													</div>
+													
+													<div class="form-group with-icon">
+														<label><i class="fab fa-instagram"></i> Instagram</label>
+														{{ profile_form.instagram }}
+														{{ profile_form.instagram.errors }}
+													</div>
+												</div>
+									
+												<!-- Form Actions -->
+												<div class="form-actions">
+													<button type="submit" class="btn btn-primary">
+														<i class="fas fa-save mr-2"></i>Save Changes
+													</button>
+													<a href="{% url 'account:instructor_profile' instructor.id %}" class="btn btn-outline-secondary">
+														Cancel
+													</a>
+												</div>
+											</form>
 										</div>
-										<form class="edit-profile">
-											<div class="">
-												<div class="form-group row">
-													<div class="col-12 col-sm-9 col-md-9 col-lg-10 ml-auto">
-														<h3>1. Personal Details</h3>
-													</div>
-												</div>
-												<div class="form-group row">
-													<label class="col-12 col-sm-3 col-md-3 col-lg-2 col-form-label">Full Name</label>
-													<div class="col-12 col-sm-9 col-md-9 col-lg-7">
-														<input class="form-control" type="text" value="Mark Andre">
-													</div>
-												</div>
-												<div class="form-group row">
-													<label class="col-12 col-sm-3 col-md-3 col-lg-2 col-form-label">Occupation</label>
-													<div class="col-12 col-sm-9 col-md-9 col-lg-7">
-														<input class="form-control" type="text" value="CTO">
-													</div>
-												</div>
-												<div class="form-group row">
-													<label class="col-12 col-sm-3 col-md-3 col-lg-2 col-form-label">Company Name</label>
-													<div class="col-12 col-sm-9 col-md-9 col-lg-7">
-														<input class="form-control" type="text" value="EduChamp">
-														<span class="help">If you want your invoices addressed to a company. Leave blank to use your full name.</span>
-													</div>
-												</div>
-												<div class="form-group row">
-													<label class="col-12 col-sm-3 col-md-3 col-lg-2 col-form-label">Phone No.</label>
-													<div class="col-12 col-sm-9 col-md-9 col-lg-7">
-														<input class="form-control" type="text" value="+120 012345 6789">
-													</div>
-												</div>
-												
-												<div class="seperator"></div>
-												
-												<div class="form-group row">
-													<div class="col-12 col-sm-9 col-md-9 col-lg-10 ml-auto">
-														<h3>2. Address</h3>
-													</div>
-												</div>
-												<div class="form-group row">
-													<label class="col-12 col-sm-3 col-md-3 col-lg-2 col-form-label">Address</label>
-													<div class="col-12 col-sm-9 col-md-9 col-lg-7">
-														<input class="form-control" type="text" value="5-S2-20 Dummy City, UK">
-													</div>
-												</div>
-												<div class="form-group row">
-													<label class="col-12 col-sm-3 col-md-3 col-lg-2 col-form-label">City</label>
-													<div class="col-12 col-sm-9 col-md-9 col-lg-7">
-														<input class="form-control" type="text" value="US">
-													</div>
-												</div>
-												<div class="form-group row">
-													<label class="col-12 col-sm-3 col-md-3 col-lg-2 col-form-label">State</label>
-													<div class="col-12 col-sm-9 col-md-9 col-lg-7">
-														<input class="form-control" type="text" value="California">
-													</div>
-												</div>
-												<div class="form-group row">
-													<label class="col-12 col-sm-3 col-md-3 col-lg-2 col-form-label">Postcode</label>
-													<div class="col-12 col-sm-9 col-md-9 col-lg-7">
-														<input class="form-control" type="text" value="000702">
-													</div>
-												</div>
-
-												<div class="m-form__seperator m-form__seperator--dashed m-form__seperator--space-2x"></div>
-
-												<div class="form-group row">
-													<div class="col-12 col-sm-9 col-md-9 col-lg-10 ml-auto">
-														<h3 class="m-form__section">3. Social Links</h3>
-													</div>
-												</div>
-
-												<div class="form-group row">
-													<label class="col-12 col-sm-3 col-md-3 col-lg-2 col-form-label">Linkedin</label>
-													<div class="col-12 col-sm-9 col-md-9 col-lg-7">
-														<input class="form-control" type="text" value="www.linkedin.com">
-													</div>
-												</div>
-												<div class="form-group row">
-													<label class="col-12 col-sm-3 col-md-3 col-lg-2 col-form-label">Facebook</label>
-													<div class="col-12 col-sm-9 col-md-9 col-lg-7">
-														<input class="form-control" type="text" value="www.facebook.com">
-													</div>
-												</div>
-												<div class="form-group row">
-													<label class="col-12 col-sm-3 col-md-3 col-lg-2 col-form-label">Twitter</label>
-													<div class="col-12 col-sm-9 col-md-9 col-lg-7">
-														<input class="form-control" type="text" value="www.twitter.com">
-													</div>
-												</div>
-												<div class="form-group row">
-													<label class="col-12 col-sm-3 col-md-3 col-lg-2 col-form-label">Instagram</label>
-													<div class="col-12 col-sm-9 col-md-9 col-lg-7">
-														<input class="form-control" type="text" value="www.instagram.com">
-													</div>
-												</div>
-											</div>
-											<div class="">
-												<div class="">
-													<div class="row">
-														<div class="col-12 col-sm-3 col-md-3 col-lg-2">
-														</div>
-														<div class="col-12 col-sm-9 col-md-9 col-lg-7">
-															<button type="reset" class="btn">Save changes</button>
-															<button type="reset" class="btn-secondry">Cancel</button>
-														</div>
-													</div>
-												</div>
-											</div>
-										</form>
 									</div>
 									<div class="tab-pane" id="change-password">
 										<div class="profile-head">
