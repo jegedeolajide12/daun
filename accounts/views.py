@@ -173,6 +173,7 @@ def reject_application(request, application_id):
     return redirect('account:dashboard') 
 
 def admin_dashboard(request):
+
     if request.method == 'POST':
         form = FacultyForm(request.POST)
         if form.is_valid():

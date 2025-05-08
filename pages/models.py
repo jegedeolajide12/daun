@@ -6,8 +6,10 @@ from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
-
+from django.utils import timezone
 from .fields import OrderField
+
+from accounts.models import CustomUser
 
 User = get_user_model()
 # Create your models here.
@@ -190,9 +192,47 @@ class UserTask(models.Model):
         return f'{self.user.username} - {self.task.title}'
     
 class Enrollment(models.Model):
-    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='enrollments')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='enrollments')
     date_enrolled = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
+    progress = models.IntegerField(default=0)  # Progress in percentage
+    last_activity = models.DateTimeField(auto_now=True, null=True, blank=True)
+    completed_topics = models.ManyToManyField(Topic, related_name='completed_by', blank=True)
+    average_score = models.FloatField(default=0.0)
+
+    class Meta:
+        unique_together = ('student', 'course')
+        ordering = ['-date_enrolled']
+    def __str__(self):
+        return f'{self.student.username} enrolled in {self.course.name}'
+
+
+class StudentActivity(models.Model):
+    ACTIVITY_TYPES = (
+        ('module_complete', 'Module Completed'),
+        ('quiz_attempt', 'Quiz Attempt'),
+        ('assignment_submit', 'Assignment Submitted'),
+        ('forum_post', 'Forum Post'),
+        ('message', 'Message Sent'),
+    )
+    
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='activities')
+    course = models.ForeignKey('Course', on_delete=models.CASCADE)
+    activity_type = models.CharField(max_length=20, choices=ACTIVITY_TYPES)
+    title = models.CharField(max_length=200)
+    details = models.TextField(blank=True)
+    timestamp = models.DateTimeField(default=timezone.now)
+
+    def get_icon_class(self):
+        icons = {
+            'module_complete': 'fas fa-check-circle',
+            'quiz_attempt': 'fas fa-question-circle',
+            'assignment_submit': 'fas fa-file-upload',
+            'forum_post': 'fas fa-comments',
+            'message': 'fas fa-envelope',
+        }
+        return icons.get(self.activity_type, 'fas fa-circle')
 
 
 class Submission(models.Model):
@@ -209,3 +249,53 @@ class Submission(models.Model):
         if not self.file and not self.content:
             raise ValidationError('Either a file or content must be provided.')
 
+
+class Notification(models.Model):
+    NOTIFICATION_TYPES = (
+        ('enrollment', 'New Enrollment'),
+        ('progress', 'Progress Update'),
+        ('message', 'Message'),
+        ('grade', 'Grade Update'),
+        ('system', 'System Notification'),
+    )
+    recipient = models.ForeignKey(User, 
+                                  on_delete=models.CASCADE, 
+                                  related_name='notifications'
+                                  )
+    sender = models.ForeignKey(User, 
+                                on_delete=models.CASCADE, 
+                                related_name='sent_notifications', 
+                                null=True, 
+                                blank=True,
+                                )
+    notification_type = models.CharField(max_length=20, 
+                                         choices=NOTIFICATION_TYPES
+                                         )
+    title = models.CharField(max_length=200)
+    message = models.TextField()
+    related_course = models.ForeignKey(Course, 
+                                        on_delete=models.SET_NULL,
+                                        related_name='notifications',
+                                        null=True,
+                                        blank=True,
+                                        )
+    related_enrollment = models.ForeignKey(Enrollment,
+                                        on_delete=models.SET_NULL,
+                                        related_name='notifications',
+                                        null=True,
+                                        blank=True,
+                                        )
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['recipient', 'is_read']),
+        ]
+    def __str__(self):
+        return f'{self.notification_type.upper()}: {self.title}'
+    def mark_as_read(self):
+        self.is_read = True
+        self.save()
+    

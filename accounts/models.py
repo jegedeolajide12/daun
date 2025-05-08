@@ -42,7 +42,7 @@ class CustomUser(AbstractUser):
     
 
     def __str__(self):
-        return f"{self.full_name}'s Profile"
+        return f"{self.full_name} ({self.username})"
     
 CustomUser = get_user_model()
 

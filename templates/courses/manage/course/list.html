@@ -1,95 +1,118 @@
+
 {% extends parent_template|default:"user_navbar.html" %}
 {% load static %}
 {% block content %}
 
-<!--Main container start -->
+<!-- Main Container -->
 <main class="ttr-wrapper">
     <div class="container-fluid">
-        <div class="db-breadcrumb">
-            <h4 class="breadcrumb-title">Courses</h4>
-            <ul class="db-breadcrumb-list">
-                <li><a href="#"><i class="fa fa-home"></i>Home</a></li>
-                <li>Courses</li>
-            </ul>
-        </div>  
-        <div class="row">
-            <!-- Your Profile Views Chart -->
-            <div class="col-lg-12 m-b30">
-                <div class="widget-box">
-                    <div class="wc-title">
-                        <h4>Your Courses</h4>
-                    </div>
-                    <!-- Debugging context -->
-                    {% if courses %}
-                    <div class="widget-inner text-right p-5">
-                        <a href="{% url 'course:course_create' %}" class="btn green radius-xl">Create a Course</a>
-                    </div>
-                    <div class="widget-inner">
-                        {% for course in courses %}
-                        <div class="card-courses-list admin-courses">
+        <!-- Breadcrumb -->
+        <nav class="db-breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="#"><i class="fas fa-home"></i> Home</a></li>
+                <li class="breadcrumb-item active">Courses</li>
+            </ol>
+            <h1 class="page-title">Your Courses</h1>
+        </nav>
+
+        <!-- Courses Section -->
+        <div class="courses-container">
+            <!-- Create Course Button -->
+            <div class="text-right mb-4">
+                <a href="{% url 'course:course_create' %}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-plus-circle mr-2"></i>Create New Course
+                </a>
+            </div>
+
+            {% if courses %}
+                <!-- Courses Grid -->
+                <div class="courses-grid">
+                    {% for course in courses %}
+                    <div class="course-card">
+                        <!-- Course Image -->
+                        <div class="course-image">
                             {% if course.cover_image %}
-                                <div class="card-courses-media">
-                                    <img src="{{ course.cover_image.url }}" alt=""/>
+                                <img src="{{ course.cover_image.url }}" alt="{{ course.name }}">
+                            {% else %}
+                                <div class="course-image-placeholder">
+                                    <i class="fas fa-book-open"></i>
                                 </div>
                             {% endif %}
-                            <div class="card-courses-full-dec">
-                                <div class="card-courses-title">
-                                    <a href="{% url "course:course" course.slug %}"><h4>{{ course.name|upper }}</h4></a>
-                                </div>
-                                <div class="card-courses-list-bx">
-                                    <ul class="card-courses-view">
-                                        <li class="card-courses-user">
-                                            <div class="card-courses-user-pic">
-                                                <img src="{% static "asset/images/testimonials/pic3.jpg" %}" alt=""/>
-                                            </div>
-                                            <div class="card-courses-user-info">
-                                                <h5>Teacher</h5>
-                                                <h4>{{ course.owner.last_name }} {{ course.owner.first_name }}</h4>
-                                            </div>
-                                        </li>
-                                        <li class="card-courses-categories">
-                                            <h5>FACULTY OF</h5>
-                                            <h4>{{ course.faculty.name }}</h4>
-                                        </li>
-                                        <li class="card-courses-review">
-                                            <h5>3 Review</h5>
-                                        </li>
-                                        <li class="card-courses-stats">
-                                            <a href="#" class="btn button-sm red radius-xl">YOUR COURSE</a>
-                                        </li>
-                                        <li class="card-courses-price">
-                                            <del>$190</del>
-                                            <h5 class="text-primary">$120</h5>
-                                        </li>
-                                    </ul>
-                                </div>
-                                <div class="row card-courses-dec">
-                                    <div class="col-md-12">
-                                        <h6 class="m-b10">Course Description</h6>
-                                        {{ course.overview|linebreaks|truncatewords:50 }}
+                            <div class="course-badge">Your Course</div>
+                        </div>
+
+                        <!-- Course Content -->
+                        <div class="course-content">
+                            <div class="course-header">
+                                <h3 class="course-title">
+                                    <a href="{% url 'course:course' course.slug %}">{{ course.name }}</a>
+                                </h3>
+                                <div class="course-meta">
+                                    <span class="faculty-badge">{{ course.faculty.name }}</span>
+                                    <div class="course-rating">
+                                        <i class="fas fa-star"></i>
+                                        <span>4.5 (23)</span>
                                     </div>
-                                    <div class="col-md-12">
-                                        <a href="{% url "course:course_update" course.slug %}" class="btn green radius-xl outline">Edit Course</a>
-                                        <a href="{% url "course:course_delete" course.slug %}" class="btn red outline radius-xl">Delete Course</a>
+                                </div>
+                            </div>
+
+                            <div class="course-description">
+                                {{ course.overview|truncatewords:30 }}
+                            </div>
+
+                            <div class="course-footer">
+                                <div class="course-instructor">
+                                    <div class="instructor-avatar">
+                                        {% if course.owner.profile_picture %}
+                                            <img src="{{ course.owner.profile_picture.url }}" alt="{{ course.owner.get_full_name }}">
+                                        {% else %}
+                                            <div class="avatar-initials">
+                                                {{ course.owner.first_name|first }}{{ course.owner.last_name|first }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="instructor-info">
+                                        <span>Instructor</span>
+                                        <h5>{{ course.owner.get_full_name }}</h5>
+                                    </div>
+                                </div>
+
+                                <div class="course-actions">
+                                    <div class="course-price">
+                                        <span class="original-price">$190</span>
+                                        <span class="current-price">$120</span>
+                                    </div>
+                                    <div class="action-buttons">
+                                        <a href="{% url 'course:course_update' course.slug %}" class="btn btn-edit">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </a>
+                                        <a href="{% url 'course:course_delete' course.slug %}" class="btn btn-delete">
+                                            <i class="fas fa-trash-alt"></i> Delete
+                                        </a>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        {% endfor %}
-                        
                     </div>
-                    {% else %}
-                    <div class="widget-inner text-center p-5">
-                        <h5>You have not created any courses yet.</h5>
-                        <p>Click the button below to create your first course.</p>
-                        <a href="{% url 'course:course_create' %}" class="btn green radius-xl">Create a Course</a>
-                    </div>
-                    {% endif %}
+                    {% endfor %}
                 </div>
-            </div>
-            <!-- Your Profile Views Chart END-->
+            {% else %}
+                <!-- Empty State -->
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <h3>No Courses Yet</h3>
+                    <p>You haven't created any courses. Get started by creating your first course!</p>
+                    <a href="{% url 'course:course_create' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-plus-circle mr-2"></i>Create First Course
+                    </a>
+                </div>
+            {% endif %}
         </div>
     </div>
 </main>
+
+<!-- Overlay -->
 <div class="ttr-overlay"></div>
 {% endblock %}
