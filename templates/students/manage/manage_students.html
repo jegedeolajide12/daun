@@ -108,16 +108,16 @@
                     <div class="student-card" data-course="{{ student.course.id }}" data-status="{{ student.status }}">
                         <div class="student-card-header">
                             <div class="student-avatar">
-                                {% if student.user.profile_picture %}
-                                <img src="{{ student.user.profile_picture.url }}" alt="{{ student.user.get_full_name }}">
+                                {% if student.student.profile_picture %}
+                                <img src="{{ student.student.profile_picture.url }}" alt="{{ student.student.get_full_name }}">
                                 {% else %}
-                                <div class="avatar-initials">{{ student.user.get_initials }}</div>
+                                <div class="avatar-initials">{{ student.student.get_initials }}</div>
                                 {% endif %}
                                 <div class="status-indicator {% if student.is_active %}active{% else %}inactive{% endif %}"></div>
                             </div>
                             <div class="student-info">
-                                <h4>{{ student.user.get_full_name }}</h4>
-                                <p>{{ student.user.email }}</p>
+                                <h4>{{ student.student.get_full_name }}</h4>
+                                <p>{{ student.student.email }}</p>
                                 <span class="course-badge">{{ student.course.name }}</span>
                             </div>
                         </div>
@@ -129,7 +129,7 @@
                                 </div>
                             </div>
                             <div class="last-activity">
-                                <i class="far fa-clock"></i> Last active: {{ student.last_active|timesince }} ago
+                                <i class="far fa-clock"></i> Last active: {{ student.last_activity|timesince }} ago
                             </div>
                         </div>
                         <div class="student-actions">
@@ -186,10 +186,10 @@
                                 <td>
                                     <div class="student-cell">
                                         <div class="student-avatar">
-                                            {% if student.user.profile_picture %}
-                                            <img src="{{ student.user.profile_picture.url }}" alt="{{ student.user.get_full_name }}">
+                                            {% if student.student.profile_picture %}
+                                            <img src="{{ student.student.profile_picture.url }}" alt="{{ student.student.get_full_name }}">
                                             {% else %}
-                                            <div class="avatar-initials">{{ student.user.get_initials }}</div>
+                                            <div class="avatar-initials">{{ student.student.get_initials }}</div>
                                             {% endif %}
                                         </div>
                                         <div class="student-info">

@@ -39,6 +39,17 @@ class CustomUser(AbstractUser):
     def full_name(self):
         return f"{self.first_name} {self.last_name}" if self.first_name and self.last_name else self.username
 
+    @property
+    def get_initials(self):
+        if self.first_name and self.last_name:
+            return f"{self.first_name[0]}{self.last_name[0]}"
+        elif self.first_name:
+            return self.first_name[0]
+        elif self.last_name:
+            return self.last_name[0]
+        else:
+            return self.username[0]
+
     
 
     def __str__(self):

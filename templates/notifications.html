@@ -1,0 +1,32 @@
+<div class="notification-dropdown">
+    <button class="notification-bell">
+        <i class="fas fa-bell"></i>
+        {% if unread_notifications > 0 %}
+        <span class="badge">{{ unread_notifications }}</span>
+        {% endif %}
+    </button>
+    <div class="dropdown-content">
+        {% for notification in recent_notifications %}
+        <div class="notification-item {% if notification.is_read %}read{% endif %}" 
+             data-notification-id="{{ notification.id }}">
+            <div class="notification-header">
+                <strong>{{ notification.title }}</strong>
+                <small>{{ notification.created_at|timesince }} ago</small>
+            </div>
+            <p>{{ notification.message }}</p>
+            {% if notification.related_course %}
+            <a href="{% url 'course:course' notification.related_course.id %}" class="btn btn-sm">
+                View Course
+            </a>
+            {% endif %}
+        </div>
+        {% empty %}
+        <div class="notification-item">
+            <p>No new notifications</p>
+        </div>
+        {% endfor %}
+        <div class="notification-footer">
+            <a href="{% url 'account:mail_inbox' %}">View All Notifications</a>
+        </div>
+    </div>
+</div>

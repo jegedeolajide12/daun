@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.urls import reverse 
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView,UpdateView,DeleteView
@@ -14,11 +15,12 @@ from django.contrib.contenttypes.models import ContentType
 from django.forms.models import modelform_factory
 from django.apps import apps
 from django.contrib.auth.models import Group
+from django.http import JsonResponse
 
 from actstream import action
 from students.forms import CourseEnrollForm
 
-from .models import Course, Content, Topic, Video, Faculty
+from .models import Course, Content, Topic, Video, Faculty, Notification
 from .forms import CourseForm, ModuleFormSet, FacultyForm
 
 def create_faculty(request):
@@ -247,3 +249,27 @@ class CourseListView(TemplateResponseMixin, View):
         courses = Course.objects.all()
         is_instructor = self.request.user.groups.filter(name='Instructors').exists()
         return self.render_to_response({'faculties':faculties, 'courses':courses,'is_instructor':is_instructor})
+
+@login_required
+def mark_notification_read(request, notification_id):
+    notification = get_object_or_404(
+        Notification, 
+        id=notification_id, 
+        recipient=request.user
+    )
+    notification.mark_as_read()
+    return JsonResponse({'status': 'success'})
+
+@login_required
+def get_notifications(request):
+    notifications = request.user.notifications.filter(is_read=False).order_by('-created_at')[:10]
+    data = [{
+        'id': n.id,
+        'title': n.title,
+        'message': n.message,
+        'type': n.notification_type,
+        'timestamp': n.created_at.strftime('%b %d, %H:%M'),
+        'course': n.related_course.name if n.related_course else None,
+        'url': reverse('course_detail', args=[n.related_course.id]) if n.related_course else '#'
+    } for n in notifications]
+    return JsonResponse(data, safe=False)

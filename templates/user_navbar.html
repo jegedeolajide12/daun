@@ -292,6 +292,7 @@
 				</form>
 			</div>
 			<!--header search panel end -->
+			{% include "notifications.html" %}
 		</div>
 		{% if messages %}
 			<div class="messages">
@@ -756,6 +757,21 @@
     }
 </script>
 
+<script>
+	$(document).ready(function() {
+		$('.notification-item').click(function() {
+			const notificationId = $(this).data('notification-id');
+			$.post(`/notifications/${notificationId}/mark-read/`);
+		});
+		
+		// Poll for new notifications every 2 minutes
+		setInterval(function() {
+			$.getJSON('/notifications/', function(data) {
+				updateNotificationBadge(data.length);
+			});
+		}, 120000);
+	});
+	</script>
 </body>
 
 <!-- Mirrored from educhamp.themetrades.com/demo/admin/courses.html by HTTrack Website Copier/3.x [XR&CO'2014], Fri, 22 Feb 2019 13:11:35 GMT -->
