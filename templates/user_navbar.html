@@ -292,7 +292,6 @@
 				</form>
 			</div>
 			<!--header search panel end -->
-			{% include "notifications.html" %}
 		</div>
 		{% if messages %}
 			<div class="messages">
@@ -626,6 +625,11 @@
     });
 </script>
 <script>
+	// Get the URL pattern once when the page loads
+	const STUDENT_DETAIL_URL = "{% url 'student:student_detail' 0 %}";  // 0 is a placeholder
+	</script>
+<!-- manage_student.html Student detail modal script -->
+<script>
 	 // Toggle between grid and list view
 	 document.querySelectorAll('.view-btn').forEach(btn => {
         btn.addEventListener('click', function() {
@@ -656,105 +660,6 @@
         // Implement your search logic here
         console.log('Searching for:', searchTerm);
     });
-
-    // Student detail modal
-    $('#studentDetailModal').on('show.bs.modal', function(event) {
-        const button = $(event.relatedTarget);
-        const studentId = button.data('student-id');
-        
-        // Load student details via AJAX
-        $(this).find('.modal-body').html(`
-            <div class="text-center py-5">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="sr-only">Loading...</span>
-                </div>
-            </div>
-        `);
-        
-        // Simulate AJAX loading
-        setTimeout(() => {
-            $(this).find('.modal-body').html(`
-                <div class="student-detail-content">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="student-avatar-large">
-                                <img src="{% static 'images/default-avatar.jpg' %}" alt="Student Avatar" class="img-fluid rounded-circle">
-                            </div>
-                            <div class="student-meta mt-3">
-                                <h4>${button.closest('.student-card').find('h4').text()}</h4>
-                                <p><i class="fas fa-envelope mr-2"></i>${button.closest('.student-card').find('p').text()}</p>
-                                <p><i class="fas fa-book mr-2"></i>${button.closest('.student-card').find('.course-badge').text()}</p>
-                                <p><i class="fas fa-circle mr-2 text-success"></i>Active</p>
-                            </div>
-                        </div>
-                        <div class="col-md-8">
-                            <div class="progress-chart">
-                                <h5>Course Progress</h5>
-                                <div class="progress mb-3">
-                                    <div class="progress-bar" role="progressbar" style="width: 75%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                                <div class="progress-stats">
-                                    <div class="stat-item">
-                                        <span>Completed Modules</span>
-                                        <strong>8/12</strong>
-                                    </div>
-                                    <div class="stat-item">
-                                        <span>Last Activity</span>
-                                        <strong>2 days ago</strong>
-                                    </div>
-                                    <div class="stat-item">
-                                        <span>Avg. Quiz Score</span>
-                                        <strong>87%</strong>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="activity-log mt-4">
-                                <h5>Recent Activity</h5>
-                                <ul class="activity-list">
-                                    <li>
-                                        <i class="fas fa-check-circle text-success"></i>
-                                        <span>Completed Module 5: Advanced Techniques</span>
-                                        <small>2 days ago</small>
-                                    </li>
-                                    <li>
-                                        <i class="fas fa-comment-alt text-info"></i>
-                                        <span>Posted in Discussion Forum</span>
-                                        <small>3 days ago</small>
-                                    </li>
-                                    <li>
-                                        <i class="fas fa-question-circle text-warning"></i>
-                                        <span>Asked a question about Module 4</span>
-                                        <small>4 days ago</small>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `);
-        }, 1000);
-    });
-
-    // Bulk actions
-    $('#bulkActionsModal').on('show.bs.modal', function() {
-        // Update selected count
-        const selectedCount = document.querySelectorAll('.student-table input[type="checkbox"]:checked').length;
-        $(this).find('label[for="selectedStudents"]').text(`For selected students (${selectedCount} selected)`);
-    });
-
-    // Select all checkbox
-    document.getElementById('selectAll').addEventListener('change', function() {
-        const checkboxes = document.querySelectorAll('.student-table input[type="checkbox"]');
-        checkboxes.forEach(checkbox => {
-            checkbox.checked = this.checked;
-        });
-    });
-
-    // Function to send message
-    function sendMessage(studentId) {
-        console.log('Sending message to student:', studentId);
-        // Implement your message functionality here
-    }
 </script>
 
 <script>

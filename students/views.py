@@ -114,39 +114,17 @@ def manage_students(request):
 
 @login_required
 def student_detail(request, student_id):
-    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        student = get_object_or_404(CustomUser, id=student_id)
-        enrollment = get_object_or_404(Enrollment, student=student, course__owner=request.user)
-        recent_activity = student.activities.filter(
-            course = enrollment.course
-        ).order_by('-timestamp')[:5]
-        
-        data = {
-            'student': {
-                'name': student.get_full_name(),
-                'email': student.email,
-                'avatar_url': student.profile_picture.url if student.profile_picture else None,
-                'joined_date': student.date_joined.strftime('%Y-%m-%d %H:%M:%S')
-            },
-            'enrollment': {
-                'course': enrollment.course.title,
-                'progress': enrollment.progress,
-                'completed_topics': f"{enrollment.completed_topics.count()}/{enrollment.course.course_topics.count()}",
-                'last_activity': enrollment.last_activity.strftime('%Y-%m-%d %H:%M:%S') if enrollment.last_activity else 'Never',
-                'average_score': enrollment.average_score(),
-            },
-            'activities': {
-                {
-                    'type': activity.activity_type,
-                    'title': activity.title,
-                    'timestamp': activity.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
-                    'icon': activity.get_icon_class(),
-                } for activity in recent_activities
-            }
-        }
-        return JsonResponse(data)
-    return JsonResponse({'error': 'Invalid request'}, status=400)
-
+    student = get_object_or_404(CustomUser, id=student_id)
+    enrollment = get_object_or_404(Enrollment, student=student, course__owner=request.user)
+    recent_activities = student.activities.filter(
+        course=enrollment.course
+    ).order_by('-timestamp')[:5]
+    context = {
+        'student': student,
+        'enrollment': enrollment,
+        'recent_activities': recent_activities,
+    }
+    return render(request, 'students/manage/student_detail.html', context)
 
 @login_required
 def bulk_student_actions(request):
