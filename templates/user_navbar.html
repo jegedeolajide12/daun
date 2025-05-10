@@ -196,37 +196,48 @@
 					<li>
 						<a href="#" class="ttr-material-button ttr-search-toggle"><i class="fa fa-search"></i></a>
 					</li>
-					<li>
-						<a href="#" class="ttr-material-button ttr-submenu-toggle" style="position: relative;">
+					<li class="notification-menu-item">
+						<a href="#" class="ttr-material-button notification-icon-wrapper" onclick="handleNotificationClick(event)">
 							<i class="fa fa-bell"></i>
-							{% if messages %}
-								<span style="position: absolute; top: 5px; right: 5px; width: 10px; height: 10px; background-color: green; border-radius: 50%; border: 2px solid white;"></span>
+							{% if unread_notifications %}
+								<span class="notification-badge">{{ unread_notifications|length }}</span>
 							{% endif %}
 						</a>
-						<div class="ttr-header-submenu noti-menu">
-							<div class="ttr-notify-header">
-								<span class="ttr-notify-text-top">{{ messages|length }} New</span>
-								<span class="ttr-notify-text">User Notifications</span>
+						
+						<div class="ttr-header-submenu notification-container">
+							<div class="notification-header">
+								<h4>Notifications</h4>
+								<button class="mark-all-read" onclick="markAllNotificationsRead()">
+									Mark All as Read
+								</button>
 							</div>
-							<div class="noti-box-list">
-								<ul>
-									{% if messages %}
-									{% for message in messages %}
-									<li>
-										<span class="notification-icon dashbg-gray">
-											<i class="fa fa-check"></i>
-										</span>
-										<span class="notification-text">
-											<span>{{ message }}</span>.
-										</span>
-										<span class="notification-time">
-											<a href="#" class="fa fa-close"></a>
-											<span> 02:14</span>
-										</span>
-									</li>
-									{% endfor %}
-									{% endif %}
-								</ul>
+							
+							<div class="notification-list">
+								{% for notification in recent_notifications %}
+									<div class="notification-item {% if not notification.is_read %}unread{% endif %}" 
+										data-notification-id="{{ notification.id }}"
+										onclick="markNotificationAsRead(this)">
+										<div class="notification-icon">
+											<i class="fas fa-bell{% if not notification.is_read %}-slash{% endif %}"></i>
+										</div>
+										<div class="notification-content">
+											<p class="notification-message">{{ notification.message }}</p>
+											<div class="notification-meta">
+												<span class="notification-time">
+													{{ notification.created_at|timesince }} ago
+												</span>
+												{% if not notification.is_read %}
+												<span class="unread-badge">New</span>
+												{% endif %}
+											</div>
+										</div>
+									</div>
+								{% empty %}
+									<div class="empty-notifications">
+										<i class="fas fa-bell-slash"></i>
+										<p>No new notifications</p>
+									</div>
+								{% endfor %}
 							</div>
 						</div>
 					</li>
@@ -660,23 +671,95 @@
         // Implement your search logic here
         console.log('Searching for:', searchTerm);
     });
+
+	// Bulk actions
+    $('#bulkActionsModal').on('show.bs.modal', function() {
+        // Update selected count
+        const selectedCount = document.querySelectorAll('.student-table input[type="checkbox"]:checked').length;
+        $(this).find('label[for="selectedStudents"]').text(`For selected students (${selectedCount} selected)`);
+    });
+
+    // Select all checkbox
+    document.getElementById('selectAll').addEventListener('change', function() {
+        const checkboxes = document.querySelectorAll('.student-table input[type="checkbox"]');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = this.checked;
+        });
+    });
+
+    // Function to send message
+    function sendMessage(studentId) {
+        console.log('Sending message to student:', studentId);
+        // Implement your message functionality here
+    }
 </script>
 
 <script>
-	$(document).ready(function() {
-		$('.notification-item').click(function() {
-			const notificationId = $(this).data('notification-id');
-			$.post(`/notifications/${notificationId}/mark-read/`);
-		});
-		
-		// Poll for new notifications every 2 minutes
-		setInterval(function() {
-			$.getJSON('/notifications/', function(data) {
-				updateNotificationBadge(data.length);
-			});
-		}, 120000);
-	});
-	</script>
+function handleNotificationClick(event) {
+    event.preventDefault();
+    const container = event.currentTarget.nextElementSibling;
+    container.style.display = container.style.display === 'block' ? 'none' : 'block';
+    markAllNotificationsRead();
+}
+
+function markAllNotificationsRead() {
+    fetch('/notifications/mark-all-read/', {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            document.querySelectorAll('.notification-item').forEach(item => {
+                item.classList.remove('unread');
+                item.querySelector('.fa-bell').classList.replace('fa-bell', 'fa-bell-slash');
+            });
+            
+            document.querySelectorAll('.unread-badge').forEach(badge => badge.remove());
+            document.querySelector('.notification-badge')?.remove();
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+function markNotificationAsRead(element) {
+    const notificationId = element.dataset.notificationId;
+    fetch(`/notifications/${notificationId}/mark-read/`, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            element.classList.remove('unread');
+            element.querySelector('.fa-bell').classList.replace('fa-bell', 'fa-bell-slash');
+            element.querySelector('.unread-badge')?.remove();
+            
+            const badge = document.querySelector('.notification-badge');
+            if (badge) {
+                const count = parseInt(badge.textContent);
+                if (count > 1) {
+                    badge.textContent = count - 1;
+                } else {
+                    badge.remove();
+                }
+            }
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.notification-menu-item')) {
+        document.querySelector('.notification-container').style.display = 'none';
+    }
+});
+</script>
 </body>
 
 <!-- Mirrored from educhamp.themetrades.com/demo/admin/courses.html by HTTrack Website Copier/3.x [XR&CO'2014], Fri, 22 Feb 2019 13:11:35 GMT -->

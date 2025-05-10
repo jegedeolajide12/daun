@@ -114,8 +114,8 @@ def manage_students(request):
 
 @login_required
 def student_detail(request, student_id):
-    student = get_object_or_404(CustomUser, id=student_id)
-    enrollment = get_object_or_404(Enrollment, student=student, course__owner=request.user)
+    enrollment = get_object_or_404(Enrollment, id=student_id, course__owner=request.user)
+    student = enrollment.student
     recent_activities = student.activities.filter(
         course=enrollment.course
     ).order_by('-timestamp')[:5]

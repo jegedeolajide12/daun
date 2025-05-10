@@ -85,7 +85,7 @@
 						<a href="{% url "account:instructors_list" %}" class="btn btn-primary btn-block text-truncate" title="View all Instructors">View all Instructors</a>
 					</div>
 					<div class="col-md-3 col-sm-6 col-6 mb-3">
-						<a href="#" class="btn btn-primary btn-block text-truncate" title="Create new Certificate">Create new Certificate</a>
+						<a href="{% url "student:manage_students" %}" class="btn btn-primary btn-block text-truncate" title="Manage your students">Manage students</a>
 					</div>
 				</div>
 				<div class="row">
@@ -109,20 +109,21 @@
 							<div class="widget-inner">
 								<div class="noti-box-list">
 									<ul>
-										{% for action in actions %}
-											<li>
-												<span class="notification-icon dashbg-gray">
-													<i class="fa fa-check"></i>
-												</span>
-												<span class="notification-text">
-													<span>{{ action.actor }}</span> {{ action.verb }} "{{ action.target }}"
-												</span>
-												<span class="notification-time">
-													<a href="#" class="fa fa-close"></a>
-													<span> {{ action.timestamp.time }}</span>
-												</span>
-											</li>
-										{% endfor %}
+										{% for notification in recent_notifications %}
+                                            <li>
+                                                <span class="notification-icon dashbg-gray">
+                                                    <i class="fa fa-bell"></i>
+                                                </span>
+                                                <span class="notification-text">
+                                                    {{ notification.message }}
+                                                </span>
+                                                <span class="notification-time">
+                                                    <span>{{ notification.created_at|timesince }} ago</span>
+                                                </span>
+                                            </li>
+                                        {% empty %}
+                                            <li class="text-muted text-center py-4">No new notifications</li>
+                                        {% endfor %}
 									</ul>
 								</div>
 							</div>
@@ -360,15 +361,15 @@
 						</div>
 					</div>
 				</div>
-				{% elif is_instructor %}
+			{% elif is_instructor %}
                 <!-- Instructor Block -->
                 <div class="row">
                     <div class="col-md-6 col-lg-3 col-xl-3 col-sm-6 col-12">
                         <div class="widget-card widget-bg1">					 
                             <div class="wc-item">
                                 <h4 class="wc-title">Your Students</h4>
-                                <span class="wc-des">Total monthly Enrollments</span>
-                                <span class="wc-stats counter">{{ avg_monthly_student_enrollment }}</span>		
+                                <span class="wc-des">Total active Enrollments</span>
+                                <span class="wc-stats counter">{{ enrollment_count }}</span>		
                             </div>				      
                         </div>
                     </div>
@@ -437,16 +438,16 @@
                             <div class="widget-inner">
                                 <div class="noti-box-list">
                                     <ul>
-                                        {% for note in instructor_notifications %}
+                                        {% for notification in recent_notifications %}
                                             <li>
                                                 <span class="notification-icon dashbg-gray">
                                                     <i class="fa fa-bell"></i>
                                                 </span>
                                                 <span class="notification-text">
-                                                    {{ note.message }}
+                                                    {{ notification.message }}
                                                 </span>
                                                 <span class="notification-time">
-                                                    <span>{{ note.timestamp|time }}</span>
+                                                    <span>{{ notification.timestamp|time }}</span>
                                                 </span>
                                             </li>
                                         {% empty %}

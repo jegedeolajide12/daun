@@ -7,7 +7,9 @@ from .models import (Faculty,
                      Text, 
                      File, 
                      Task,
-                     UserTask)
+                     UserTask,
+                     Enrollment,
+                     Notification)
 
 # Register your models here.
 
@@ -27,6 +29,18 @@ class CourseAdmin(admin.ModelAdmin):
     list_filter = ['created', 'faculty']
     search_fields = ['name', 'overview']
     inlines = [TopicInline]
+
+@admin.register(Enrollment)
+class EnrollmentAdmin(admin.ModelAdmin):
+    list_display = ['student', 'course', 'is_active']
+    list_filter = ['is_active', 'course']
+    search_fields = ['student__username', 'course__name']
+
+@admin.register(Notification)
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ['sender', 'message', 'is_read']
+    list_filter = ['is_read', 'sender']
+    search_fields = ['sender__username', 'message']
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):

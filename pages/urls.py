@@ -16,7 +16,8 @@ from .views import (index,
                     course_unenroll,
                     create_faculty,
                     get_notifications,
-                    mark_notification_read
+                    mark_notification_read,
+                    mark_all_notifications_read,
                     )
 
 
@@ -41,6 +42,7 @@ urlpatterns = [
 
 
     path('notifications/', get_notifications, name='get_notifications'),
-    path('notifications/mark_read/<int:notification_id>/', mark_notification_read, name='mark_notification_read'),
+    path('notifications/<int:notification_id>/mark-read', mark_notification_read, name='mark_notification_read'),
+    path('notifications/mark-all-read/', mark_all_notifications_read, name='mark_all_read')
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

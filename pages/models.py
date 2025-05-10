@@ -204,6 +204,19 @@ class Enrollment(models.Model):
     class Meta:
         unique_together = ('student', 'course')
         ordering = ['-date_enrolled']
+    
+    def get_progress(self):
+        total_topics = self.course.course_topics.count()
+        completed_topics = self.completed_topics.count()
+        if total_topics == 0:
+            return 0
+        return int((completed_topics / total_topics) * 100)
+    
+    def delete(self, *args, **kwargs):
+        # Remove the student from the course's students list
+        self.course.students.remove(self.student)
+        super().delete(*args, **kwargs)
+
     def __str__(self):
         return f'{self.student.username} enrolled in {self.course.name}'
 
@@ -253,6 +266,10 @@ class Submission(models.Model):
 class Notification(models.Model):
     NOTIFICATION_TYPES = (
         ('enrollment', 'New Enrollment'),
+        ('task', 'New Task Assigned'),
+        ('deadline', 'Deadline Reminder'),
+        ('submission', 'New Submission'),
+        
         ('progress', 'Progress Update'),
         ('message', 'Message'),
         ('grade', 'Grade Update'),

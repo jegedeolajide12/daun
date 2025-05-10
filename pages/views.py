@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
+
 from django.urls import reverse 
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
@@ -9,6 +10,7 @@ from django.contrib import messages
 from django.utils.text import slugify
 from django.db import IntegrityError
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.contenttypes.models import ContentType
@@ -20,7 +22,7 @@ from django.http import JsonResponse
 from actstream import action
 from students.forms import CourseEnrollForm
 
-from .models import Course, Content, Topic, Video, Faculty, Notification
+from .models import Course, Content, Topic, Video, Faculty, Notification, Enrollment
 from .forms import CourseForm, ModuleFormSet, FacultyForm
 
 def create_faculty(request):
@@ -203,9 +205,26 @@ def course_detail(request, course_slug):
         # Handle form submission
         enroll_form = CourseEnrollForm(request.POST)
         if enroll_form.is_valid():
-            course.students.add(request.user)  # Enroll the user in the course
-            action.send(request.user, verb='Enrolled in', target=course)
-            messages.success(request, "You have successfully enrolled in the course!")
+            enrollment, created = Enrollment.objects.get_or_create(student=request.user, course=course)  # Create an enrollment record
+            if created:
+                course.students.add(request.user)  # Enroll the user in the course
+                # Optionally, you can also create a notification for the course owner
+                Notification.objects.create(
+                    sender = request.user,
+                    related_course=course,
+                    recipient=course.owner,
+                    related_enrollment=enrollment,
+
+                    title="Enrollment Notification",
+                    message=f"{request.user.username} has enrolled in your course: {course.name}",
+                    notification_type="Enrollment",
+                    is_read=False
+                )
+                action.send(request.user, verb='Enrolled in', target=course)
+                messages.success(request, "You have successfully enrolled in the course!")
+                return redirect('course:course', course_slug=course.slug)
+            else:
+                messages.error(request, "You are already enrolled in this course.")
             return redirect('course:course', course_slug=course.slug)
     else:
         # Initialize the enrollment form with the current course
@@ -218,6 +237,22 @@ def course_unenroll(request, course_slug):
     course = get_object_or_404(Course, slug=course_slug)
     if request.method == 'POST':
         course.students.remove(request.user)  # Unenroll the user from the course
+        Enrollment.objects.filter(student=request.user, course=course).delete()
+        # Optionally, you can also delete the enrollment record
+        # action.send(request.user, verb='Unenrolled from', target=course)
+        # Create a notification for the user
+        Notification.objects.create(
+            sender = request.user,
+            related_course=course,
+            recipient=course.owner,
+            
+            title="Unenrollment Notification",
+            message=f"You have been unenrolled from the course: {course.name}",
+            notification_type="Unenrollment",
+            is_read=False
+        )
+        # Send a notification to the user
+
         action.send(request.user, verb='Unenrolled from', target=course)
         messages.success(request, "You have successfully unenrolled from the course!")
         return redirect('course:course', course_slug=course.slug)
@@ -250,7 +285,7 @@ class CourseListView(TemplateResponseMixin, View):
         is_instructor = self.request.user.groups.filter(name='Instructors').exists()
         return self.render_to_response({'faculties':faculties, 'courses':courses,'is_instructor':is_instructor})
 
-@login_required
+@require_POST
 def mark_notification_read(request, notification_id):
     notification = get_object_or_404(
         Notification, 
@@ -258,6 +293,13 @@ def mark_notification_read(request, notification_id):
         recipient=request.user
     )
     notification.mark_as_read()
+    return JsonResponse({'status': 'success'})
+
+@require_POST
+def mark_all_notifications_read(request):
+    notifications = request.user.notifications.filter(is_read=False)
+    for notification in notifications:
+        notification.mark_as_read()
     return JsonResponse({'status': 'success'})
 
 @login_required
@@ -270,6 +312,6 @@ def get_notifications(request):
         'type': n.notification_type,
         'timestamp': n.created_at.strftime('%b %d, %H:%M'),
         'course': n.related_course.name if n.related_course else None,
-        'url': reverse('course_detail', args=[n.related_course.id]) if n.related_course else '#'
+        'url': reverse('course:course', args=[n.related_course.id]) if n.related_course else '#'
     } for n in notifications]
     return JsonResponse(data, safe=False)
