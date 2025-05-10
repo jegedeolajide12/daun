@@ -693,12 +693,23 @@
         // Implement your message functionality here
     }
 </script>
-
 <script>
 function handleNotificationClick(event) {
     event.preventDefault();
     const container = event.currentTarget.nextElementSibling;
-    container.style.display = container.style.display === 'block' ? 'none' : 'block';
+    
+    if (container.classList.contains('hidden')) {
+        container.classList.remove('hidden');
+        container.style.opacity = 1;
+        container.style.transform = 'translateY(0)';
+    } else {
+        container.classList.add('hidden');
+        setTimeout(() => {
+            container.style.opacity = 0;
+            container.style.transform = 'translateY(-10px)';
+        }, 200);
+    }
+    
     markAllNotificationsRead();
 }
 
@@ -713,12 +724,28 @@ function markAllNotificationsRead() {
     .then(response => {
         if (response.ok) {
             document.querySelectorAll('.notification-item').forEach(item => {
-                item.classList.remove('unread');
-                item.querySelector('.fa-bell').classList.replace('fa-bell', 'fa-bell-slash');
+                item.classList.add('marking-read');
+                setTimeout(() => {
+                    item.classList.remove('unread', 'marking-read');
+                    item.querySelector('.fa-bell').classList.replace('fa-bell', 'fa-bell-slash');
+                }, 300);
             });
             
-            document.querySelectorAll('.unread-badge').forEach(badge => badge.remove());
-            document.querySelector('.notification-badge')?.remove();
+            document.querySelectorAll('.unread-badge').forEach(badge => {
+                badge.classList.add('fade-out');
+                setTimeout(() => badge.remove(), 300);
+            });
+            
+            const globalBadge = document.querySelector('.notification-badge');
+            if (globalBadge) {
+                globalBadge.classList.add('update');
+                setTimeout(() => {
+                    globalBadge.classList.remove('update');
+                    if (parseInt(globalBadge.textContent) === 1) {
+                        globalBadge.remove();
+                    }
+                }, 200);
+            }
         }
     })
     .catch(error => console.error('Error:', error));
@@ -735,31 +762,109 @@ function markNotificationAsRead(element) {
     })
     .then(response => {
         if (response.ok) {
-            element.classList.remove('unread');
-            element.querySelector('.fa-bell').classList.replace('fa-bell', 'fa-bell-slash');
-            element.querySelector('.unread-badge')?.remove();
-            
-            const badge = document.querySelector('.notification-badge');
+            element.classList.add('marking-read');
+            setTimeout(() => {
+                element.classList.remove('unread', 'marking-read');
+                element.querySelector('.fa-bell').classList.replace('fa-bell', 'fa-bell-slash');
+            }, 300);
+
+            const badge = element.querySelector('.unread-badge');
             if (badge) {
-                const count = parseInt(badge.textContent);
-                if (count > 1) {
-                    badge.textContent = count - 1;
-                } else {
-                    badge.remove();
-                }
+                badge.classList.add('fade-out');
+                setTimeout(() => badge.remove(), 300);
+            }
+
+            const globalBadge = document.querySelector('.notification-badge');
+            if (globalBadge) {
+                globalBadge.classList.add('update');
+                setTimeout(() => {
+                    const count = parseInt(globalBadge.textContent);
+                    globalBadge.textContent = count - 1;
+                    globalBadge.classList.remove('update');
+                    if (count === 1) globalBadge.remove();
+                }, 200);
             }
         }
     })
     .catch(error => console.error('Error:', error));
 }
 
-// Close dropdown when clicking outside
+// Close dropdown with animation
 document.addEventListener('click', function(e) {
     if (!e.target.closest('.notification-menu-item')) {
-        document.querySelector('.notification-container').style.display = 'none';
+        const container = document.querySelector('.notification-container');
+        if (container) {
+            container.classList.add('hidden');
+            setTimeout(() => {
+                container.style.opacity = 0;
+                container.style.transform = 'translateY(-10px)';
+            }, 200);
+        }
     }
 });
 </script>
+
+
+<script>
+	// File input handling
+	document.querySelectorAll('.custom-file-input').forEach(input => {
+		input.addEventListener('change', function(e) {
+			const label = this.nextElementSibling;
+			if(this.files && this.files.length > 0) {
+				label.textContent = this.files[0].name;
+				
+				// Handle cover image preview
+				if(this.id === 'coverImage' && this.files[0]) {
+					const reader = new FileReader();
+					const preview = document.getElementById('coverPreview');
+					const previewContainer = preview.parentElement;
+					
+					previewContainer.style.display = 'block';
+					reader.onload = function(e) {
+						preview.src = e.target.result;
+						preview.style.display = 'block';
+					}
+					reader.readAsDataURL(this.files[0]);
+				}
+			} else {
+				label.textContent = 'Choose file...';
+			}
+		});
+	});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Circular progress animation
+    const circularProgress = document.querySelector(".circular-progress");
+    const progressValue = document.querySelector(".progress-value");
+    
+    if (circularProgress) {
+        let progressStartValue = 0;
+        const progressEndValue = parseInt(circularProgress.getAttribute("data-value"));
+        const speed = 20;
+        
+        const progress = setInterval(() => {
+            progressStartValue++;
+            progressValue.textContent = `${progressStartValue}%`;
+            circularProgress.style.background = `conic-gradient(#4361ee ${progressStartValue * 3.6}deg, #e9ecef 0deg)`;
+            
+            if (progressStartValue === progressEndValue) {
+                clearInterval(progress);
+            }
+        }, speed);
+    }
+
+    // Assignment status tooltips
+    const statusBadges = document.querySelectorAll('.cd-assignment-status');
+    statusBadges.forEach(badge => {
+        badge.addEventListener('mouseover', function() {
+            // Add tooltip functionality here
+        });
+    });
+});
+</script>
+
 </body>
 
 <!-- Mirrored from educhamp.themetrades.com/demo/admin/courses.html by HTTrack Website Copier/3.x [XR&CO'2014], Fri, 22 Feb 2019 13:11:35 GMT -->

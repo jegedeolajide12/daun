@@ -2,7 +2,7 @@ from django import forms
 
 from django.forms.models import inlineformset_factory
 
-from .models import Course, Topic, Faculty
+from .models import Course, Topic, Faculty, Assignment
 
 ModuleFormSet = inlineformset_factory(Course, Topic, fields=['name', 'description'], extra=2, can_delete=True)
 
@@ -43,5 +43,28 @@ class FacultyForm(forms.ModelForm):
             'name': forms.Select(attrs={
                 'class': 'form-control',
                 'placeholder': 'Enter Faculty Name',
+            }),
+        }
+
+class AssignmentForm(forms.ModelForm):
+    class Meta:
+        model = Assignment
+        fields = ['title', 'description', 'file', 'max_score']
+        widgets = {
+            'title': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter Assignment Name',
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Enter Assignment Description',
+            }),
+            'file': forms.ClearableFileInput(attrs={
+                'class': 'form-control',
+            }),
+            'max_score': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter Max Score',
             }),
         }

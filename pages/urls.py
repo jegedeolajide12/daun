@@ -18,6 +18,7 @@ from .views import (index,
                     get_notifications,
                     mark_notification_read,
                     mark_all_notifications_read,
+                    create_assignment,
                     )
 
 
@@ -43,6 +44,8 @@ urlpatterns = [
 
     path('notifications/', get_notifications, name='get_notifications'),
     path('notifications/<int:notification_id>/mark-read', mark_notification_read, name='mark_notification_read'),
-    path('notifications/mark-all-read/', mark_all_notifications_read, name='mark_all_read')
+    path('notifications/mark-all-read/', mark_all_notifications_read, name='mark_all_read'),
+
+    path('assignment/create/', create_assignment, name='create_assignment'),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

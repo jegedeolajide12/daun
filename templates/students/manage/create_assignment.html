@@ -1,0 +1,73 @@
+{% extends 'user_navbar.html' %}
+{% load static %}
+{% load activity_tags %}
+{% block content %}
+<main class="ttr-wrapper">
+    <div class="profile-edit-container">
+        <h1 class="page-title">Create New Assignment</h1>
+        
+        <form id="assignmentForm" enctype="multipart/form-data">
+            <!-- Main Content Section -->
+            <div class="form-section">
+                <h2 class="section-title">Assignment Details</h2>
+                
+                <div class="form-row">
+                    <div class="form-group col-md-12">
+                        <label for="assignmentTitle">Assignment Title</label>
+                        <input type="text" id="assignmentTitle" class="form-control" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-12">
+                        <label for="assignmentDescription">Description</label>
+                        <textarea id="assignmentDescription" class="form-control" rows="5" required></textarea>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="dueDate">Due Date</label>
+                        <input type="date" id="dueDate" class="form-control" required>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="maxPoints">Maximum Points</label>
+                        <input type="number" id="maxPoints" class="form-control" min="0" value="100" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Attachments Section -->
+            <div class="form-section">
+                <h2 class="section-title">Attachments</h2>
+                
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label>Supporting Files</label>
+                        <input type="file" class="custom-file-input" id="fileUpload" multiple>
+                        <label class="custom-file-label" for="fileUpload">Choose files...</label>
+                        <small class="form-text text-muted">Max 5 files (PDF, DOC, PPT)</small>
+                    </div>
+                    
+                    <div class="form-group col-md-6">
+                        <label>Cover Image</label>
+                        <div class="d-flex align-items-center">
+                            <input type="file" class="custom-file-input" id="coverImage" accept="image/*">
+                            <label class="custom-file-label" for="coverImage">Choose image...</label>
+                        </div>
+                        <div class="cover-preview mt-2" style="width: 100px; height: 100px; border: 2px dashed #ddd; display: none;">
+                            <img id="coverPreview" class="cover-preview-img" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <button type="button" class="btn btn-outline-secondary">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Assignment</button>
+            </div>
+        </form>
+    </div>
+</main>
+{% endblock %}

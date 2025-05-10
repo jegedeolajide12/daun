@@ -247,6 +247,30 @@ class StudentActivity(models.Model):
         }
         return icons.get(self.activity_type, 'fas fa-circle')
 
+class Assignment(models.Model):
+    AssignmentStatus = (
+        ('pending', 'Pending'),
+        ('submitted', 'Submitted'),
+        ('graded', 'Graded'),
+        ('overdue', 'Overdue'),
+    )
+
+    title = models.CharField(max_length=200)
+    slug = models.SlugField(max_length=200, null=True, blank=True)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    due_date = models.DateTimeField(null=True, blank=True)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='assignments')
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='assignments', null=True, blank=True)
+    topic = models.ForeignKey(Topic, on_delete=models.CASCADE, related_name='assignments', null=True, blank=True)
+    description = models.TextField()
+    file = models.FileField(upload_to='assignments', null=True, blank=True)
+    max_score = models.IntegerField(default=100)
+    status = models.CharField(max_length=20, choices=AssignmentStatus, default='pending')
+    is_graded = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f'Assignment: {self.title} for {self.course.name}'
 
 class Submission(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='submissions')

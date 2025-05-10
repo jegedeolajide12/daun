@@ -1,3 +1,5 @@
+from .models import Course, Enrollment
+
 def notifications(request):
     if request.user.is_authenticated:
         return {
@@ -7,8 +9,10 @@ def notifications(request):
     return {}
 
 def enrollment_count(request):
-    if request.user.is_authenticated:
+    if request.user and request.user.is_authenticated:
+        instructor_courses = Course.objects.filter(owner=request.user)
+        enrollment_count = Enrollment.objects.filter(course__in=instructor_courses).select_related('student', 'course').count()
         return {
-            'enrollment_count': request.user.enrollments.filter(is_active=True).count()
+            'enrollment_count': enrollment_count
         }
     return {}

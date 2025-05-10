@@ -1,11 +1,26 @@
-{% extends parent_template|default:"user_navbar.html" %}
+{% extends parent_template|default:"navbar.html" %}
 {% load static %}
 {% load course %}
 {% block content %}
-<main class="ttr-wrapper">
     <!-- Content -->
     <div class="page-content bg-white">
         <!-- inner page banner -->
+        <div class="page-banner ovbl-dark" style="background-image:url({% static 'assets/images/banner/banner2.jpg' %});">
+            <div class="container">
+                <div class="page-banner-entry">
+                    <h1 class="text-white">Topic Details</h1>
+				 </div>
+            </div>
+        </div>
+		<!-- Breadcrumb row -->
+		<div class="breadcrumb-row">
+			<div class="container">
+				<ul class="list-inline">
+					<li><a href="#">Home</a></li>
+					<li>Topic Details</li>
+				</ul>
+			</div>
+		</div>
         <div class="content-block">
             <div class="section-area section-sp1">
                 <div class="container">
@@ -23,27 +38,25 @@
                                                 Your browser does not support the video tag.
                                             </video>
                                         </div>
-                                    {% elif content.item|model_name == 'image' and content.item.file %}
-                                        <div class="action-box blog-lg">
-                                            <img src="{{ content.item.file.url }}" alt="{{ content.item.title }}" class="rounded" width="100%">
-                                        </div>
-                                    {% endif %}
-                                    
-                                    <!-- Show Delete Button Only to the Owner -->
-                                    {% if content.item.owner == user %}
-                                        <form method="post" action="{% url 'course:content_delete' content.id %}">
-                                            {% csrf_token %}
-                                            <button type="submit" class="btn btn-danger mt-2">Delete</button>
-                                        </form>
+                                        <!-- Show Delete Button Only to the Owner -->
+                                        {% if content.item.owner == user %}
+                                            <form method="post" action="{% url 'course:content_delete' content.id %}">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-danger mt-2">Delete</button>
+                                            </form>
+                                        {% endif %}
                                     {% endif %}
                                 {% endfor %}
                                 <!-- Topic Details -->
                                 <div class="info-bx">
-                                    <ul class="media-post">
-                                        <li><a href="#"><i class="fa fa-calendar"></i>{{ topic.course.created|date:"M j Y" }}</a></li>
-                                        <li><a href="#"><i class="fa fa-comments-o"></i>10 Comment</a></li>
-                                    </ul>
+                                    
                                     <h5 class="post-title">{{ topic.name|title }}</h5>
+                                    <div class="media-post mt-3 text-start">
+                                        <ul class="list-inline mb-0">
+                                            <li class="list-inline-item"><a href="#"><i class="fa fa-calendar"></i> {{ topic.course.created|date:"M j Y" }}</a></li>
+                                            <li class="list-inline-item"><a href="#"><i class="fa fa-comments-o"></i> 10 Comment</a></li>
+                                        </ul>
+                                    </div>
                                     <p>{{ topic.description|linebreaks }}</p>
                                     <div class="ttr-divider bg-gray"><i class="icon-dot c-square"></i></div>
 
@@ -73,6 +86,32 @@
                                         <li><a href="#" class="btn outline radius-xl"><i class="fa fa-google-plus"></i></a></li>
                                     </ul>
                                     <div class="ttr-divider bg-gray"><i class="icon-dot c-square"></i></div>
+                                </div>
+                            </div>
+                            <!-- New Assignments Section -->
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h4 class="mb-0">Topic Assignments</h4>
+                                </div>
+                                <div class="card-body">
+                                    <div class="list-group">
+                                        {% for assignment in assignments %}
+                                        <div class="list-group-item">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <h5 class="mb-1">{{ assignment.title }}</h5>
+                                                    <small class="text-muted">Due: {{ assignment.due_date|date:"M j, Y" }}</small>
+                                                </div>
+                                                <span class="badge bg-{% if assignment.status == 'completed' %}success{% else %}warning{% endif %}">
+                                                    {{ assignment.get_status_display }}
+                                                </span>
+                                            </div>
+                                            <p class="mt-2 mb-0">{{ assignment.description|truncatewords:20 }}</p>
+                                        </div>
+                                        {% empty %}
+                                        <div class="text-muted">No assignments for this topic</div>
+                                        {% endfor %}
+                                    </div>
                                 </div>
                             </div>
 
@@ -128,96 +167,145 @@
                             </div>
                         </div>
                         <!-- Left part END -->
+                         
 
-                        <!-- Sidebar Start -->
-                        <div class="col-lg-4 col-xl-4">
-                                <!-- Search Widget -->
-                                <!--<div class="widget">
-                                    <h6 class="widget-title">Search</h6>
-                                    <div class="search-bx style-1">
-                                        <form role="search" method="post">
-                                            <div class="input-group">
-                                                <input name="text" class="form-control" placeholder="Enter your keywords..." type="text">
-                                                <span class="input-group-btn">
-                                                    <button type="submit" class="fa fa-search text-primary"></button>
-                                                </span>
-                                            </div>
-                                        </form>
+                        <!-- Sidebar -->
+                        <div class="col-lg-4 col-xl-4 col-md-12 order-lg-2 order-1">
+                            <div class="sticky-top" style="top: 80px;">
+                                <!-- Learning Materials -->
+                                <div class="card border-0 shadow-sm mb-4">
+                                    <div class="card-header bg-primary text-white">
+                                        <h5 class="mb-0">Learning Materials</h5>
                                     </div>
-                                </div>-->
-
-                                <!-- Recent Posts Widget -->
-                                <div class="widget recent-posts-entry">
-                                    <h6 class="widget-title">Topic Contents</h6>
-                                    <div class="widget-post-bx">
-                                        <!-- Example Post -->
-                                        <div class="widget-post clearfix">
+                                    <div class="card-body">
+                                    {% if contents %}
+                                        <ul class="list-group list-group-flush">
                                             {% for content in contents %}
-                                                {% if content.item|model_name == 'video' and content.item.file %}
-                                                    <h6 class="widget-title">Video</h6>
-                                                    <div class="ttr-post-media">
-                                                        <video id="myVideo" width="100" height="143">
-                                                            <source src="{{ content.item.file.url }}" type="video/mp4">
-                                                            Your browser does not support the video tag.
-                                                        </video>
-                                                        <canvas id="thumbnailCanvas" style="display:none;"></canvas>
-                                                        <img id="thumbnail" width="640" height="360">
-                                                    </div>
-                                                
-                                                    <div class="ttr-post-info">
-                                                        <div class="ttr-post-header">
-                                                            <h6 class="post-title"><a href="blog-details.html">{{ content.item.title }}</a></h6>
-                                                        </div>
-                                                    </div>
-                                                {% endif %}
-                                            {% endfor%}
-                                        </div>
-                                        <!-- Repeat for other posts -->
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <span>{{ content.item.title }}</span>
+                                                <span class="badge bg-secondary">
+                                                    {{ content.item|model_name|title }}
+                                                </span>
+                                            </li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% else %}
+                                        <p class="text-muted">No learning materials available for this topic.</p>
+                                    {% endif %}
                                     </div>
                                 </div>
 
-                                <!-- Newsletter Widget -->
-                                <div class="widget widget-newslatter">
-                                    <h6 class="widget-title">Newsletter</h6>
-                                    <div class="news-box">
-                                        <p>Enter your e-mail and subscribe to our newsletter.</p>
-                                        <form class="subscription-form" action="#" method="post">
-                                            <div class="input-group">
-                                                <input name="dzEmail" required="required" type="email" class="form-control" placeholder="Your Email Address">
-                                                <button name="submit" value="Submit" type="submit" class="btn black radius-no">
-                                                    <i class="fa fa-paper-plane-o"></i>
-                                                </button>
+                                <!-- Topic Progress -->
+                                <div class="card border-0 mb-4 shadow-sm">
+                                    <div class="card-header bg-success text-white">
+                                        <h5 class="mb-0">Your Progress</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <span>Topic Completion</span>
+                                                <span>65%</span>
                                             </div>
-                                        </form>
+                                            <div class="progress" style="height: 8px;">
+                                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" 
+                                                    role="progressbar" style="width: 65%" 
+                                                    aria-valuenow="65" aria-valuemin="0" aria-valuemax="100">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <dl class="row mb-0">
+                                            <dt class="col-6">Completed:</dt>
+                                            <dd class="col-6 text-end">3/5 topics</dd>
+                                            <dt class="col-6">Assignments:</dt>
+                                            <dd class="col-6 text-end">2/3 done</dd>
+                                            <dt class="col-6">Quizzes:</dt>
+                                            <dd class="col-6 text-end">1/2 done</dd>
+                                        </dl>
                                     </div>
                                 </div>
 
-                                <!-- Gallery Widget -->
-                                <div class="widget widget_gallery gallery-grid-4">
-                                    <h6 class="widget-title">Our Gallery</h6>
-                                    <ul>
-                                        <li><div><a href="#"><img src="{% static 'assets/images/gallery/pic2.jpg' %}" alt=""></a></div></li>
-                                        <!-- Repeat for other gallery items -->
-                                    </ul>
-                                </div>
-
-                                <!-- Tags Widget -->
-                                <div class="widget widget_tag_cloud">
-                                    <h6 class="widget-title">Tags</h6>
-                                    <div class="tagcloud">
-                                        <a href="#">Design</a>
-                                        <a href="#">User interface</a>
-                                        <a href="#">SEO</a>
-                                        <!-- Repeat for other tags -->
+                                <!-- Upcoming Deadlines -->
+                                <div class="card border-0 mb-4 shadow-sm">
+                                    <div class="card-header bg-warning text-dark">
+                                        <h5 class="mb-0">Upcoming Deadlines</h5>
+                                    </div>
+                                    <div class="card-body">
+                                    {% if assignments %}
+                                        <ul class="list-group list-group-flush">
+                                            {% for assignment in assignments|slice:":3" %}
+                                            <li class="list-group-item">
+                                                <div class="d-flex justify-content-between">
+                                                    <span>{{ assignment.title }}</span>
+                                                    <small class="text-muted">{{ assignment.due_date|date:"M j" }}</small>
+                                                </div>
+                                            </li>
+                                            {% empty %}
+                                            <li class="list-group-item text-muted">No upcoming deadlines</li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% else %}
+                                        <p class="text-muted">No upcoming deadlines</p>
+                                    {% endif %}
                                     </div>
                                 </div>
+
+                                <!-- Instructor Info -->
+                                <div class="card-body">
+                                    <div class="d-flex align-items-start mb-4">
+                                        <!-- Image Container -->
+                                        <div class="me-3">
+                                            <img src="{% if topic.course.owner.profile_picture %}{{ topic.course.owner.profile_picture.url }}{% else %}{% static 'assets/images/empty_profile.jpg' %}{% endif %}"
+                                                class="rounded-circle border border-3 border-white shadow-sm"
+                                                style="width: 72px; height: 72px; object-fit: cover;"
+                                                alt="{{ topic.course.owner.get_full_name }} profile picture">
+                                        </div>
+                                        
+                                        <!-- Instructor Info with Badge -->
+                                        <div class="flex-grow-1 position-relative">
+                                            <div class="d-flex align-items-center">
+                                                <h5 class="mb-0 me-2">{{ topic.course.owner.get_full_name }}</h5>
+                                                <!-- Verification badge now next to name -->
+                                                <div class="bg-primary rounded-circle p-1 border border-2 border-white" style="width: 20px; height: 20px;">
+                                                    <i class="fa fa-check text-white d-flex justify-content-center align-items-center" style="font-size: 0.7rem;"></i>
+                                                </div>
+                                            </div>
+                                            
+                                            <p class="text-muted small mb-2">Course Instructor</p>
+                                            
+                                            <!-- Rating (optional) -->
+                                            <div class="d-flex align-items-center mb-2">
+                                                <div class="text-warning me-2">
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star-half-alt"></i>
+                                                </div>
+                                                <small class="text-muted">4.8 (128 reviews)</small>
+                                            </div>
+                                            
+                                            <!-- Bio -->
+                                            <p class="mb-3 text-muted">{{ topic.course.owner.bio|truncatewords:20 }}</p>
+                                            
+                                            <!-- Contact Buttons with proper spacing -->
+                                            <div class="d-flex gap-3">  <!-- Changed from gap-2 to gap-3 for more spacing -->
+                                                <a href="#" class="btn btn-sm btn-outline-primary rounded-pill px-2 flex-grow-1 text-center">
+                                                    <i class="fa fa-envelope me-2"></i> Message
+                                                </a>
+                                                <a href="#" class="btn btn-sm btn-outline-secondary rounded-pill px-3 flex-grow-1 text-center">
+                                                    <i class="fa fa-user me-2"></i> Profile
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Sidebar END -->
                         </div>
-                        <!-- Sidebar END -->
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <!-- Content END -->
-</main>
+{% include "footer.html" %}
 {% endblock %}

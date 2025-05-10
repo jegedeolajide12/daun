@@ -23,7 +23,7 @@ from actstream import action
 from students.forms import CourseEnrollForm
 
 from .models import Course, Content, Topic, Video, Faculty, Notification, Enrollment
-from .forms import CourseForm, ModuleFormSet, FacultyForm
+from .forms import CourseForm, ModuleFormSet, FacultyForm, AssignmentForm
 
 def create_faculty(request):
     if request.method == "POST":
@@ -263,6 +263,7 @@ def course_unenroll(request, course_slug):
 def topic_detail(request, topic_id):
     topic = get_object_or_404(Topic, id=topic_id)
     contents = Content.objects.prefetch_related('content_type').filter(topic=topic)
+    assignments = topic.course.assignments.all()
 
     # Get the ContentType for the Video model
     video_content_type = ContentType.objects.get_for_model(Video)
@@ -271,7 +272,7 @@ def topic_detail(request, topic_id):
     video_count = contents.filter(content_type=video_content_type).count()
 
 
-    context = {'topic': topic, 'contents': contents, 'video_count': video_count}
+    context = {'topic': topic, 'contents': contents, 'video_count': video_count, 'assignments': assignments}
     return render(request, 'courses/manage/module/module_detail.html', context)
 
 
@@ -315,3 +316,30 @@ def get_notifications(request):
         'url': reverse('course:course', args=[n.related_course.id]) if n.related_course else '#'
     } for n in notifications]
     return JsonResponse(data, safe=False)
+
+@login_required
+def create_assignment(request, course_id):
+    course = get_object_or_404(Course, id=course_id)
+    if request.method == 'POST':
+        form = AssignmentForm(request.POST)
+        if form.is_valid():
+            assignment = form.save(commit=False)
+            assignment.owner = request.user
+            assignment.course = get_object_or_404(Course, id=course_id)
+            assignment.save()
+            messages.success(request, "Assignment created successfully!")
+            # Optionally, you can also create a notification for the course owner
+            Notification.objects.create(
+                sender=request.user,
+                related_course=assignment.course,
+                recipient=assignment.course.students.all(),
+                related_enrollment=assignment.course.enrollment_set.filter(student=request.user).first(),
+                title="Assignment Notification",
+                message=f"New assignment created: {assignment.title}",
+                notification_type="Assignment",
+                is_read=False
+            )
+            return redirect('accounts:dashboard')
+    else:
+        form = AssignmentForm()
+    return render(request, 'students/manage/assignment/create_assignment.html', {'form': form})
