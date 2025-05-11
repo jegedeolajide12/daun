@@ -4888,18 +4888,25 @@ textarea.form-control {
     transform: scale(1.2);
 }
 .ttr-header-submenu.notification-container {
-    width: 350px;
+    width: 350px; /* Fixed width */
+    max-width: 350px; /* Ensure it doesn't expand */
     right: 0;
     left: auto !important;
     padding: 0;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     border: none;
-	animation: slideIn 0.3s ease-out forwards;
+    animation: slideIn 0.3s ease-out forwards;
     transform-origin: top center;
-    display: block !important; /* Override inline style */
+    display: block !important;
     opacity: 0;
     transition: opacity 0.2s ease, transform 0.3s ease;
+    position: absolute; /* Changed from fixed to absolute */
+    z-index: 1000;
+    top: 100%; /* Position directly below parent */
+    margin-top: 5px; /* Small gap from trigger */
+    transform: scale(0.95); /* Initial scaled down state */
+    transform-origin: top right;
 }
 
 .notification-header {
@@ -4910,7 +4917,10 @@ textarea.form-control {
     border-bottom: 1px solid #eee;
     background: #f8f9fa;
     border-radius: 8px 8px 0 0;
+    width: 100%; /* Ensure header fills container */
+    box-sizing: border-box; /* Include padding in width */
 }
+
 
 .mark-all-read {
     background: none;
@@ -4929,6 +4939,7 @@ textarea.form-control {
 .notification-list {
     max-height: 400px;
     overflow-y: auto;
+    width: 100%; /* Fill container width */
 }
 
 .notification-item {
@@ -5007,9 +5018,19 @@ textarea.form-control {
     margin: 0;
     font-size: 14px;
 }
-
+.main-content {
+    position: relative;
+    z-index: 1; /* Lower than notification */
+}
 .notification-container.hidden {
     animation: fadeOut 0.2s ease-in forwards;
+	opacity: 0;
+    pointer-events: none; /* Allow clicks to pass through */
+}
+.notification-container:not(.hidden) {
+	opacity: 1;
+	pointer-events: auto; /* Ensure it's clickable when visible */
+	transform: scale(1);
 }
 .notification-item.marking-read {
     transform: translateX(-20px);
@@ -5022,6 +5043,35 @@ textarea.form-control {
     transform: scale(1.1);
 }
 /* Enhanced Styling without changing existing classes */
+@media (max-width: 768px) {
+    .ttr-header-submenu.notification-container {
+        position: fixed;
+        width: 90%;
+        max-width: 350px;
+        right: 5%;
+        left: auto;
+        top: 60px; /* Adjust based on your header height */
+        z-index: 1000;
+    }
+    
+    /* Mobile-specific bell icon behavior */
+    .fa-bell {
+        pointer-events: auto !important;
+    }
+}
+@media (max-width: 576px) {
+    .ttr-header-submenu.notification-container {
+        width: 300px;
+        right: -50px; /* Adjust positioning on small screens */
+    }
+}
+.notification-list::-webkit-scrollbar {
+    width: 6px;
+}
+.notification-list::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,0.2);
+    border-radius: 3px;
+}
 /* Ensure buttons stay clickable */
 .quick-action-buttons {
     position: relative;

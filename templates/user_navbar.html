@@ -198,13 +198,13 @@
 					</li>
 					<li class="notification-menu-item">
 						<a href="#" class="ttr-material-button notification-icon-wrapper" onclick="handleNotificationClick(event)">
-							<i class="fa fa-bell"></i>
+							<i class="fa fa-bell" onclick="toggleNotifications(event)"></i>
 							{% if unread_notifications %}
 								<span class="notification-badge">{{ unread_notifications|length }}</span>
 							{% endif %}
 						</a>
 						
-						<div class="ttr-header-submenu notification-container">
+						<div class="ttr-header-submenu notification-container hidden">
 							<div class="notification-header">
 								<h4>Notifications</h4>
 								<button class="mark-all-read" onclick="markAllNotificationsRead()">
@@ -392,6 +392,9 @@
   
 </script>
 <script>
+	var calendarEvents = JSON.parse('{{ tasks|default:"[]"|safe }}');
+</script>
+<script>
 	var instructorLabels = JSON.parse('{{ instructor_labels|default:"[]"|safe }}');
     var instructorData = JSON.parse('{{ instructor_data|default:"[]"|safe }}'); 
 </script>
@@ -419,7 +422,33 @@ function handleNotificationClick(event) {
     
     markAllNotificationsRead();
 }
-
+function toggleNotifications(event) {
+    // Prevent this from interfering with mark-as-read functionality
+    event.stopPropagation();
+    
+    const container = document.querySelector('.notification-container');
+    const bellIcon = document.querySelector('.fa-bell');
+    
+    // Toggle visibility
+    container.classList.toggle('hidden');
+    
+    // Only add click-outside listener when showing
+    if (!container.classList.contains('hidden')) {
+        // Close when clicking outside
+        const clickHandler = function(e) {
+            if (!container.contains(e.target) && e.target !== bellIcon) {
+                container.classList.add('hidden');
+                document.removeEventListener('click', clickHandler);
+            }
+        };
+        document.addEventListener('click', clickHandler);
+    }
+    
+    // Prevent default if this is a mobile touch event
+    if (window.innerWidth <= 768) {
+        event.preventDefault();
+    }
+}
 function markAllNotificationsRead() {
     fetch('/notifications/mark-all-read/', {
         method: 'POST',
@@ -430,7 +459,7 @@ function markAllNotificationsRead() {
     })
     .then(response => {
         if (response.ok) {
-            document.querySelectorAll('.notification-item').forEach(item => {
+            document.querySelectorAll('.notification-menu-item').forEach(item => {
                 item.classList.add('marking-read');
                 setTimeout(() => {
                     item.classList.remove('unread', 'marking-read');
