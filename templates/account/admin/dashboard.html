@@ -405,18 +405,17 @@
                     </div>
                 </div>
 
-                <div class="row text-center">
-                    <div class="col-md-4 col-sm-6 col-6 mb-3">
-                        <a href="{% url "course:course_create" %}" class="btn btn-primary btn-block text-truncate" title="Create New Course">Create New Course</a>
-                    </div>
-                    <div class="col-md-4 col-sm-6 col-6 mb-3">
-                        <a href="{% url "student:manage_students" %}" class="btn btn-primary btn-block text-truncate" title="Manage My Students">Manage My Students</a>
-                    </div>
-                    <div class="col-md-4 col-sm-6 col-6 mb-3">
-                        <a href="" class="btn btn-primary btn-block text-truncate" title="Upload New Assignment">Upload Assignment</a>
-                    </div>
-                </div>
-
+                <div class="row text-center quick-action-buttons">
+					<div class="col-md-4 col-sm-6 col-6 mb-3">
+						<a href="{% url "course:course_create" %}" class="btn btn-primary btn-block text-truncate" title="Create New Course">Create New Course</a>
+					</div>
+					<div class="col-md-4 col-sm-6 col-6 mb-3">
+						<a href="{% url "student:manage_students" %}" class="btn btn-primary btn-block text-truncate" title="Manage My Students">Manage My Students</a>
+					</div>
+					<div class="col-md-4 col-sm-6 col-6 mb-3">
+						<a href="{% url "course:create_assignment" %}" class="btn btn-primary btn-block text-truncate" title="Upload New Assignment">Upload Assignment</a>
+					</div>
+				</div>
                 <div class="row">
                     <!-- Chart -->
                     <div class="col-lg-8 m-b30">
@@ -900,14 +899,13 @@
 	</main>
 	<div class="ttr-overlay"></div>
 
-		
 <!-- Modal -->
 <div id="facultyModal" class="modal">
     <div class="modal-content">
         <span id="closeFacultyModal" class="close">&times;</span>
         <h2>Create a New Faculty</h2>
         <form method="POST" action="{% url "course:create_faculty" %}">
-			{% csrf_token %}
+            {% csrf_token %}
             <div class="form-group">
                 <label for="facultyName">Faculty Name</label>
                 <input type="text" id="id_name" name="name" placeholder="Enter faculty name" required>
@@ -921,4 +919,44 @@
     </div>
 </div>
 
+
+<script>
+	document.addEventListener("DOMContentLoaded", () => {
+		const modal = document.getElementById("facultyModal");
+		const openBtn = document.getElementById("openFacultyModal");
+		const closeBtn = document.getElementById("closeFacultyModal");
+		const cancelBtn = document.getElementById("cancelFacultyModal");
+
+		// Only run the modal logic if all elements exist
+		if (modal && openBtn && closeBtn && cancelBtn) {
+			// Show modal
+			openBtn.addEventListener("click", () => {
+				modal.classList.add("show");
+			});
+
+			// Close with X
+			closeBtn.addEventListener("click", () => {
+				modal.classList.remove("show");
+			});
+
+			// Close with Cancel button
+			cancelBtn.addEventListener("click", () => {
+				modal.classList.remove("show");
+			});
+
+			// Optional: Close when clicking outside the modal
+			window.addEventListener("click", (e) => {
+				if (e.target === modal) {
+					modal.classList.remove("show");
+				}
+			});
+		} else {
+			console.log("Modal-related elements are not present in the DOM. Skipping modal logic.");
+		}
+	});
+</script>
+
+<script>
+	var calendarEvents = JSON.parse('{{ tasks|default:"[]"|safe }}');
+</script>
 {% endblock %}

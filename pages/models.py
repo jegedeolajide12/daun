@@ -261,13 +261,35 @@ class Assignment(models.Model):
     updated = models.DateTimeField(auto_now=True)
     due_date = models.DateTimeField(null=True, blank=True)
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='assignments')
-    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='assignments', null=True, blank=True)
     topic = models.ForeignKey(Topic, on_delete=models.CASCADE, related_name='assignments', null=True, blank=True)
     description = models.TextField()
     file = models.FileField(upload_to='assignments', null=True, blank=True)
     max_score = models.IntegerField(default=100)
     status = models.CharField(max_length=20, choices=AssignmentStatus, default='pending')
     is_graded = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.title)
+        super().save(*args, **kwargs)
+        # Create Task objects so that UserTask can be created for all students in the course
+        title = self.title
+        task = Task.objects.create(
+            title=title,
+            course=self.course,
+            start_date=self.created,
+            due_date=self.due_date,
+            type=TaskType.ASSIGNMENT,
+            description=self.description
+        )
+        # Create UserTask objects for all students in the course
+        students = self.course.students.all()
+        user_tasks = [
+            UserTask(user=student, task=task) for student in students
+        ]
+        UserTask.objects.bulk_create(user_tasks)
+
+        
 
     def __str__(self):
         return f'Assignment: {self.title} for {self.course.name}'

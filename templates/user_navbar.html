@@ -354,221 +354,18 @@
 <script src="{% static "asset/vendors/summernote/summernote.js" %}"></script>
 <script src="{% static "asset/vendors/file-upload/imageuploadify.min.js" %}"></script>
 <script src='{% static 'asset/vendors/switcher/switcher.js' %}'></script>
+
 <script>
-    $(document).ready(function() {
-      $('.summernote').summernote({
-        height: 300,
-        tabsize: 2
-      });
-	  
-	   $('input[type="file"]').imageuploadify();
-    });
+    var chartLabels = JSON.parse('{{ labels|default:"[]"|safe }}'); // Default to an empty array
+    var chartData = JSON.parse('{{ data|default:"[]"|safe }}');     // Default to an empty array
 </script>
 <script>
-	const modal = document.getElementById("facultyModal");
-	const openBtn = document.getElementById("openFacultyModal"); // Your trigger button
-	const closeBtn = document.getElementById("closeFacultyModal");
-	const cancelBtn = document.getElementById("cancelFacultyModal");
-
-	// Show modal
-	openBtn.addEventListener("click", () => {
-		modal.classList.add("show");
-	});
-
-	// Close with X
-	closeBtn.addEventListener("click", () => {
-		modal.classList.remove("show");
-	});
-
-	// Close with cancel button
-	cancelBtn.addEventListener("click", () => {
-		modal.classList.remove("show");
-	});
-
-	// Optional: close when clicking outside the modal
-	window.addEventListener("click", (e) => {
-		if (e.target === modal) {
-			modal.classList.remove("show");
-		}
-	});
+    console.log("Chart Labels:", JSON.parse('{{ labels|default:"[]"|safe }}'));
+    console.log("Chart Data:", JSON.parse('{{ data|default:"[]"|safe }}'));
 </script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Star rating interaction
-        const stars = document.querySelectorAll('.rating-stars input');
-        const ratingText = document.getElementById('rating-text');
-        const ratingEmoji = document.getElementById('rating-emoji');
-        const emojiMap = {
-            1: '😞 Terrible',
-            2: '😕 Not great',
-            3: '😐 Average',
-            4: '😊 Very good',
-            5: '🤩 Excellent'
-        };
-        
-        stars.forEach(star => {
-            star.addEventListener('change', function() {
-                ratingText.textContent = this.value;
-                ratingEmoji.textContent = emojiMap[this.value];
-                ratingEmoji.style.opacity = 1;
-                
-                // Trigger confetti for 5-star rating
-                if (this.value == 5) {
-                    createConfetti();
-                }
-            });
-            
-            star.addEventListener('mouseover', function() {
-                const hoverValue = this.value;
-                ratingEmoji.textContent = emojiMap[hoverValue];
-                ratingEmoji.style.opacity = 0.7;
-            });
-            
-            star.addEventListener('mouseout', function() {
-                const checkedStar = document.querySelector('.rating-stars input:checked');
-                if (checkedStar) {
-                    ratingEmoji.textContent = emojiMap[checkedStar.value];
-                } else {
-                    ratingEmoji.textContent = '👈 Pick a star!';
-                }
-            });
-        });
-        
-        // Character counter for feedback
-        const feedback = document.getElementById('feedback');
-        const charCount = document.getElementById('char-count');
-        
-        feedback.addEventListener('input', function() {
-            charCount.textContent = this.value.length;
-        });
-        
-        // Confetti effect
-        function createConfetti() {
-            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
-            const container = document.querySelector('.confetti-container');
-            
-            for (let i = 0; i < 50; i++) {
-                const confetti = document.createElement('div');
-                confetti.className = 'confetti';
-                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                confetti.style.left = Math.random() * 100 + '%';
-                confetti.style.top = '-10px';
-                confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
-                
-                container.appendChild(confetti);
-                
-                const animation = confetti.animate([
-                    { top: '-10px', opacity: 1 },
-                    { top: '100%', opacity: 0 }
-                ], {
-                    duration: 1000 + Math.random() * 2000,
-                    easing: 'cubic-bezier(0.1, 0.8, 0.3, 1)'
-                });
-                
-                animation.onfinish = () => confetti.remove();
-            }
-        }
-         // AJAX Form submission
-		const form = document.getElementById('rating-form');
-		form.addEventListener('submit', function (e) {
-			e.preventDefault();
-
-			const checkedStar = document.querySelector('.rating-stars input:checked');
-			if (!checkedStar) {
-				alert('Please select a rating before submitting.');
-				return; // Don't submit if no rating is selected
-			}
-
-			// Create FormData object
-			const formData = new FormData(form);
-
-			// AJAX request
-			fetch(form.action, {
-				method: 'POST',
-				body: formData,
-				headers: {
-					'X-Requested-With': 'XMLHttpRequest', // Identify as AJAX request
-					'X-CSRFToken': formData.get('csrfmiddlewaretoken') // Django CSRF token
-				}
-			})
-				.then(response => {
-					if (!response.ok) throw new Error('Network response was not ok');
-					return response.json(); // Assuming the server returns JSON
-				})
-				.then(data => {
-					// Success - reset form and display success message
-					form.reset();
-					ratingText.textContent = '0';
-					ratingEmoji.textContent = '👈 Pick a star!';
-					const charCount = document.getElementById('char-count');
-					if (charCount) charCount.textContent = '0';
-
-					// Uncheck all stars
-					stars.forEach(star => (star.checked = false));
-
-					// Display success message
-					const successMessage = document.createElement('div');
-					successMessage.className = 'alert alert-success';
-					successMessage.textContent = data.message || 'Your rating has been submitted successfully!';
-					const header = document.querySelector('header.ttr-header');
-					if (header) {
-						header.appendChild(successMessage);
-					}
-
-					// Remove success message after 5 seconds
-					setTimeout(() => {
-						successMessage.remove();
-					}, 5000);
-
-					// Trigger confetti
-					createConfetti();
-				})
-				.catch(error => {
-					console.error('Error:', error);
-
-					// Display error message
-					const errorMessage = document.createElement('div');
-					errorMessage.className = 'alert alert-danger';
-					errorMessage.textContent = 'An error occurred while submitting your rating. Please try again.';
-					form.parentElement.insertBefore(errorMessage, form);
-
-					// Remove error message after 5 seconds
-					setTimeout(() => {
-						errorMessage.remove();
-					}, 5000);
-				});
-		});
-	});
-</script>
-<script>
-	const video = document.getElementById("myVideo");
-	const canvas = document.getElementById("thumbnailCanvas");
-	const img = document.getElementById("thumbnail");
-	const ctx = canvas.getContext("2d");
-  
-	video.addEventListener("loadeddata", () => {
-	  video.currentTime = 10; // Capture at 1 second (adjust as needed)
-	});
-  
-	video.addEventListener("seeked", () => {
-	  canvas.width = video.videoWidth;
-	  canvas.height = video.videoHeight;
-	  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-	  img.src = canvas.toDataURL(); // Convert canvas to image
-	  video.style.display = "none"; // Hide video element
-	});
-</script>
-<script>
-    var chartLabels = JSON.parse('{{ labels|safe }}'); // Parse JSON-encoded labels
-    var chartData = JSON.parse('{{ data|safe }}');     // Parse JSON-encoded data
-</script>
-<script>
-    console.log("Chart Labels:", JSON.parse('{{ labels|safe }}'));
-    console.log("Chart Data:", JSON.parse('{{ data|safe }}'));
-</script>
-<script>
-    console.log("Chart Labels:", JSON.parse('{{ instructor_labels|safe }}'));
-    console.log("Chart Data:", JSON.parse('{{ instructor_data|safe }}'));
+    console.log("Chart Labels:", JSON.parse('{{ instructor_labels|default:"[]"|safe }}'));
+    console.log("Chart Data:", JSON.parse('{{ instructor_data|default:"[]"|safe }}'));
 </script>
 <script>
 	$(document).ready(function() {
@@ -595,104 +392,14 @@
   
 </script>
 <script>
-	var calendarEvents = JSON.parse('{{ tasks|safe }}');
-</script>
-<script>
-	var instructorLabels = JSON.parse('{{ instructor_labels|safe }}');
-    var instructorData = JSON.parse('{{ instructor_data|safe }}'); 
-</script>
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const modal = document.getElementById("facultyModal");
-        const openBtn = document.getElementById("openFacultyModal");
-        const closeBtn = document.getElementById("closeFacultyModal");
-        const cancelBtn = document.getElementById("cancelFacultyModal");
-
-        if (modal && openBtn && closeBtn && cancelBtn) {
-            // Show modal
-            openBtn.addEventListener("click", () => {
-                modal.classList.add("show");
-            });
-
-            // Close with X
-            closeBtn.addEventListener("click", () => {
-                modal.classList.remove("show");
-            });
-
-            // Close with Cancel button
-            cancelBtn.addEventListener("click", () => {
-                modal.classList.remove("show");
-            });
-
-            // Optional: Close when clicking outside the modal
-            window.addEventListener("click", (e) => {
-                if (e.target === modal) {
-                    modal.classList.remove("show");
-                }
-            });
-        } else {
-            console.error("One or more modal-related elements are missing in the DOM.");
-        }
-    });
+	var instructorLabels = JSON.parse('{{ instructor_labels|default:"[]"|safe }}');
+    var instructorData = JSON.parse('{{ instructor_data|default:"[]"|safe }}'); 
 </script>
 <script>
 	// Get the URL pattern once when the page loads
 	const STUDENT_DETAIL_URL = "{% url 'student:student_detail' 0 %}";  // 0 is a placeholder
 	</script>
 <!-- manage_student.html Student detail modal script -->
-<script>
-	 // Toggle between grid and list view
-	 document.querySelectorAll('.view-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-            
-            if (this.dataset.view === 'grid') {
-                document.querySelector('.student-grid-view').style.display = 'grid';
-                document.querySelector('.student-list-view').style.display = 'none';
-            } else {
-                document.querySelector('.student-grid-view').style.display = 'none';
-                document.querySelector('.student-list-view').style.display = 'block';
-            }
-        });
-    });
-
-    // Filter students
-    document.querySelectorAll('#courseFilter, #statusFilter, #sortFilter').forEach(filter => {
-        filter.addEventListener('change', function() {
-            // Implement your filtering logic here
-            console.log('Filtering by:', this.id, this.value);
-        });
-    });
-
-    // Search functionality
-    document.getElementById('studentSearch').addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase();
-        // Implement your search logic here
-        console.log('Searching for:', searchTerm);
-    });
-
-	// Bulk actions
-    $('#bulkActionsModal').on('show.bs.modal', function() {
-        // Update selected count
-        const selectedCount = document.querySelectorAll('.student-table input[type="checkbox"]:checked').length;
-        $(this).find('label[for="selectedStudents"]').text(`For selected students (${selectedCount} selected)`);
-    });
-
-    // Select all checkbox
-    document.getElementById('selectAll').addEventListener('change', function() {
-        const checkboxes = document.querySelectorAll('.student-table input[type="checkbox"]');
-        checkboxes.forEach(checkbox => {
-            checkbox.checked = this.checked;
-        });
-    });
-
-    // Function to send message
-    function sendMessage(studentId) {
-        console.log('Sending message to student:', studentId);
-        // Implement your message functionality here
-    }
-</script>
 <script>
 function handleNotificationClick(event) {
     event.preventDefault();
@@ -864,7 +571,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-
 </body>
 
 <!-- Mirrored from educhamp.themetrades.com/demo/admin/courses.html by HTTrack Website Copier/3.x [XR&CO'2014], Fri, 22 Feb 2019 13:11:35 GMT -->

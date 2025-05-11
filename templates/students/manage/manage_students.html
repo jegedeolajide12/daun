@@ -321,4 +321,75 @@
         </div>
     </div>
 </div>
+
+
+<script>
+	 // Toggle between grid and list view
+	 document.querySelectorAll('.view-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            if (this.dataset.view === 'grid') {
+                document.querySelector('.student-grid-view').style.display = 'grid';
+                document.querySelector('.student-list-view').style.display = 'none';
+            } else {
+                document.querySelector('.student-grid-view').style.display = 'none';
+                document.querySelector('.student-list-view').style.display = 'block';
+            }
+        });
+    });
+
+    // Filter students
+    document.querySelectorAll('#courseFilter, #statusFilter, #sortFilter').forEach(filter => {
+        filter.addEventListener('change', function() {
+            // Implement your filtering logic here
+            console.log('Filtering by:', this.id, this.value);
+        });
+    });
+
+    // Search functionality
+    document.addEventListener('DOMContentLoaded', function () {
+		const studentSearch = document.getElementById('studentSearch');
+
+		if (studentSearch) {
+			studentSearch.addEventListener('input', function () {
+				const searchTerm = this.value.toLowerCase();
+				console.log('Searching for:', searchTerm);
+			});
+		} else {
+			console.error("The element with ID 'studentSearch' is missing in the DOM.");
+		}
+	});
+
+	// Bulk actions
+    $('#bulkActionsModal').on('show.bs.modal', function() {
+        // Update selected count
+        const selectedCount = document.querySelectorAll('.student-table input[type="checkbox"]:checked').length;
+        $(this).find('label[for="selectedStudents"]').text(`For selected students (${selectedCount} selected)`);
+    });
+
+    // Select all checkbox
+    document.addEventListener('DOMContentLoaded', function () {
+		const selectAllCheckbox = document.getElementById('selectAll');
+
+		if (selectAllCheckbox) {
+			selectAllCheckbox.addEventListener('change', function () {
+				const checkboxes = document.querySelectorAll('.student-table input[type="checkbox"]');
+				checkboxes.forEach(checkbox => {
+					checkbox.checked = this.checked;
+				});
+			});
+		} else {
+			console.error("The element with ID 'selectAll' is missing in the DOM.");
+		}
+	});
+
+    // Function to send message
+    function sendMessage(studentId) {
+        console.log('Sending message to student:', studentId);
+        // Implement your message functionality here
+    }
+</script>
+
 {% endblock %}

@@ -6,33 +6,54 @@
     <div class="profile-edit-container">
         <h1 class="page-title">Create New Assignment</h1>
         
-        <form id="assignmentForm" enctype="multipart/form-data">
+        <form id="assignmentForm" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
             <!-- Main Content Section -->
             <div class="form-section">
                 <h2 class="section-title">Assignment Details</h2>
                 
                 <div class="form-row">
                     <div class="form-group col-md-12">
-                        <label for="assignmentTitle">Assignment Title</label>
-                        <input type="text" id="assignmentTitle" class="form-control" required>
+                        <label for="id_title">Assignment Title</label>
+                        <input type="text" id="id_title" name="title" class="form-control" required>
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group col-md-12">
-                        <label for="assignmentDescription">Description</label>
-                        <textarea id="assignmentDescription" class="form-control" rows="5" required></textarea>
+                        <label for="id_description">Description</label>
+                        <textarea id="id_description" name="description" class="form-control" rows="5" required></textarea>
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group col-md-6">
-                        <label for="dueDate">Due Date</label>
-                        <input type="date" id="dueDate" class="form-control" required>
+                        <label for="id_due_date">Due Date</label>
+                        <input type="datetime-local" id="id_due_date" name="due_date" class="form-control" required>
                     </div>
                     <div class="form-group col-md-6">
-                        <label for="maxPoints">Maximum Points</label>
-                        <input type="number" id="maxPoints" class="form-control" min="0" value="100" required>
+                        <label for="id_max_score">Maximum Points</label>
+                        <input type="number" id="id_max_score" name="max_score" class="form-control" min="0" value="100" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="id_course">Course</label>
+                        <select id="id_course" name="course" class="form-control" required>
+                            <option value="" selected disabled>Select Course</option>
+                            {% for course in courses %}
+                                <option value="{{ course.id }}">{{ course.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="id_topic">Topic</label>
+                        <select id="id_topic" name="topic" class="form-control">
+                            <option value="" selected disabled>Select Topic</option>
+                            <!-- Topics will be loaded dynamically via AJAX -->
+                        </select>
                     </div>
                 </div>
             </div>
@@ -43,9 +64,9 @@
                 
                 <div class="form-row">
                     <div class="form-group col-md-6">
-                        <label>Supporting Files</label>
-                        <input type="file" class="custom-file-input" id="fileUpload" multiple>
-                        <label class="custom-file-label" for="fileUpload">Choose files...</label>
+                        <label for="id_file">Supporting Files</label>
+                        <input type="file" id="id_file" name="file" class="custom-file-input" multiple>
+                        <label class="custom-file-label" for="id_file">Choose files...</label>
                         <small class="form-text text-muted">Max 5 files (PDF, DOC, PPT)</small>
                     </div>
                     
@@ -70,4 +91,63 @@
         </form>
     </div>
 </main>
+
+
+<!-- Load jQuery FIRST -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Then your custom script -->
+<script>
+// Wait for DOM to be fully loaded
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("Script loaded - DOM ready"); // Debugging line
+    
+    // Event delegation for course select
+    $(document).ready(function() {
+        // Use event delegation in case select is dynamically added
+        $(document).on('change', '#id_course', function() {
+            var courseId = $(this).val();
+            var topicSelect = $('#id_topic');
+            
+            if (courseId) {
+                console.log("Fetching topics for course:", courseId);
+                
+                // Show loading state
+                topicSelect.html('<option value="">Loading...</option>');
+                
+                $.ajax({
+                    url: '{% url "course:ajax_load_topics" %}',
+                    data: { 'course_id': courseId },
+                    dataType: 'json',
+                    success: function(data) {
+                        console.log("Received data:", data);
+                        
+                        topicSelect.empty();
+                        topicSelect.append('<option value="" selected disabled>Select Topic</option>');
+                        
+                        if (data && data.length > 0) {
+                            $.each(data, function(i, topic) {
+                                topicSelect.append($('<option>', {
+                                    value: topic.id,
+                                    text: topic.name
+                                }));
+                            });
+                        } else {
+                            topicSelect.append('<option value="">No topics found</option>');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("AJAX Error:", error);
+                        topicSelect.html('<option value="">Error loading topics</option>');
+                    }
+                });
+            } else {
+                topicSelect.html('<option value="" selected disabled>Select Topic</option>');
+            }
+        });
+    });
+    // Initial check to verify binding
+    console.log("Event listeners registered"); // Debugging
+});
+</script>
 {% endblock %}

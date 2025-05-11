@@ -47,4 +47,20 @@
 		</div>
 	</main>
 	<div class="ttr-overlay"></div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+		$('.summernote').summernote({
+			height: 300,
+			tabsize: 2
+		});
+
+		const fileInputs = document.querySelectorAll('input[type="file"]');
+		if (fileInputs.length > 0) {
+			$('input[type="file"]').imageuploadify();
+		} else {
+			console.error("No file input elements found for imageuploadify.");
+		}
+	});
+</script>
 {% endblock %}

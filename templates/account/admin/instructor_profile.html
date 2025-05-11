@@ -455,4 +455,145 @@
     </div>
     <!-- Content END-->
 </main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Star rating interaction
+    const stars = document.querySelectorAll('.rating-stars input');
+    const ratingText = document.getElementById('rating-text');
+    const ratingEmoji = document.getElementById('rating-emoji');
+    const emojiMap = {
+        1: '😞 Terrible',
+        2: '😕 Not great',
+        3: '😐 Average',
+        4: '😊 Very good',
+        5: '🤩 Excellent'
+    };
+
+    stars.forEach(star => {
+        star.addEventListener('change', function() {
+            ratingText.textContent = this.value;
+            ratingEmoji.textContent = emojiMap[this.value];
+            ratingEmoji.style.opacity = 1;
+
+            if (this.value == 5) {
+                createConfetti();
+            }
+        });
+
+        star.addEventListener('mouseover', function() {
+            const hoverValue = this.value;
+            ratingEmoji.textContent = emojiMap[hoverValue];
+            ratingEmoji.style.opacity = 0.7;
+        });
+
+        star.addEventListener('mouseout', function() {
+            const checkedStar = document.querySelector('.rating-stars input:checked');
+            if (checkedStar) {
+                ratingEmoji.textContent = emojiMap[checkedStar.value];
+            } else {
+                ratingEmoji.textContent = '👈 Pick a star!';
+            }
+        });
+    });
+
+    // Character counter for feedback
+    const feedback = document.getElementById('feedback');
+    const charCount = document.getElementById('char-count');
+    if (feedback && charCount) {
+        feedback.addEventListener('input', function() {
+            charCount.textContent = this.value.length;
+        });
+    } else {
+        console.error("The element with ID 'feedback' or 'char-count' is missing in the DOM.");
+    }
+
+    // Confetti effect
+    function createConfetti() {
+        const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+        const container = document.querySelector('.confetti-container');
+
+        for (let i = 0; i < 50; i++) {
+            const confetti = document.createElement('div');
+            confetti.className = 'confetti';
+            confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            confetti.style.left = Math.random() * 100 + '%';
+            confetti.style.top = '-10px';
+            confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+
+            container.appendChild(confetti);
+
+            const animation = confetti.animate([
+                { top: '-10px', opacity: 1 },
+                { top: '100%', opacity: 0 }
+            ], {
+                duration: 1000 + Math.random() * 2000,
+                easing: 'cubic-bezier(0.1, 0.8, 0.3, 1)'
+            });
+
+            animation.onfinish = () => confetti.remove();
+        }
+    }
+
+    // AJAX Form submission
+    const form = document.getElementById('rating-form');
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const checkedStar = document.querySelector('.rating-stars input:checked');
+        if (!checkedStar) {
+            alert('Please select a rating before submitting.');
+            return;
+        }
+
+        const formData = new FormData(form);
+
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+            }
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.json();
+        })
+        .then(data => {
+            form.reset();
+            ratingText.textContent = '0';
+            ratingEmoji.textContent = '👈 Pick a star!';
+            if (charCount) charCount.textContent = '0';
+            stars.forEach(star => (star.checked = false));
+
+            const successMessage = document.createElement('div');
+            successMessage.className = 'alert alert-success';
+            successMessage.textContent = data.message || 'Your rating has been submitted successfully!';
+            const header = document.querySelector('header.ttr-header');
+            if (header) {
+                header.appendChild(successMessage);
+            }
+
+            setTimeout(() => {
+                successMessage.remove();
+            }, 5000);
+
+            createConfetti();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            const errorMessage = document.createElement('div');
+            errorMessage.className = 'alert alert-danger';
+            errorMessage.textContent = 'An error occurred while submitting your rating. Please try again.';
+            form.parentElement.insertBefore(errorMessage, form);
+
+            setTimeout(() => {
+                errorMessage.remove();
+            }, 5000);
+        });
+    });
+});
+</script>
+
 {% endblock %}

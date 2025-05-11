@@ -19,6 +19,7 @@ from .views import (index,
                     mark_notification_read,
                     mark_all_notifications_read,
                     create_assignment,
+                    load_topics,
                     )
 
 
@@ -47,5 +48,6 @@ urlpatterns = [
     path('notifications/mark-all-read/', mark_all_notifications_read, name='mark_all_read'),
 
     path('assignment/create/', create_assignment, name='create_assignment'),
+    path('ajax/load-topics/', load_topics, name='ajax_load_topics'),  # AJAX endpoint to load topics
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -318,14 +318,12 @@ def get_notifications(request):
     return JsonResponse(data, safe=False)
 
 @login_required
-def create_assignment(request, course_id):
-    course = get_object_or_404(Course, id=course_id)
+def create_assignment(request):
     if request.method == 'POST':
-        form = AssignmentForm(request.POST)
+        form = AssignmentForm(request.POST, request.FILES, user=request.user)
         if form.is_valid():
             assignment = form.save(commit=False)
-            assignment.owner = request.user
-            assignment.course = get_object_or_404(Course, id=course_id)
+            assignment.is_graded = False
             assignment.save()
             messages.success(request, "Assignment created successfully!")
             # Optionally, you can also create a notification for the course owner
@@ -342,4 +340,18 @@ def create_assignment(request, course_id):
             return redirect('accounts:dashboard')
     else:
         form = AssignmentForm()
-    return render(request, 'students/manage/assignment/create_assignment.html', {'form': form})
+    # Get the list of courses for the dropdown
+    courses = Course.objects.filter(owner=request.user)
+    return render(request, 'students/manage/create_assignment.html', {'form': form, 'courses': courses})
+
+def load_topics(request):
+    course_id = request.GET.get('course_id')
+    topics = Topic.objects.filter(course_id=course_id).order_by('order')
+    
+    # Return both id and the formatted string (including order number)
+    data = [{
+        'id': topic.id,
+        'name': str(topic)  # This uses your __str__ method
+    } for topic in topics]
+    
+    return JsonResponse(data, safe=False)
