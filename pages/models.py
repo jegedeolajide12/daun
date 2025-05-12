@@ -143,7 +143,6 @@ class UserTask(models.Model):
     score = models.IntegerField(null=True, blank=True)
     
     class Meta:
-        unique_together = ('user', 'task')
         ordering = ['task__due_date']
 
 
@@ -315,7 +314,7 @@ class Notification(models.Model):
         ('task', 'New Task Assigned'),
         ('deadline', 'Deadline Reminder'),
         ('submission', 'New Submission'),
-        
+        ('Assignment', 'New Assignment'),
         ('progress', 'Progress Update'),
         ('message', 'Message'),
         ('grade', 'Grade Update'),

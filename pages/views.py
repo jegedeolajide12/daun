@@ -321,6 +321,9 @@ def get_notifications(request):
 def create_assignment(request):
     if request.method == 'POST':
         form = AssignmentForm(request.POST, request.FILES, user=request.user)
+        course_id = request.POST.get('course')
+        if course_id:
+            form.fields['topic'].queryset = Topic.objects.filter(course_id=course_id)
         if form.is_valid():
             assignment = form.save(commit=False)
             assignment.is_graded = False
@@ -328,16 +331,25 @@ def create_assignment(request):
             messages.success(request, "Assignment created successfully!")
             # Optionally, you can also create a notification for the course owner
             Notification.objects.create(
-                sender=request.user,
-                related_course=assignment.course,
-                recipient=assignment.course.students.all(),
-                related_enrollment=assignment.course.enrollment_set.filter(student=request.user).first(),
-                title="Assignment Notification",
-                message=f"New assignment created: {assignment.title}",
-                notification_type="Assignment",
+                related_course = assignment.course,
+                recipient=request.user,
+                title = "Assignment Notification",
+                message=f"You have created a new assignment: {assignment.title}",
+                notifcation_type="Assignment",
                 is_read=False
             )
-            return redirect('accounts:dashboard')
+            for recipient in assignment.course.students.all():
+                Notification.objects.create(
+                    sender=request.user,
+                    related_course=assignment.course,
+                    recipient=recipient,
+                    related_enrollment=assignment.course.enrollments.filter(student=recipient).first(),
+                    title="Assignment Notification",
+                    message=f"New assignment created: {assignment.title}",
+                    notification_type="Assignment",
+                    is_read=False
+                )
+            return redirect('account:dashboard')
         else:
             form = AssignmentForm(request.POST, user=request.user)
             messages.error(request, "There was an error creating the assignment. Please correct the errors below.")

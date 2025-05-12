@@ -54,24 +54,29 @@ class AssignmentForm(forms.ModelForm):
             'title': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Enter Assignment Name',
+                'id': 'id_title',
             }),
             'description': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 3,
                 'placeholder': 'Enter Assignment Description',
+                'id': 'id_description',
             }),
             'course': forms.Select(attrs={
                 'class': 'form-control',
                 'placeholder': 'Select Course',
+                'id': 'id_course',
             }),
             'due_date': forms.DateInput(attrs={
                 'class': 'form-control',
                 'type': 'date',
                 'placeholder': 'Select Due Date',
+                'id': 'id_due_date',
             }),
             'topic': forms.Select(attrs={
                 'class': 'form-control',
                 'placeholder': 'Select Topic',
+                'id': 'id_topic',
             }),
             'file': forms.ClearableFileInput(attrs={
                 'class': 'form-control',
@@ -81,6 +86,7 @@ class AssignmentForm(forms.ModelForm):
                 'min': 0,
                 'max': 100,
                 'placeholder': 'Enter Max Score',
+                'id': 'id_max_score',
             }),
         }
     def __init__(self, *args, **kwargs):
