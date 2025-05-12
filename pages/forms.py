@@ -49,7 +49,7 @@ class FacultyForm(forms.ModelForm):
 class AssignmentForm(forms.ModelForm):
     class Meta:
         model = Assignment
-        fields = ['title', 'description', 'course', 'topic', 'file', 'max_score']
+        fields = ['title', 'description','due_date', 'course', 'topic', 'file', 'max_score']
         widgets = {
             'title': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -63,6 +63,11 @@ class AssignmentForm(forms.ModelForm):
             'course': forms.Select(attrs={
                 'class': 'form-control',
                 'placeholder': 'Select Course',
+            }),
+            'due_date': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date',
+                'placeholder': 'Select Due Date',
             }),
             'topic': forms.Select(attrs={
                 'class': 'form-control',

@@ -6,87 +6,128 @@
     <div class="profile-edit-container">
         <h1 class="page-title">Create New Assignment</h1>
         
-        <form id="assignmentForm" method="post" enctype="multipart/form-data">
+        <form id="assignmentForm" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
             {% csrf_token %}
             
             <!-- Main Content Section -->
-            <div class="form-section">
-                <h2 class="section-title">Assignment Details</h2>
+            <div class="form-section mb-4">
+                <h2 class="section-title mb-4 pb-2 border-bottom">Assignment Details</h2>
                 
-                <div class="form-row">
-                    <div class="form-group col-md-12">
-                        <label for="id_title">Assignment Title</label>
-                        <input type="text" id="id_title" name="title" class="form-control" required>
+                <!-- Title -->
+                <div class="form-group mb-4">
+                    <label for="id_title" class="form-label fw-bold">Assignment Title</label>
+                    <input type="text" id="id_title" name="title" class="form-control form-control-lg" required>
+                    <div class="invalid-feedback">
+                        Please provide an assignment title.
                     </div>
+                    {% if form.title.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.title.errors|join:", " }}
+                        </div>
+                    {% endif %}
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group col-md-12">
-                        <label for="id_description">Description</label>
-                        <textarea id="id_description" name="description" class="form-control" rows="5" required></textarea>
+                <!-- Description -->
+                <div class="form-group mb-4">
+                    <label for="id_description" class="form-label fw-bold">Description</label>
+                    <textarea id="id_description" name="description" class="form-control" rows="5" required></textarea>
+                    <div class="invalid-feedback">
+                        Please provide a description.
                     </div>
+                    {% if form.description.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.description.errors|join:", " }}
+                        </div>
+                    {% endif %}
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label for="id_due_date">Due Date</label>
+                <!-- Date and Points - Stack on mobile, side by side on larger screens -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label for="id_due_date" class="form-label fw-bold">Due Date & Time</label>
                         <input type="datetime-local" id="id_due_date" name="due_date" class="form-control" required>
+                        <div class="invalid-feedback">
+                            Please select a due date.
+                        </div>
+                        {% if form.due_date.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.due_date.errors|join:", " }}
+                            </div>
+                        {% endif %}
                     </div>
-                    <div class="form-group col-md-6">
-                        <label for="id_max_score">Maximum Points</label>
+                    <div class="col-md-6">
+                        <label for="id_max_score" class="form-label fw-bold">Maximum Points</label>
                         <input type="number" id="id_max_score" name="max_score" class="form-control" min="0" value="100" required>
+                        <div class="invalid-feedback">
+                            Please enter maximum points.
+                        </div>
+                        {% if form.max_score.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.max_score.errors|join:", " }}
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label for="id_course">Course</label>
-                        <select id="id_course" name="course" class="form-control" required>
+                <!-- Course and Topic - Stack on mobile, side by side on larger screens -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label for="id_course" class="form-label fw-bold">Course</label>
+                        <select id="id_course" name="course" class="form-select" required>
                             <option value="" selected disabled>Select Course</option>
                             {% for course in courses %}
                                 <option value="{{ course.id }}">{{ course.name }}</option>
                             {% endfor %}
                         </select>
+                        <div class="invalid-feedback">
+                            Please select a course.
+                        </div>
+                        {% if form.course.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.course.errors|join:", " }}
+                            </div>
+                        {% endif %}
                     </div>
-                    <div class="form-group col-md-6">
-                        <label for="id_topic">Topic</label>
-                        <select id="id_topic" name="topic" class="form-control">
+                    <div class="col-md-6">
+                        <label for="id_topic" class="form-label fw-bold">Topic</label>
+                        <select id="id_topic" name="topic" class="form-select">
                             <option value="" selected disabled>Select Topic</option>
                             <!-- Topics will be loaded dynamically via AJAX -->
                         </select>
+                        {% if form.topic.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.topic.errors|join:", " }}
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
 
             <!-- Attachments Section -->
-            <div class="form-section">
-                <h2 class="section-title">Attachments</h2>
+            <div class="form-section mb-4">
+                <h2 class="section-title mb-4 pb-2 border-bottom">Attachments</h2>
                 
-                <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label for="id_file">Supporting Files</label>
-                        <input type="file" id="id_file" name="file" class="custom-file-input" multiple>
-                        <label class="custom-file-label" for="id_file">Choose files...</label>
-                        <small class="form-text text-muted">Max 5 files (PDF, DOC, PPT)</small>
-                    </div>
-                    
-                    <div class="form-group col-md-6">
-                        <label>Cover Image</label>
-                        <div class="d-flex align-items-center">
-                            <input type="file" class="custom-file-input" id="coverImage" accept="image/*">
-                            <label class="custom-file-label" for="coverImage">Choose image...</label>
-                        </div>
-                        <div class="cover-preview mt-2" style="width: 100px; height: 100px; border: 2px dashed #ddd; display: none;">
-                            <img id="coverPreview" class="cover-preview-img" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                <div class="row g-3">
+                    <!-- File Upload - Full width on all screens -->
+                    <div class="col-12">
+                        <label for="id_file" class="form-label fw-bold">Supporting Files</label>
+                        <div class="file-upload-wrapper">
+                            <input type="file" id="id_file" name="file" class="form-control" multiple>
+                            <div class="form-text">Max 5 files (PDF, DOC, PPT, up to 10MB each)</div>
+                            {% if form.file.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.file.errors|join:", " }}
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Form Actions -->
-            <div class="form-actions">
-                <button type="button" class="btn btn-outline-secondary">Cancel</button>
-                <button type="submit" class="btn btn-primary">Save Assignment</button>
+            <!-- Form Actions - Right-aligned and responsive -->
+            <div class="form-actions d-flex flex-column flex-md-row justify-content-md-end gap-2 pt-4 mt-4 border-top">
+                <button type="button" class="btn btn-outline-secondary order-md-1">Cancel</button>
+                <button type="submit" class="btn btn-primary order-md-0">Save Assignment</button>
             </div>
         </form>
     </div>
@@ -96,58 +137,128 @@
 <!-- Load jQuery FIRST -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<!-- Then your custom script -->
+
 <script>
-// Wait for DOM to be fully loaded
-document.addEventListener('DOMContentLoaded', function() {
-    console.log("Script loaded - DOM ready"); // Debugging line
-    
-    // Event delegation for course select
-    $(document).ready(function() {
-        // Use event delegation in case select is dynamically added
-        $(document).on('change', '#id_course', function() {
-            var courseId = $(this).val();
-            var topicSelect = $('#id_topic');
+	// File input handling
+	document.querySelectorAll('.custom-file-input').forEach(input => {
+		input.addEventListener('change', function(e) {
+			const label = this.nextElementSibling;
+			if(this.files && this.files.length > 0) {
+				label.textContent = this.files[0].name;
+				
+				// Handle cover image preview
+				if(this.id === 'coverImage' && this.files[0]) {
+					const reader = new FileReader();
+					const preview = document.getElementById('coverPreview');
+					const previewContainer = preview.parentElement;
+					
+					previewContainer.style.display = 'block';
+					reader.onload = function(e) {
+						preview.src = e.target.result;
+						preview.style.display = 'block';
+					}
+					reader.readAsDataURL(this.files[0]);
+				}
+			} else {
+				label.textContent = 'Choose file...';
+			}
+		});
+	});
+</script>
+
+<script>
+    // Client-side form validation
+    (function() {
+        'use strict';
+        
+        const form = document.getElementById('assignmentForm');
+        
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
             
-            if (courseId) {
-                console.log("Fetching topics for course:", courseId);
-                
-                // Show loading state
-                topicSelect.html('<option value="">Loading...</option>');
-                
-                $.ajax({
-                    url: '{% url "course:ajax_load_topics" %}',
-                    data: { 'course_id': courseId },
-                    dataType: 'json',
-                    success: function(data) {
-                        console.log("Received data:", data);
-                        
-                        topicSelect.empty();
-                        topicSelect.append('<option value="" selected disabled>Select Topic</option>');
-                        
-                        if (data && data.length > 0) {
-                            $.each(data, function(i, topic) {
-                                topicSelect.append($('<option>', {
-                                    value: topic.id,
-                                    text: topic.name
-                                }));
-                            });
-                        } else {
-                            topicSelect.append('<option value="">No topics found</option>');
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        console.error("AJAX Error:", error);
-                        topicSelect.html('<option value="">Error loading topics</option>');
-                    }
-                });
-            } else {
-                topicSelect.html('<option value="" selected disabled>Select Topic</option>');
+            form.classList.add('was-validated');
+        }, false);
+        
+        // Update file input display
+        document.getElementById('id_file').addEventListener('change', function(e) {
+            const label = this.nextElementSibling;
+            if(this.files && this.files.length > 0) {
+                const names = Array.from(this.files).map(f => f.name).join(', ');
+                document.querySelector('.file-upload-wrapper::before').textContent = names;
             }
         });
+    })();
+</script>
+
+
+<script>
+$(document).ready(function() {
+    console.log("Document ready - jQuery version:", $.fn.jquery);
+    
+    // Initialize selectpicker only once
+    $('#id_topic').selectpicker({
+        liveSearch: true,
+        noneSelectedText: 'Select Topic'
     });
-    // Initial check to verify binding
-    console.log("Event listeners registered"); // Debugging
+    
+    // Course change handler
+    $('#id_course').change(function() {
+        const courseId = $(this).val();
+        const $topicSelect = $('#id_topic');
+        
+        console.log("Course changed, ID:", courseId);
+        
+        if (courseId) {
+            console.log("Fetching topics...");
+            
+            // Show loading state - disable through selectpicker
+            $topicSelect.selectpicker('val', '');
+            $topicSelect.selectpicker('disable');
+            $topicSelect.empty().append('<option value="">Loading topics...</option>');
+            $topicSelect.selectpicker('refresh');
+            
+            // Make AJAX request
+            $.ajax({
+                url: '{% url "course:ajax_load_topics" %}',
+                type: 'GET',
+                data: { 'course_id': courseId },
+                dataType: 'json',
+                success: function(response) {
+                    console.log("AJAX success, received:", response);
+                    
+                    $topicSelect.empty().append('<option value="" selected disabled>Select Topic</option>');
+                    
+                    if (response && response.length > 0) {
+                        response.forEach(function(topic) {
+                            $topicSelect.append(
+                                $('<option>').val(topic.id).text(topic.name)
+                            );
+                        });
+                    } else {
+                        $topicSelect.append('<option value="">No topics available</option>');
+                    }
+                    
+                    // Properly re-enable and refresh
+                    $topicSelect.selectpicker('enable');
+                    $topicSelect.selectpicker('refresh');
+                    console.log("Dropdown refreshed with new options");
+                },
+                error: function(xhr, status, error) {
+                    console.error("AJAX error:", status, error);
+                    $topicSelect.empty().append('<option value="">Error loading topics</option>');
+                    $topicSelect.selectpicker('enable');
+                    $topicSelect.selectpicker('refresh');
+                }
+            });
+        } else {
+            $topicSelect.empty().append('<option value="" selected disabled>Select Topic</option>');
+            $topicSelect.selectpicker('enable');
+            $topicSelect.selectpicker('refresh');
+        }
+    });
 });
 </script>
 {% endblock %}

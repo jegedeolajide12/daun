@@ -9,7 +9,8 @@ from .models import (Faculty,
                      Task,
                      UserTask,
                      Enrollment,
-                     Notification)
+                     Notification,
+                     Assignment)
 
 # Register your models here.
 
@@ -42,12 +43,21 @@ class NotificationAdmin(admin.ModelAdmin):
     list_filter = ['is_read', 'sender']
     search_fields = ['sender__username', 'message']
 
+@admin.register(Assignment)
+class AssignmentAdmin(admin.ModelAdmin):
+    list_display = ['title', 'course', 'topic', 'due_date', 'max_score']
+    list_filter = ['course', 'topic', 'due_date']
+    search_fields = ['title', 'course__name', 'topic__name']
+    prepopulated_fields = {'slug':('title',)}
+
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
     list_display = ['title', 'course', 'start_date', 'due_date']
     list_filter = ['course', 'start_date']
     search_fields = ['title', 'course__name']
     prepopulated_fields = {'slug':('title',)}
+
+
 
 @admin.register(UserTask)
 class UserTaskAdmin(admin.ModelAdmin):

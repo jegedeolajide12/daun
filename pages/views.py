@@ -338,6 +338,9 @@ def create_assignment(request):
                 is_read=False
             )
             return redirect('accounts:dashboard')
+        else:
+            form = AssignmentForm(request.POST, user=request.user)
+            messages.error(request, "There was an error creating the assignment. Please correct the errors below.")
     else:
         form = AssignmentForm()
     # Get the list of courses for the dropdown
