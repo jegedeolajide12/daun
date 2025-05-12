@@ -405,24 +405,7 @@
 	</script>
 <!-- manage_student.html Student detail modal script -->
 <script>
-function handleNotificationClick(event) {
-    event.preventDefault();
-    const container = event.currentTarget.nextElementSibling;
-    
-    if (container.classList.contains('hidden')) {
-        container.classList.remove('hidden');
-        container.style.opacity = 1;
-        container.style.transform = 'translateY(0)';
-    } else {
-        container.classList.add('hidden');
-        setTimeout(() => {
-            container.style.opacity = 0;
-            container.style.transform = 'translateY(-10px)';
-        }, 200);
-    }
-    
-    markAllNotificationsRead();
-}
+
 function toggleNotifications(event) {
     // Prevent this from interfering with mark-as-read functionality
     event.stopPropagation();
@@ -525,7 +508,24 @@ function markNotificationAsRead(element) {
     })
     .catch(error => console.error('Error:', error));
 }
-
+function handleNotificationClick(event) {
+    event.preventDefault();
+    const container = event.currentTarget.nextElementSibling;
+    
+    if (container.classList.contains('hidden')) {
+        container.classList.remove('hidden');
+        container.style.opacity = 1;
+        container.style.transform = 'translateY(0)';
+    } else {
+        container.classList.add('hidden');
+        setTimeout(() => {
+            container.style.opacity = 0;
+            container.style.transform = 'translateY(-10px)';
+        }, 200);
+    }
+    
+    markAllNotificationsRead();
+}
 // Close dropdown with animation
 document.addEventListener('click', function(e) {
     if (!e.target.closest('.notification-menu-item')) {

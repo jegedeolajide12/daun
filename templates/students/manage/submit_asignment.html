@@ -1,0 +1,206 @@
+{% extends 'navbar.html' %}  <!-- Replace with your actual base template -->
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="h5 mb-0">Submit Your Assignment</h3>
+                    <p class="mb-0 small">For: {{ assignment.title }} ({{ course.name }})</p>
+                </div>
+                
+                <div class="card-body">
+                    <form id="submissionForm" method="post" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+                        <input type="hidden" name="course_id" value="{{ course.id }}">
+                        <input type="hidden" name="assignment_id" value="{{ assignment.id }}">
+                        
+                        <!-- Submission Content -->
+                        <div class="mb-4">
+                            <label for="id_content" class="form-label fw-bold">Your Solution</label>
+                            <textarea id="id_content" name="content" class="form-control" rows="8" 
+                                      placeholder="Write your solution here..." required></textarea>
+                            <div class="invalid-feedback">Please provide your solution.</div>
+                            <div class="form-text">You can also attach supporting files below.</div>
+                        </div>
+                        
+                        <!-- File Upload -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Supporting Files (Optional)</label>
+                            <div class="file-upload-area p-3 border rounded">
+                                <input type="file" id="id_files" name="files" class="d-none" multiple>
+                                <div class="text-center py-4">
+                                    <i class="bi bi-cloud-arrow-up display-4 text-muted"></i>
+                                    <p class="mt-2 mb-1">Drag & drop files here or click to browse</p>
+                                    <p class="small text-muted">Maximum 5 files (10MB each)</p>
+                                    <button type="button" class="btn btn-sm btn-outline-primary mt-2" 
+                                            onclick="document.getElementById('id_files').click()">
+                                        Select Files
+                                    </button>
+                                </div>
+                                <div id="filePreview" class="d-none mt-3">
+                                    <h6 class="fw-bold">Selected Files:</h6>
+                                    <ul id="fileList" class="list-group list-group-flush"></ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a href="{% url 'course:topic_detail' topic.id %}" class="btn btn-secondary me-md-2">
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-send-fill me-1"></i> Submit
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom Styles -->
+
+
+<!-- JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // File upload handling
+    const fileInput = document.getElementById('id_files');
+    const filePreview = document.getElementById('filePreview');
+    const fileList = document.getElementById('fileList');
+    const fileArea = document.querySelector('.file-upload-area');
+    
+    // Maximum file size (10MB in bytes)
+    const MAX_FILE_SIZE = 10 * 1024 * 1024;
+    
+    // Drag and drop functionality
+    fileArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        fileArea.classList.add('dragover');
+    });
+    
+    fileArea.addEventListener('dragleave', () => {
+        fileArea.classList.remove('dragover');
+    });
+    
+    fileArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        fileArea.classList.remove('dragover');
+        handleFiles(e.dataTransfer.files);
+    });
+    
+    fileInput.addEventListener('change', () => {
+        handleFiles(fileInput.files);
+    });
+    
+    function handleFiles(files) {
+        // Clear previous files
+        fileList.innerHTML = '';
+        
+        // Validate file count
+        if (files.length > 5) {
+            alert('Maximum 5 files allowed. Only the first 5 will be selected.');
+            files = Array.from(files).slice(0, 5);
+        }
+        
+        // Validate file sizes
+        const validFiles = [];
+        for (let i = 0; i < files.length; i++) {
+            if (files[i].size > MAX_FILE_SIZE) {
+                alert(`File "${files[i].name}" exceeds 10MB limit and will not be uploaded.`);
+            } else {
+                validFiles.push(files[i]);
+            }
+        }
+        
+        // Update file input with valid files
+        const dataTransfer = new DataTransfer();
+        validFiles.forEach(file => dataTransfer.items.add(file));
+        fileInput.files = dataTransfer.files;
+        
+        // Update preview
+        updateFilePreview();
+    }
+    
+    function updateFilePreview() {
+        if (fileInput.files.length > 0) {
+            filePreview.classList.remove('d-none');
+            fileList.innerHTML = '';
+            
+            Array.from(fileInput.files).forEach((file, index) => {
+                const listItem = document.createElement('li');
+                listItem.className = 'list-group-item file-item';
+                
+                // Get file icon based on type
+                let iconClass = 'bi-file-earmark';
+                if (file.type.includes('image')) iconClass = 'bi-file-image';
+                else if (file.type.includes('pdf')) iconClass = 'bi-file-pdf';
+                else if (file.type.match(/word|document/)) iconClass = 'bi-file-word';
+                else if (file.type.includes('zip')) iconClass = 'bi-file-zip';
+                else if (file.type.includes('code') || file.name.endsWith('.py') || file.name.endsWith('.js')) {
+                    iconClass = 'bi-file-code';
+                }
+                
+                listItem.innerHTML = `
+                    <i class="bi ${iconClass} file-icon"></i>
+                    <div class="file-info">
+                        <div class="file-name fw-bold">${file.name}</div>
+                        <small class="text-muted">${formatFileSize(file.size)}</small>
+                    </div>
+                    <i class="bi bi-x-lg file-remove" data-index="${index}"></i>
+                `;
+                
+                fileList.appendChild(listItem);
+            });
+            
+            // Add remove file functionality
+            document.querySelectorAll('.file-remove').forEach(icon => {
+                icon.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const index = parseInt(this.getAttribute('data-index'));
+                    removeFile(index);
+                });
+            });
+        } else {
+            filePreview.classList.add('d-none');
+        }
+    }
+    
+    function removeFile(index) {
+        const dt = new DataTransfer();
+        const files = Array.from(fileInput.files);
+        
+        files.splice(index, 1);
+        files.forEach(file => dt.items.add(file));
+        fileInput.files = dt.files;
+        
+        updateFilePreview();
+    }
+    
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i];
+    }
+    
+    // Form validation
+    const form = document.getElementById('submissionForm');
+    
+    form.addEventListener('submit', function(event) {
+        if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        
+        form.classList.add('was-validated');
+    }, false);
+});
+</script>
+{% endblock %}

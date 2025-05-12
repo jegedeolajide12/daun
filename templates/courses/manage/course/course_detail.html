@@ -68,7 +68,7 @@
 											{% endif %}
 										</div>
 										<div class="teacher-name">
-											<h5>{{ course.owner.last_name }} {{ course.owner.first_name }}</h5>
+											<h5><a href="{% url "account:instructor_profile" course.owner.id %}"> {% if course.owner.full_name %}{{ course.owner.full_name }}{% else %}{{ course.owner.username }}{% endif %}</a></h5>
 											<span>Instructor</span>
 										</div>
 									</div>
@@ -209,7 +209,7 @@
 										{% endif %}
 									</div>
 									<div class="instructor-info">
-										<h6>{{ course.owner.last_name }} {{ course.owner.first_name }}</h6>
+										<h6>{% if course.owner.full_name %}{{ course.owner.full_name }}{% else %}{{ course.owner.username }}{% endif %}</h6>
 										<span>Instructor</span>
 										<ul class="list-inline m-tb10">
 											<li><a href="#" class="btn sharp-sm facebook"><i class="fa fa-facebook"></i></a></li>

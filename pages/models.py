@@ -1,4 +1,6 @@
 from django.db import models
+from django.shortcuts import redirect
+from django.urls import reverse
 from django.db.models import Avg
 from django.contrib.auth import get_user_model
 from django.utils.text import slugify
@@ -44,6 +46,10 @@ class Course(models.Model):
 
     class Meta:
         ordering = ['-created']
+    
+    def get_absolute_url(self):
+        return reverse('course:course', args=[self.slug])
+        
     
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -295,8 +301,8 @@ class Assignment(models.Model):
 
 class Submission(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='submissions')
-    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='submissions')
     submitted_at = models.DateTimeField(auto_now_add=True)
+    assignment = models.OneToOneField(Assignment, related_name='assignment_submission', on_delete=models.CASCADE, null=True, blank=True)
     file = models.FileField(upload_to='submissions', null=True, blank=True)
     content = models.TextField(null=True, blank=True)
 

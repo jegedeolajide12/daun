@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-
+from django.utils.timezone import now
 from django.urls import reverse 
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
@@ -22,8 +22,8 @@ from django.http import JsonResponse
 from actstream import action
 from students.forms import CourseEnrollForm
 
-from .models import Course, Content, Topic, Video, Faculty, Notification, Enrollment
-from .forms import CourseForm, ModuleFormSet, FacultyForm, AssignmentForm
+from .models import Course, Content, Topic, Video, Faculty, Notification, Enrollment, Assignment
+from .forms import CourseForm, ModuleFormSet, FacultyForm, AssignmentForm, SubmissionForm
 
 def create_faculty(request):
     if request.method == "POST":
@@ -272,7 +272,7 @@ def topic_detail(request, topic_id):
     video_count = contents.filter(content_type=video_content_type).count()
 
 
-    context = {'topic': topic, 'contents': contents, 'video_count': video_count, 'assignments': assignments}
+    context = {'topic': topic, 'contents': contents, 'video_count': video_count, 'assignments': assignments, 'now': now}
     return render(request, 'courses/manage/module/module_detail.html', context)
 
 
@@ -335,7 +335,7 @@ def create_assignment(request):
                 recipient=request.user,
                 title = "Assignment Notification",
                 message=f"You have created a new assignment: {assignment.title}",
-                notifcation_type="Assignment",
+                notification_type="Assignment",
                 is_read=False
             )
             for recipient in assignment.course.students.all():
@@ -345,7 +345,7 @@ def create_assignment(request):
                     recipient=recipient,
                     related_enrollment=assignment.course.enrollments.filter(student=recipient).first(),
                     title="Assignment Notification",
-                    message=f"New assignment created: {assignment.title}",
+                    message=f"You have a new Assignment: {assignment.title}",
                     notification_type="Assignment",
                     is_read=False
                 )
@@ -358,6 +358,77 @@ def create_assignment(request):
     # Get the list of courses for the dropdown
     courses = Course.objects.filter(owner=request.user)
     return render(request, 'students/manage/create_assignment.html', {'form': form, 'courses': courses})
+
+
+@login_required
+def submit_assignment(request, course_id, topic_id, assignment_id):
+    course = get_object_or_404(Course, id=course_id)
+    topic = get_object_or_404(Topic, id=topic_id, course=course)
+    assignment = get_object_or_404(Assignment, id=assignment_id, topic=topic)
+    
+    if not course.students.filter(id=request.user.id).exists():
+        messages.error(request, "You are not enrolled in this course.")
+        return redirect('course:topic_detail', topic_id=topic.id)
+    
+    if assignment.is_graded:
+        messages.error(request, "Submissions for this assignment are graded and closed for you.")
+        return redirect('course:topic_detail', topic_id=topic.id)
+    
+    if request.method == 'POST':
+        form = SubmissionForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                submission = form.save(commit=False)
+                submission.user = request.user
+                submission.assignment = assignment
+                submission.save()
+                
+                # Handle file uploads if your form includes them
+                if 'files' in request.FILES:
+                    for file in request.FILES.getlist('files'):
+                        submission.files.create(file=file)
+                
+                # Create notification for student
+                Notification.objects.create(
+                    recipient=request.user,
+                    notification_type='Submission',
+                    title=f"Assignment submission: {assignment.title}",
+                    message=f"You have successfully submitted {assignment.title}",
+                    related_course=course,
+                    is_read=False
+                )
+                
+                # Create notification for instructor
+                Notification.objects.create(
+                    sender=request.user,
+                    recipient=course.owner,
+                    notification_type='Submission',
+                    title=f"New submission in {course.name}",
+                    message=f"{request.user.get_full_name()} submitted {assignment.title}",
+                    related_course=course,
+                    is_read=False
+                )
+                
+                messages.success(request, "Your assignment has been submitted successfully!")
+                return redirect('assignment_detail',
+                              course_id=course.id,
+                              topic_id=topic.id,
+                              assignment_id=assignment.id)
+        
+            
+            except Exception as e:
+                messages.error(request, f"An error occurred while submitting: {str(e)}")
+    else:
+        form = SubmissionForm()
+    
+    context = {
+        'course': course,
+        'topic': topic,
+        'assignment': assignment,
+        'form': form
+    }
+    return render(request, 'students/manage/submit_asignment.html', context)
+
 
 def load_topics(request):
     course_id = request.GET.get('course_id')

@@ -2,7 +2,7 @@ from django import forms
 
 from django.forms.models import inlineformset_factory
 
-from .models import Course, Topic, Faculty, Assignment
+from .models import Course, Topic, Faculty, Assignment, Submission
 
 ModuleFormSet = inlineformset_factory(Course, Topic, fields=['name', 'description'], extra=2, can_delete=True)
 
@@ -103,3 +103,38 @@ class AssignmentForm(forms.ModelForm):
         
         self.fields['file'].required = False
         self.fields['topic'].empty_label = "Select Topic"
+
+from django import forms
+from django.core.exceptions import ValidationError
+
+class SubmissionForm(forms.Form):
+    content = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'rows': 8,
+            'placeholder': 'Write your solution here...'
+        }),
+        required=True
+    )
+    files = forms.FileField(
+        widget=forms.ClearableFileInput(attrs={
+            'accept': '.pdf,.doc,.docx,.jpg,.jpeg,.png,.txt,.py,.zip'
+        }),
+        required=False
+    )
+
+    
+    def clean_files(self):
+        files = self.files.getlist('files')
+        if len(files) > 5:
+            raise ValidationError("You can upload a maximum of 5 files.")
+        
+        for file in files:
+            if file.size > 10 * 1024 * 1024:  # 10MB limit
+                raise ValidationError(f"File {file.name} exceeds 10MB size limit.")
+            
+            # Validate file extensions
+            valid_extensions = ['.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png', '.txt', '.py', '.zip']
+            if not any(file.name.lower().endswith(ext) for ext in valid_extensions):
+                raise ValidationError(f"Invalid file type for {file.name}. Allowed types: PDF, DOC, images, text, Python, ZIP")
+        
+        return files

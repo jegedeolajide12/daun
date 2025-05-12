@@ -114,6 +114,7 @@
                         <div class="file-upload-wrapper">
                             <input type="file" id="id_file" name="file" class="form-control" multiple>
                             <div class="form-text">Max 5 files (PDF, DOC, PPT, up to 10MB each)</div>
+                            <i class="fa fa-document"></i>
                             {% if form.file.errors %}
                                 <div class="text-danger small mt-1">
                                     {{ form.file.errors|join:", " }}

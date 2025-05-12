@@ -405,7 +405,7 @@
                     </div>
                 </div>
 
-                <div class="row text-center quick-action-buttons">
+                <div class="row text-center">
 					<div class="col-md-4 col-sm-6 col-6 mb-3">
 						<a href="{% url "course:course_create" %}" class="btn btn-primary btn-block text-truncate" title="Create New Course">Create New Course</a>
 					</div>
@@ -477,7 +477,7 @@
                                             {% endif %}
                                             <div class="course-details flex-grow-1">
                                                 <h5 class="mb-1">
-                                                    <a href="#" class="text-primary">{{ course.name|title }}</a>
+                                                    <a href="{{ course.get_absolute_url }}" class="text-primary">{{ course.name|title }}</a>
                                                 </h5>
                                                 <p class="mb-0 text-muted small">
                                                     Created on: {{ course.created|date:"M d, Y" }} · 
@@ -500,7 +500,7 @@
 											</li>
 											{% else %}
 											<div class="badge ml-2">
-												<a href="#" class="btn button-sm red radius-xl">YOUR COURSE</a>
+												<a href="{{ course.get_absolute_url }}" class="btn button-sm red radius-xl">YOUR COURSE</a>
 											</div>
 											<div class="text-end ml-3">
                                                 <a href="#" class="btn btn-sm btn-outline-primary">Edit</a>

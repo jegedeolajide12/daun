@@ -82,30 +82,30 @@
                                 <li class="notification-box" style="position: relative;">
                                     <a href="#" class="ttr-material-button ttr-submenu-toggle" id="notificationToggle" style="position: relative;">
                                         <i class="fa fa-bell" style="font-size: 20px; color: navy; position: relative;"></i>
-                                        {% if messages %}
+                                        {% if recent_notifications %}
                                             <span style="position: absolute; top: -5px; right: -5px; width: 10px; height: 10px; background-color: green; border-radius: 50%; border: 2px solid white;"></span>
                                         {% endif %}
                                     </a>
                                 
                                     <div class="ttr-header-submenu noti-menu" id="notificationDropdown">
                                         <div class="ttr-notify-header">
-                                            <span class="ttr-notify-text-top">{{ messages|length }} New</span>
+                                            <span class="ttr-notify-text-top">{{ unread_notifications|length }} New</span>
                                             <span class="ttr-notify-text">User Notifications</span>
                                         </div>
                                         <div class="noti-box-list">
                                             <ul>
-                                                {% if messages %}
-                                                {% for message in messages %}
+                                                {% if recent_notifications %}
+                                                {% for message in recent_notifications %}
                                                 <li>
                                                     <span class="notification-icon dashbg-gray">
                                                         <i class="fa fa-check"></i>
                                                     </span>
                                                     <span class="notification-text">
-                                                        <span>{{ message }}</span>
+                                                        <span>{{ message.message }}</span>
                                                     </span>
                                                     <span class="notification-time">
                                                         <a href="#" class="fa fa-close"></a>
-                                                        <span>02:14</span> <!-- Optional: use timestamp from message if available -->
+                                                        <span>{{ message.created_at|timesince }} ago</span> <!-- Optional: use timestamp from message if available -->
                                                     </span>
                                                 </li>
                                                 {% endfor %}
