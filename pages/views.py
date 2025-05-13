@@ -22,7 +22,7 @@ from django.http import JsonResponse
 from actstream import action
 from students.forms import CourseEnrollForm
 
-from .models import Course, Content, Topic, Video, Faculty, Notification, Enrollment, Assignment
+from .models import Course, Content, Topic, Video, Faculty, Notification, Enrollment, Assignment,Submission
 from .forms import CourseForm, ModuleFormSet, FacultyForm, AssignmentForm, SubmissionForm
 
 def create_faculty(request):
@@ -374,50 +374,44 @@ def submit_assignment(request, course_id, topic_id, assignment_id):
         messages.error(request, "Submissions for this assignment are graded and closed for you.")
         return redirect('course:topic_detail', topic_id=topic.id)
     
+    existing_submission = Submission.objects.filter(assignment=assignment).first()
     if request.method == 'POST':
-        form = SubmissionForm(request.POST, request.FILES)
+        form = SubmissionForm(request.POST, request.FILES, instance=existing_submission)
         if form.is_valid():
-            try:
-                submission = form.save(commit=False)
-                submission.user = request.user
-                submission.assignment = assignment
-                submission.save()
-                
-                # Handle file uploads if your form includes them
-                if 'files' in request.FILES:
-                    for file in request.FILES.getlist('files'):
-                        submission.files.create(file=file)
-                
-                # Create notification for student
-                Notification.objects.create(
-                    recipient=request.user,
-                    notification_type='Submission',
-                    title=f"Assignment submission: {assignment.title}",
-                    message=f"You have successfully submitted {assignment.title}",
-                    related_course=course,
-                    is_read=False
-                )
-                
-                # Create notification for instructor
-                Notification.objects.create(
-                    sender=request.user,
-                    recipient=course.owner,
-                    notification_type='Submission',
-                    title=f"New submission in {course.name}",
-                    message=f"{request.user.get_full_name()} submitted {assignment.title}",
-                    related_course=course,
-                    is_read=False
-                )
-                
-                messages.success(request, "Your assignment has been submitted successfully!")
-                return redirect('assignment_detail',
-                              course_id=course.id,
-                              topic_id=topic.id,
-                              assignment_id=assignment.id)
-        
+            submission = form.save(commit=False)
+            submission.user = request.user
+            submission.assignment = assignment
+            assignment.status = 'submitted'
+            assignment.save()  # Save the updated status to the database
+            submission.save()
             
-            except Exception as e:
-                messages.error(request, f"An error occurred while submitting: {str(e)}")
+            
+            # Create notification for student
+            Notification.objects.create(
+                recipient=request.user,
+                notification_type='Submission',
+                title=f"Assignment submission: {assignment.title}",
+                message=f"You have successfully submitted {assignment.title}",
+                related_course=course,
+                is_read=False
+            )
+            
+            # Create notification for instructor
+            Notification.objects.create(
+                sender=request.user,
+                recipient=course.owner,
+                notification_type='Submission',
+                title=f"New submission in {course.name}",
+                message=f"{request.user.get_full_name()} submitted {assignment.title}",
+                related_course=course,
+                is_read=False
+            )
+            
+            messages.success(request, "Your assignment has been submitted successfully!")
+            return redirect('course:topic_detail', topic_id=topic.id)
+        else:
+            form = SubmissionForm(request.POST, request.FILES)
+            messages.error(request, "There was an error while submitting your asssignment. Correct the errors below")
     else:
         form = SubmissionForm()
     

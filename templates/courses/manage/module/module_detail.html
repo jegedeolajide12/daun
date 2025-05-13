@@ -102,7 +102,7 @@
                                                     <h5 class="mb-1">{{ assignment.title }}</h5>
                                                     <small class="text-muted">Due: {{ assignment.due_date|date:"M j, Y" }}</small>
                                                 </div>
-                                                <span class="badge bg-{% if assignment.status == 'completed' %}success{% else %}warning{% endif %}">
+                                                <span class="badge bg-{% if assignment.status == 'submitted' %}info{% elif assignment.status == 'graded' %}success{% elif assignment.status == 'overdue' %}danger{% else %}warning{% endif %}">
                                                     {{ assignment.get_status_display }}
                                                 </span>
                                             </div>
@@ -118,18 +118,18 @@
                                                     {% endif %}
                                                 </small>
                                                 
-                                                {% if assignment.status != 'completed' and assignment.due_date|date:"U" > now|date:"U" %}
+                                                {% if assignment.status != 'submitted' and assignment.due_date|date:"U" > now|date:"U" %}
                                                     <a href="{% url 'course:submit_assignment' course_id=assignment.course.id topic_id=topic.id assignment_id=assignment.id %}" 
                                                     class="btn btn-sm btn-primary">
-                                                        <i class="fas fa-paper-plane me-1"></i> Submit
+                                                        <i class="fa fa-paper-plane me-1"></i> Submit
                                                     </a>
-                                                {% elif assignment.status == 'completed' %}
+                                                {% elif assignment.status == 'submitted' %}
                                                     <span class="badge bg-success">
-                                                        <i class="fas fa-check me-1"></i> Submitted
+                                                        <i class="fa fa-check me-1"></i> Submitted
                                                     </span>
                                                 {% else %}
                                                     <span class="text-danger small">
-                                                        <i class="fas fa-exclamation-circle me-1"></i> Submission closed
+                                                        <i class="fa fa-exclamation-circle me-1"></i> Submission closed
                                                     </span>
                                                 {% endif %}
                                             </div>

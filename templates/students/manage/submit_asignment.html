@@ -62,11 +62,10 @@
         </div>
     </div>
 </div>
+{% include "footer.html" %}
 
 <!-- Custom Styles -->
 
-
-<!-- JavaScript -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // File upload handling
@@ -74,6 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const filePreview = document.getElementById('filePreview');
     const fileList = document.getElementById('fileList');
     const fileArea = document.querySelector('.file-upload-area');
+    const uploadPrompt = fileArea.querySelector('.text-center');
     
     // Maximum file size (10MB in bytes)
     const MAX_FILE_SIZE = 10 * 1024 * 1024;
@@ -129,6 +129,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function updateFilePreview() {
         if (fileInput.files.length > 0) {
+            // Hide the upload prompt
+            uploadPrompt.classList.add('d-none');
+            
+            // Show the preview section
             filePreview.classList.remove('d-none');
             fileList.innerHTML = '';
             
@@ -167,6 +171,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             });
         } else {
+            // No files - show upload prompt again
+            uploadPrompt.classList.remove('d-none');
             filePreview.classList.add('d-none');
         }
     }
@@ -187,7 +193,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const k = 1024;
         const sizes = ['Bytes', 'KB', 'MB', 'GB'];
         const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i];
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     }
     
     // Form validation

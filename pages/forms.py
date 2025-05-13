@@ -1,5 +1,6 @@
 from django import forms
 
+from django.core.exceptions import ValidationError
 from django.forms.models import inlineformset_factory
 
 from .models import Course, Topic, Faculty, Assignment, Submission
@@ -104,10 +105,9 @@ class AssignmentForm(forms.ModelForm):
         self.fields['file'].required = False
         self.fields['topic'].empty_label = "Select Topic"
 
-from django import forms
-from django.core.exceptions import ValidationError
 
-class SubmissionForm(forms.Form):
+
+class SubmissionForm(forms.ModelForm):
     content = forms.CharField(
         widget=forms.Textarea(attrs={
             'rows': 8,
@@ -115,16 +115,19 @@ class SubmissionForm(forms.Form):
         }),
         required=True
     )
-    files = forms.FileField(
+    file = forms.FileField(
         widget=forms.ClearableFileInput(attrs={
             'accept': '.pdf,.doc,.docx,.jpg,.jpeg,.png,.txt,.py,.zip'
         }),
         required=False
     )
 
-    
-    def clean_files(self):
-        files = self.files.getlist('files')
+    class Meta:
+        model = Submission
+        fields = ['file', 'content']
+
+    def clean_file(self):
+        files = self.files.getlist('file')
         if len(files) > 5:
             raise ValidationError("You can upload a maximum of 5 files.")
         

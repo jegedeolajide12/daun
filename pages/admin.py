@@ -10,7 +10,8 @@ from .models import (Faculty,
                      UserTask,
                      Enrollment,
                      Notification,
-                     Assignment)
+                     Assignment,
+                     Submission)
 
 # Register your models here.
 
@@ -70,4 +71,4 @@ admin.site.register(Video)
 admin.site.register(Image)
 admin.site.register(File)
 admin.site.register(Text)
-
+admin.site.register(Submission)

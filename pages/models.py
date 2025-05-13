@@ -274,6 +274,8 @@ class Assignment(models.Model):
     is_graded = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
+        self.status = 'pending'
+        self.is_graded = False
         if not self.slug:
             self.slug = slugify(self.title)
         super().save(*args, **kwargs)
@@ -306,8 +308,14 @@ class Submission(models.Model):
     file = models.FileField(upload_to='submissions', null=True, blank=True)
     content = models.TextField(null=True, blank=True)
 
+    def save(self, *args, **kwargs):
+        self.assignment.status = 'submitted'
+        self.assignment.is_graded = False
+        self.assignment.save()
+        super().save(*args, **kwargs)
+
     def __str__(self):
-        return f'Submission by {self.user.username} for {self.task.title}'
+        return f'Submission by {self.user.username} for {self.assignment.title}'
 
     def clean(self):
         if not self.file and not self.content:
