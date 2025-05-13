@@ -124,6 +124,7 @@ class Task(models.Model):
     start_date = models.DateTimeField()
     due_date = models.DateTimeField(null=True, blank=True)
     type = models.CharField(max_length=20, choices=TaskType.choices, default=TaskType.QUIZ)
+    assignment = models.OneToOneField('Assignment', on_delete=models.CASCADE, related_name='assignment_task', null=True,blank=True)
     description = models.TextField()
 
     def __str__(self):
@@ -136,8 +137,9 @@ class Task(models.Model):
 
         # Now create UserTask objects for all students in the course
         students = self.course.students.all()
+        existing_user_tasks = UserTask.objects.filter(task=self).values_list('user_id', flat=True)
         user_tasks = [
-            UserTask(user=student, task=self) for student in students
+            UserTask(user=student, task=self) for student in students if student.id not in existing_user_tasks
         ]
         UserTask.objects.bulk_create(user_tasks)
 
@@ -274,14 +276,16 @@ class Assignment(models.Model):
     is_graded = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
-        self.status = 'pending'
-        self.is_graded = False
+        if not self.pk:
+            self.status = 'pending'
+            self.is_graded = False
         if not self.slug:
             self.slug = slugify(self.title)
         super().save(*args, **kwargs)
         # Create Task objects so that UserTask can be created for all students in the course
         title = self.title
-        task = Task.objects.create(
+        task, created = Task.objects.get_or_create(
+            assignment=self,
             title=title,
             course=self.course,
             start_date=self.created,
@@ -289,12 +293,7 @@ class Assignment(models.Model):
             type=TaskType.ASSIGNMENT,
             description=self.description
         )
-        # Create UserTask objects for all students in the course
-        students = self.course.students.all()
-        user_tasks = [
-            UserTask(user=student, task=task) for student in students
-        ]
-        UserTask.objects.bulk_create(user_tasks)
+        
 
         
 
@@ -312,7 +311,29 @@ class Submission(models.Model):
         self.assignment.status = 'submitted'
         self.assignment.is_graded = False
         self.assignment.save()
+
+        task = self.assignment.assignment_task
+        if task:
+            user_task = UserTask.objects.filter(user=self.user, task=task).first()
+            if user_task:
+                user_task.is_completed = True
+                user_task.save()
         super().save(*args, **kwargs)
+    
+    def delete(self, *args, **kwargs):
+        # Set the assignment status to 'pending' if the submission is deleted
+        if self.assignment:
+            self.assignment.status = 'pending'
+            self.assignment.is_graded = False
+            self.assignment.save()
+
+        # Mark the UserTask as not completed
+        user_task = UserTask.objects.filter(user=self.user, task__assignment=self.assignment).first()
+        if user_task:
+            user_task.is_completed = False
+            user_task.save()
+        
+        super().delete(*args, **kwargs)
 
     def __str__(self):
         return f'Submission by {self.user.username} for {self.assignment.title}'
