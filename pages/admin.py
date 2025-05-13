@@ -1,17 +1,8 @@
 from django.contrib import admin
-from .models import (Faculty, 
-                     Course, 
-                     Topic, 
-                     Video, 
-                     Image, 
-                     Text, 
-                     File, 
-                     Task,
-                     UserTask,
-                     Enrollment,
-                     Notification,
-                     Assignment,
-                     Submission)
+from .models import (Faculty, Course, Topic, Video, 
+                     Image, Text, File, Task, 
+                     UserTask, Enrollment, Notification, 
+                     Assignment, Submission, SubmissionFile)
 
 # Register your models here.
 
@@ -72,3 +63,4 @@ admin.site.register(Image)
 admin.site.register(File)
 admin.site.register(Text)
 admin.site.register(Submission)
+admin.site.register(SubmissionFile)

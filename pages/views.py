@@ -374,6 +374,8 @@ def submit_assignment(request, course_id, topic_id, assignment_id):
         messages.error(request, "Submissions for this assignment are graded and closed for you.")
         return redirect('course:topic_detail', topic_id=topic.id)
     
+    
+    
     existing_submission = Submission.objects.filter(assignment=assignment).first()
     if request.method == 'POST':
         form = SubmissionForm(request.POST, request.FILES, instance=existing_submission)
@@ -385,6 +387,9 @@ def submit_assignment(request, course_id, topic_id, assignment_id):
             assignment.save()  # Save the updated status to the database
             submission.save()
             
+            # Handle file uploads
+            for file in request.FILES.getlist('files'):
+                submission.files.create(file=file)
             
             # Create notification for student
             Notification.objects.create(

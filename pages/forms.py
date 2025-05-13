@@ -115,7 +115,7 @@ class SubmissionForm(forms.ModelForm):
         }),
         required=True
     )
-    file = forms.FileField(
+    files = forms.FileField(
         widget=forms.ClearableFileInput(attrs={
             'accept': '.pdf,.doc,.docx,.jpg,.jpeg,.png,.txt,.py,.zip'
         }),
@@ -124,7 +124,7 @@ class SubmissionForm(forms.ModelForm):
 
     class Meta:
         model = Submission
-        fields = ['file', 'content']
+        fields = ['files', 'content']
 
     def clean_file(self):
         files = self.files.getlist('file')

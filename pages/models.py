@@ -304,7 +304,6 @@ class Submission(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='submissions')
     submitted_at = models.DateTimeField(auto_now_add=True)
     assignment = models.OneToOneField(Assignment, related_name='assignment_submission', on_delete=models.CASCADE, null=True, blank=True)
-    file = models.FileField(upload_to='submissions', null=True, blank=True)
     content = models.TextField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
@@ -339,8 +338,25 @@ class Submission(models.Model):
         return f'Submission by {self.user.username} for {self.assignment.title}'
 
     def clean(self):
-        if not self.file and not self.content:
+        if not self.files and not self.content:
             raise ValidationError('Either a file or content must be provided.')
+
+
+class SubmissionFile(models.Model):
+    submission = models.ForeignKey(Submission, on_delete=models.CASCADE, related_name='files')
+    file = models.FileField(upload_to='submissions/%Y/%m/%d/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return self.file.name
+    
+    def filename(self):
+        return self.file.name.split('/')[-1]
+    
+    def delete(self, *args, **kwargs):
+        # Delete the file from storage when model is deleted
+        self.file.delete()
+        super().delete(*args, **kwargs)
 
 
 class Notification(models.Model):
