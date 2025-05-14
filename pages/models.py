@@ -145,10 +145,18 @@ class Task(models.Model):
 
 
 class UserTask(models.Model):
+    AssignmentStatus = (
+        ('pending', 'Pending'),
+        ('submitted', 'Submitted'),
+        ('graded', 'Graded'),
+        ('overdue', 'Overdue'),
+    )
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='user_tasks')
     task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='user_tasks')
     is_completed = models.BooleanField(default=False)
     score = models.IntegerField(null=True, blank=True)
+    status = models.CharField(max_length=20, choices=AssignmentStatus, default='pending')
+
     
     class Meta:
         ordering = ['task__due_date']
@@ -255,13 +263,7 @@ class StudentActivity(models.Model):
         return icons.get(self.activity_type, 'fas fa-circle')
 
 class Assignment(models.Model):
-    AssignmentStatus = (
-        ('pending', 'Pending'),
-        ('submitted', 'Submitted'),
-        ('graded', 'Graded'),
-        ('overdue', 'Overdue'),
-    )
-
+    
     title = models.CharField(max_length=200)
     slug = models.SlugField(max_length=200, null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
@@ -272,7 +274,6 @@ class Assignment(models.Model):
     description = models.TextField()
     file = models.FileField(upload_to='assignments', null=True, blank=True)
     max_score = models.IntegerField(default=100)
-    status = models.CharField(max_length=20, choices=AssignmentStatus, default='pending')
     is_graded = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
@@ -293,9 +294,21 @@ class Assignment(models.Model):
             type=TaskType.ASSIGNMENT,
             description=self.description
         )
-        
+    @property
+    def is_past_due(self):
+        return timezone.now() > self.due_date
+    
+    @property
+    def is_active(self):
+        return not self.is_past_due
+    
 
-        
+    def get_absolute_url(self):
+        return reverse('course:assignment_detail', kwargs={
+            'assignment_id': self.id,
+            'topic_id': self.topic.id,
+            'course_id': self.course.id
+        }) 
 
     def __str__(self):
         return f'Assignment: {self.title} for {self.course.name}'
@@ -305,34 +318,40 @@ class Submission(models.Model):
     submitted_at = models.DateTimeField(auto_now_add=True)
     assignment = models.OneToOneField(Assignment, related_name='assignment_submission', on_delete=models.CASCADE, null=True, blank=True)
     content = models.TextField(null=True, blank=True)
+    grade = models.PositiveIntegerField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
-        self.assignment.status = 'submitted'
-        self.assignment.is_graded = False
-        self.assignment.save()
 
         task = self.assignment.assignment_task
+        
+    
         if task:
             user_task = UserTask.objects.filter(user=self.user, task=task).first()
             if user_task:
                 user_task.is_completed = True
+                user_task.status = 'submitted'
                 user_task.save()
         super().save(*args, **kwargs)
     
     def delete(self, *args, **kwargs):
         # Set the assignment status to 'pending' if the submission is deleted
         if self.assignment:
-            self.assignment.status = 'pending'
             self.assignment.is_graded = False
             self.assignment.save()
 
+        task = self.assignment.assignment_task
         # Mark the UserTask as not completed
         user_task = UserTask.objects.filter(user=self.user, task__assignment=self.assignment).first()
         if user_task:
             user_task.is_completed = False
+            user_task.status = 'pending'
             user_task.save()
         
         super().delete(*args, **kwargs)
+    
+    @property
+    def is_graded(self):
+        return self.grade is not None
 
     def __str__(self):
         return f'Submission by {self.user.username} for {self.assignment.title}'

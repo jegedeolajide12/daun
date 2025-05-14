@@ -12,7 +12,7 @@ from django.db.models import Count
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.models import Group
 
-from pages.models import Course, Faculty, Enrollment
+from pages.models import Course, Faculty, Enrollment, Submission
 from accounts.models import CustomUser
 
 from .forms import CourseEnrollForm
@@ -61,6 +61,10 @@ def manage_students(request):
     instructor_courses = Course.objects.filter(owner=request.user)
 
     enrollments = Enrollment.objects.filter(course__in=instructor_courses).select_related('student', 'course')
+    submitted_assignments = Submission.objects.filter(assignment__assignment_task__user_tasks__status='submitted',
+    assignment__course__in=instructor_courses,
+    assignment__is_graded=False  # This ensures the submission hasn't been graded
+).order_by('-submitted_at')
 
     course_filter = request.GET.get('course')
     status_filter = request.GET.get('status')
@@ -109,6 +113,7 @@ def manage_students(request):
         'inactive_students': inactive_students,
         'avg_progress': avg_progress,
         'unread_messages': unread_messages,
+        'submitted_assignments': submitted_assignments,
     }
     return render(request, 'students/manage/manage_students.html', context)
 

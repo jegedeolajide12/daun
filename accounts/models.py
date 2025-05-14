@@ -23,6 +23,10 @@ class CustomUser(AbstractUser):
     twitter = models.URLField(blank=True, null=True)
     
     @property
+    def is_instructor(self):
+        return self.is_staff
+    
+    @property
     def average_rating(self):
         ratings = self.ratings_recieved.aggregate(Avg('rating'))
         return ratings['rating__avg'] if ratings['rating__avg'] else 0

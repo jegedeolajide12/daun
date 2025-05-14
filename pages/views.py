@@ -383,8 +383,6 @@ def submit_assignment(request, course_id, topic_id, assignment_id):
             submission = form.save(commit=False)
             submission.user = request.user
             submission.assignment = assignment
-            assignment.status = 'submitted'
-            assignment.save()  # Save the updated status to the database
             submission.save()
             
             # Handle file uploads
@@ -440,3 +438,39 @@ def load_topics(request):
     } for topic in topics]
     
     return JsonResponse(data, safe=False)
+
+@login_required
+def assignment_detail(request, course_id, topic_id, assignment_id):
+    course = get_object_or_404(Course, id=course_id)
+    topic = get_object_or_404(Topic, id=topic_id, course=course)
+    assignment = get_object_or_404(Assignment, id=assignment_id, topic=topic)
+    is_instructor = course.owner == request.user
+    
+    context = {
+        'course': course,
+        'topic': topic,
+        'assignment': assignment,
+        'is_instructor': is_instructor,
+    }
+    
+    if is_instructor:
+        # Instructor view data
+        submissions = Submission.objects.filter(assignment=assignment).select_related('user')
+        total_students = course.students.count()
+        
+        context.update({
+            'submissions': submissions,
+            'total_students': total_students,
+        })
+    else:
+        # Student view data
+        user_submission = Submission.objects.filter(
+            assignment=assignment,
+            user=request.user
+        ).first()
+        
+        context.update({
+            'user_submission': user_submission,
+        })
+    
+    return render(request, 'students/manage/assignment_detail.html', context)

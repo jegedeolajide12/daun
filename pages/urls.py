@@ -20,7 +20,8 @@ from .views import (index,
                     mark_all_notifications_read,
                     create_assignment,
                     load_topics,
-                    submit_assignment
+                    submit_assignment,
+                    assignment_detail
                     )
 
 
@@ -50,6 +51,7 @@ urlpatterns = [
 
     path('assignment/create/', create_assignment, name='create_assignment'),
     path('ajax/load-topics/', load_topics, name='ajax_load_topics'),  # AJAX endpoint to load topics
-    path('course/<int:course_id>/topic/<int:topic_id>/assignment/<int:assignment_id>/submit', submit_assignment, name='submit_assignment')
+    path('course/<int:course_id>/topic/<int:topic_id>/assignment/<int:assignment_id>/submit', submit_assignment, name='submit_assignment'),
+    path('assignment/<int:assignment_id>/topic/<int:topic_id>/course/<int:course_id>/detail', assignment_detail, name='assignment_detail')
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

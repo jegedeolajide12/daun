@@ -16,9 +16,32 @@
                     <input type="text" placeholder="Search students..." id="studentSearch">
                     <i class="fas fa-search"></i>
                 </div>
-                <button class="btn btn-primary" data-toggle="modal" data-target="#bulkActionsModal">
-                    <i class="fas fa-users-cog mr-2"></i>Bulk Actions
-                </button>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" data-toggle="modal" data-target="#bulkActionsModal">
+                        <i class="fas fa-users-cog mr-2"></i>Bulk Actions
+                    </button>
+                    <button class="btn btn-success">
+                        <i class="fas fa-clipboard-check mr-2"></i>Grade Assignments
+                    </button>
+                    
+                    <!-- Dropdown for additional actions -->
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="moreActionsDropdown" data-toggle="dropdown">
+                            <i class="fas fa-ellipsis-h mr-2"></i>More Actions
+                        </button>
+                        <div class="dropdown-menu">
+                            <button class="dropdown-item" type="button">
+                                <i class="fas fa-tasks mr-2"></i>Grade Assessments
+                            </button>
+                            <button class="dropdown-item" type="button">
+                                <i class="fas fa-chart-pie mr-2"></i>View Reports
+                            </button>
+                            <button class="dropdown-item" type="button">
+                                <i class="fas fa-download mr-2"></i>Export Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -106,6 +129,14 @@
                 <div class="student-grid-view">
                     {% for student in students %}
                     <div class="student-card" data-course="{{ student.course.id }}" data-status="{{ student.status }}">
+                        <!-- Attention Alert Badge -->
+                        {% if student.requires_attention %}
+                        <div class="attention-badge" title="Requires instructor attention">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span class="attention-tooltip">{{ student.attention_reason }}</span>
+                        </div>
+                        {% endif %}
+
                         <div class="student-card-header">
                             <div class="student-avatar">
                                 {% if student.student.profile_picture %}
@@ -131,6 +162,21 @@
                             <div class="last-activity">
                                 <i class="far fa-clock"></i> Last active: {{ student.last_activity|timesince }} ago
                             </div>
+                            
+                            <!-- Attention Items List -->
+                            {% with submitted_assignments|dictsort:"user.id" as sorted_submissions %}
+                            {% if sorted_submissions %}
+                            <div class="attention-items">
+                                <span class="attention-item">Needs Grading</span><i class="fas fa-flag text-warning"></i> 
+                                <small>
+                                    {% for submitted_assignment in sorted_submissions %}
+                                    <span class="attention-item">{{ submitted_assignment.assignment.title }}{% if not forloop.last %}, {% endif %}</span>
+                                    
+                                    {% endfor %}
+                                </small>
+                            </div>
+                            {% endif %}
+                            {% endwith %}
                         </div>
                         <div class="student-actions">
                             <a class="btn btn-sm btn-outline-primary" href="{% url 'student:student_detail' student.id %}">
@@ -140,21 +186,22 @@
                                 <i class="fas fa-envelope"></i> Message
                             </button>
                             <div class="dropdown">
-                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" 
+                                        id="dropdownMenuButton-{{ student.id }}" data-bs-toggle="dropdown" 
+                                        aria-expanded="false">
                                     <i class="fas fa-ellipsis-v"></i>
                                 </button>
-                                <div class="dropdown-menu">
-                                    <a class="dropdown-item" href="#"><i class="fas fa-certificate mr-2"></i>Certificate</a>
-                                    <a class="dropdown-item" href="#"><i class="fas fa-chart-bar mr-2"></i>Progress Report</a>
-                                    <div class="dropdown-divider"></div>
-                                    <a class="dropdown-item text-danger" href="#"><i class="fas fa-user-times mr-2"></i>Deactivate</a>
-                                </div>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ student.id }}">
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-certificate me-2"></i>Certificate</a></li>
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-chart-bar me-2"></i>Progress Report</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-user-times me-2"></i>Deactivate</a></li>
+                                </ul>
                             </div>
                         </div>
                     </div>
                     {% endfor %}
                 </div>
-
                 <!-- List View (Hidden by default) -->
                 <div class="student-list-view" style="display: none;">
                     <table class="table student-table">
@@ -391,5 +438,29 @@
         // Implement your message functionality here
     }
 </script>
+<script>
+// Initialize Bootstrap dropdowns
+document.addEventListener('DOMContentLoaded', function() {
+    var dropdowns = document.querySelectorAll('.dropdown-toggle');
+    dropdowns.forEach(function(dropdown) {
+        dropdown.addEventListener('click', function(e) {
+            e.preventDefault();
+            var menu = this.nextElementSibling;
+            menu.classList.toggle('show');
+        });
+    });
+    
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.matches('.dropdown-toggle')) {
+            var openMenus = document.querySelectorAll('.dropdown-menu.show');
+            openMenus.forEach(function(menu) {
+                menu.classList.remove('show');
+            });
+        }
+    });
+});
+</script>
+
 
 {% endblock %}

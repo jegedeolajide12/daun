@@ -4348,6 +4348,11 @@ textarea.form-control {
 .action-buttons {
 	display: flex;
 	gap: 10px;
+	flex-wrap: wrap;
+	align-items: center;
+}
+.dropdown-menu {
+    min-width: 200px;
 }
 .btn-edit, .btn-delete {
 	padding: 5px 10px;
@@ -4436,10 +4441,22 @@ textarea.form-control {
 .header-actions {
 	display: flex;
 	align-items: center;
-	gap: 1rem;
+	gap: 15px;
+	flex-wrap: wrap;
+	width: 100%;
 }
 .search-box {
 	position: relative;
+	flex: 1 1 250px;
+	min-width: 250px;
+	max-width: 400px;
+}
+.search-box i {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
 }
 .search-box input {
 	padding: 0.75rem 1rem 0.75rem 2.5rem;
@@ -4823,20 +4840,128 @@ textarea.form-control {
 	.page-header {
 		flex-direction: column;
 		align-items: flex-start;
+		gap: 15px;
 	}
 	.header-actions {
-		width: 100%;
-		margin-top: 1rem;
+		flex-direction: column;
+		align-items: stretch;
+		gap: 10px;
 	}
-	.search-box input {
-		width: 100%;
-	}
+	.search-box {
+        flex: 1 1 100%;
+        max-width: 100%;
+        min-width: 100%;
+    }
+	.action-buttons {
+        justify-content: flex-start;
+    }
 	.filters {
 		flex-wrap: wrap;
 	}
 	.student-grid-view {
 		grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
 	}
+}
+/* Attention indicators */
+.attention-badge {
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	color: #dc3545;
+	font-size: 1.2rem;
+	z-index: 2;
+	cursor: help;
+}
+
+.attention-tooltip {
+	visibility: hidden;
+	width: 200px;
+	background-color: #333;
+	color: #fff;
+	text-align: center;
+	border-radius: 4px;
+	padding: 5px;
+	position: absolute;
+	z-index: 3;
+	top: 125%;
+	right: 0;
+	opacity: 0;
+	transition: opacity 0.3s;
+	font-size: 0.8rem;
+}
+
+.attention-badge:hover .attention-tooltip {
+	visibility: visible;
+	opacity: 1;
+}
+
+.attention-items {
+	margin-top: 8px;
+	color: #ffc107;
+	font-size: 0.8rem;
+}
+
+.attention-item {
+	display: inline-block;
+	margin-right: 5px;
+}
+
+/* Fix dropdown visibility */
+.dropdown-menu {
+	position: absolute;
+	right: 0;
+	z-index: 1000;
+	display: none;
+	min-width: 10rem;
+	padding: 0.5rem 0;
+	margin: 0;
+	font-size: 1rem;
+	color: #212529;
+	text-align: left;
+	list-style: none;
+	background-color: #fff;
+	background-clip: padding-box;
+	border: 1px solid rgba(0,0,0,.15);
+	border-radius: 0.25rem;
+}
+
+.dropdown-menu.show {
+	display: block;
+}
+
+/* Student card adjustments */
+.student-card {
+	position: relative;
+	overflow: visible; /* Ensure dropdown is visible */
+}
+
+@media (max-width: 1200px) {
+    .header-actions {
+        gap: 12px;
+    }
+    .action-buttons {
+        gap: 8px;
+    }
+}
+
+@media (max-width: 768px) {
+    .action-buttons {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+    
+    .action-buttons > * {
+        width: 100%;
+    }
+    
+    .dropdown-menu {
+        position: static !important;
+        transform: none !important;
+        width: 100%;
+        border: 1px solid #dee2e6;
+        margin-top: 5px;
+    }
 }
 
 @media (max-width: 768px) {
@@ -5192,4 +5317,33 @@ textarea.form-control {
 /* Make sure notification menu doesn't overlap */
 .notification-container {
     z-index: 999 !important; /* Just below buttons */
+}
+/* Assignment Status Badges */
+.badge.bg-success {
+    background-color: #28a745 !important;
+}
+
+.badge.bg-warning {
+    background-color: #ffc107 !important;
+    color: #212529;
+}
+
+.badge.bg-secondary {
+    background-color: #6c757d !important;
+}
+
+/* Submission Table */
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .assignment-meta {
+        margin-top: 1.5rem;
+    }
+    
+    .table-responsive {
+        border: 0;
+    }
 }
