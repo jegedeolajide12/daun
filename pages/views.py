@@ -262,11 +262,18 @@ def course_unenroll(request, course_slug):
 
 def topic_detail(request, topic_id):
     topic = get_object_or_404(Topic, id=topic_id)
+    total_topics = topic.course.course_topics.count()
+    topics_check = topic.course.course_topics.all()
+    completed_topics_count = topics_check.filter(is_completed=True).count()
+    course_completed = False  # Initialize with a default value
+    if not topics_check.filter(is_completed=False):
+        course_completed = True
+
     contents = Content.objects.prefetch_related('content_type').filter(topic=topic)
     assignments = topic.course.assignments.all()
     assignment = topic.course.assignments.first()  # Example: Get the first assignment
     user_task = UserTask.objects.filter(task=assignment.assignment_task, user=request.user).first() if assignment else None
-
+    total_completed_assignments = assignment.assignment_task.user_tasks.filter(is_completed=True).count()
     # Get the ContentType for the Video model
     video_content_type = ContentType.objects.get_for_model(Video)
 
@@ -274,7 +281,13 @@ def topic_detail(request, topic_id):
     video_count = contents.filter(content_type=video_content_type).count()
 
 
-    context = {'topic': topic, 'contents': contents, 'user_task':user_task, 'video_count': video_count, 'assignments': assignments, 'now': now}
+    context = {
+               'topic': topic, 'completed_topics_count':completed_topics_count,
+               'contents': contents, 'total_topics':total_topics,
+               'user_task':user_task, 'video_count': video_count, 
+               'assignments': assignments, 'now': now,
+               'course_commpleted':course_completed, 'total_completed_assignments':total_completed_assignments,
+               }
     return render(request, 'courses/manage/module/module_detail.html', context)
 
 

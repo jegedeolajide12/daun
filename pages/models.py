@@ -43,6 +43,7 @@ class Course(models.Model):
     cover_image = models.ImageField(null=True, upload_to='courses/cover_images')
     overview = models.TextField()
     created = models.DateTimeField(auto_now_add=True)
+    is_completed = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['-created']
@@ -64,6 +65,7 @@ class Topic(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     order = OrderField(blank=True, for_fields=['course'])
+    is_completed = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['order']
@@ -331,6 +333,16 @@ class Submission(models.Model):
                 user_task.is_completed = True
                 user_task.status = 'submitted'
                 user_task.save()
+        
+        course = self.assignment.course
+        topic = self.assignment.topic
+        all_assignments_completed = all(
+            UserTask.objects.filter(task=assignment.assignment_task, is_completed=False).count() == 0
+            for assignment in topic.assignments.all()
+            )
+        if all_assignments_completed:
+            topic.is_completed = True
+            topic.save()
         super().save(*args, **kwargs)
     
     def delete(self, *args, **kwargs):

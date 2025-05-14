@@ -241,9 +241,9 @@
                                         </div>
                                         <dl class="row mb-0">
                                             <dt class="col-6">Completed:</dt>
-                                            <dd class="col-6 text-end">3/5 topics</dd>
+                                            <dd class="col-6 text-end">{{ completed_topics_count }}/{{ total_topics }} topics</dd>
                                             <dt class="col-6">Assignments:</dt>
-                                            <dd class="col-6 text-end">2/3 done</dd>
+                                            <dd class="col-6 text-end">{{ total_completed_assignments }}/{{ assignments|length }} done</dd>
                                             <dt class="col-6">Quizzes:</dt>
                                             <dd class="col-6 text-end">1/2 done</dd>
                                         </dl>
