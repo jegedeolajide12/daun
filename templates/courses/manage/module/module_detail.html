@@ -102,7 +102,7 @@
                                                     <h5 class="mb-1"><a href="{{ assignment.get_absolute_url }}">{{ assignment.title }}</a> </h5>
                                                     <small class="text-muted">Due: {{ assignment.due_date|date:"M j, Y" }}</small>
                                                 </div>
-                                                <span class="badge bg-{% if assignment.status == 'submitted' %}info{% elif assignment.status == 'graded' %}success{% elif assignment.status == 'overdue' %}danger{% else %}warning{% endif %}">
+                                                <span class="badge bg-{% if assignment.assignment_task.user_tasks.status == 'submitted' %}info{% elif assignment.status == 'graded' %}success{% elif assignment.status == 'overdue' %}danger{% else %}warning{% endif %}">
                                                     {{ assignment.get_status_display }}
                                                 </span>
                                             </div>
@@ -118,12 +118,12 @@
                                                     {% endif %}
                                                 </small>
                                                 
-                                                {% if assignment.status != 'submitted' and assignment.due_date|date:"U" > now|date:"U" %}
+                                                {% if user_task and user_task.status != 'submitted' and assignment.due_date|date:"U" > now|date:"U" %}
                                                     <a href="{% url 'course:submit_assignment' course_id=assignment.course.id topic_id=topic.id assignment_id=assignment.id %}" 
                                                     class="btn btn-sm btn-primary">
                                                         <i class="fa fa-paper-plane me-1"></i> Submit
                                                     </a>
-                                                {% elif assignment.status == 'submitted' %}
+                                                {% elif user_task.status == 'submitted' %}
                                                     <span class="badge bg-success">
                                                         <i class="fa fa-check me-1"></i> Submitted
                                                     </span>

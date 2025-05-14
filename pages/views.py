@@ -22,7 +22,7 @@ from django.http import JsonResponse
 from actstream import action
 from students.forms import CourseEnrollForm
 
-from .models import Course, Content, Topic, Video, Faculty, Notification, Enrollment, Assignment,Submission
+from .models import Course, Content, Topic, Video, Faculty, Notification, Enrollment, Assignment,Submission, UserTask
 from .forms import CourseForm, ModuleFormSet, FacultyForm, AssignmentForm, SubmissionForm
 
 def create_faculty(request):
@@ -264,6 +264,8 @@ def topic_detail(request, topic_id):
     topic = get_object_or_404(Topic, id=topic_id)
     contents = Content.objects.prefetch_related('content_type').filter(topic=topic)
     assignments = topic.course.assignments.all()
+    assignment = topic.course.assignments.first()  # Example: Get the first assignment
+    user_task = UserTask.objects.filter(task=assignment.assignment_task, user=request.user).first() if assignment else None
 
     # Get the ContentType for the Video model
     video_content_type = ContentType.objects.get_for_model(Video)
@@ -272,7 +274,7 @@ def topic_detail(request, topic_id):
     video_count = contents.filter(content_type=video_content_type).count()
 
 
-    context = {'topic': topic, 'contents': contents, 'video_count': video_count, 'assignments': assignments, 'now': now}
+    context = {'topic': topic, 'contents': contents, 'user_task':user_task, 'video_count': video_count, 'assignments': assignments, 'now': now}
     return render(request, 'courses/manage/module/module_detail.html', context)
 
 
