@@ -125,6 +125,20 @@
                 </div>
             </div>
 
+            <!-- Rubric Section -->
+            <div class="form-section mb-4">
+                <div class="d-flex flex-wrap align-items-center mb-4 pb-2 border-bottom bg-light rounded px-3 py-2 shadow-sm">
+                    <h2 class="section-title mb-0 me-2" style="font-size: 1.3rem; font-weight: 600;">Rubric Criteria</h2>
+                    <i class="fa fa-info-circle ms-2 text-primary" aria-hidden="true" title="A rubric defines the criteria and scoring for this assignment." style="font-size: 1.1rem;"></i>
+                    <span class="ms-3 text-muted small" style="font-weight: 400; font-size: 0.98rem;"></span>
+                        Add criteria to evaluate the assignment. Each criterion should have a description and a maximum score.
+                    </span>
+                </div>
+                
+                <div id="rubricItems"></div>
+                <button type="button" class="btn btn-outline-primary btn-sm" onclick="addRubricItem()">Add Rubric Item</button>
+            </div>
+
             <!-- Form Actions - Right-aligned and responsive -->
             <div class="form-actions d-flex flex-column flex-md-row justify-content-md-end gap-2 pt-4 mt-4 border-top">
                 <button type="button" class="btn btn-outline-secondary order-md-1">Cancel</button>
@@ -194,6 +208,30 @@
     })();
 </script>
 
+<script>
+function addRubricItem() {
+    const rubricItems = document.getElementById('rubricItems');
+    const index = rubricItems.children.length;
+    const html = `
+        <div class="rubric-item border rounded p-3 mb-2">
+            <div class="mb-2">
+                <label>Criterion</label>
+                <input type="text" name="rubric_criteria[]" class="form-control" required placeholder="Enter criterion">
+            </div>
+            <div class="mb-2">
+                <label>Description</label>
+                <input type="text" name="rubric_description[]" class="form-control" required placeholder="Enter description">
+            </div>
+            <div class="mb-2">
+                <label>Max Score</label>
+                <input type="number" name="rubric_max_score[]" class="form-control" min="1" required placeholder="Enter max score">
+            </div>
+            <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()">Remove</button>
+        </div>
+    `;
+    rubricItems.insertAdjacentHTML('beforeend', html);
+}
+</script>
 
 <script>
 $(document).ready(function() {

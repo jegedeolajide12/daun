@@ -463,7 +463,6 @@ class Grade(models.Model):
 
 
 class Rubric(models.Model):
-    title = models.CharField(max_length=200)
     description = models.TextField()
     criteria = models.TextField()
     max_score = models.IntegerField(default=100)
@@ -476,7 +475,7 @@ class Rubric(models.Model):
 
 class RubricScore(models.Model):
     rubric = models.ForeignKey(Rubric, on_delete=models.CASCADE, related_name='rubric_scores')
-    score = models.IntegerField()
+    score = models.IntegerField(null=True, blank=True)
     submission = models.ForeignKey(Submission, on_delete=models.CASCADE, related_name='rubric_scores')
     
     def __str__(self):

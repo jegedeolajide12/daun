@@ -22,7 +22,11 @@ from django.http import JsonResponse
 from actstream import action
 from students.forms import CourseEnrollForm
 
-from .models import Course, Content, Topic, Video, Faculty, Notification, Enrollment, Assignment,Submission, UserTask, Grade
+from .models import (
+                Course, Content, Topic, Video, 
+                Faculty, Notification, Enrollment, Assignment,
+                Submission, UserTask, Grade, RubricScore, Rubric
+                )
 from .forms import CourseForm, ModuleFormSet, FacultyForm, AssignmentForm, SubmissionForm
 
 def create_faculty(request):
@@ -345,6 +349,17 @@ def create_assignment(request):
             assignment = form.save(commit=False)
             assignment.is_graded = False
             assignment.save()
+            rubric_criteria = request.POST.getlist('rubric_criteria[]')
+            rubric_description = request.POST.getlist('rubric_description[]')
+            rubric_max_score = request.POST.getlist('rubric_max_score[]')
+
+            for crit, desc, max_score in zip(rubric_criteria, rubric_description, rubric_max_score):
+                Rubric.objects.create(
+                    assignment=assignment,
+                    criteria=crit,
+                    description=desc,
+                    max_score=max_score
+                )
             messages.success(request, "Assignment created successfully!")
             # Optionally, you can also create a notification for the course owner
             Notification.objects.create(
@@ -537,7 +552,7 @@ def get_submission_details(request, submission_id):
             {
                 'criterion': item.criteria,
                 'max_points': item.max_score,
-                'current_points': item.score,
+                'current_points': item.rubric_scores.filter(submission=submission).first().score if item.rubric_scores.filter(submission=submission).exists() else None,
                 'description': item.description,
                 'id': str(item.id),
             } for item in rubric_items
@@ -550,24 +565,31 @@ def get_submission_details(request, submission_id):
     print(submission.assignment.is_past_due)
     return JsonResponse(data, safe=False)
 
+
 def grade_submission(request, submission_id):
     submission = get_object_or_404(Submission, id=submission_id)
     grade = float(request.POST.get('grade', 0))
     feedback = request.POST.get('feedback', '')
-    rubic_scores = request.POST.getlist('rubric_scores[]')
+    rubric_scores = request.POST.getlist('rubric_scores[]')
+    rubric_ids = request.POST.getlist('rubric_ids[]')
+
     try:
         submission.grade = grade
         submission.save()
         submission.assignment.is_graded = True
+        submission.assignment.save()
+        # Update rubric scores
+        for rubric_id, score in zip(rubric_ids, rubric_scores):
+            rubric = submission.assignment.rubrics.get(id=rubric_id)
+            rubric.score = score
+            rubric.save()
+        # Update feedback, etc.
         submission.submission_grade.feedback = feedback
-        submission.submission_grade.rubric_scores = rubic_scores
         submission.submission_grade.score = grade
         submission.submission_grade.save()
-        submission.assignment.save()
-        
         return JsonResponse({'status': 'success',
-                            'status_display': 'Graded',
-                            'grade': submission.grade,
-                            'max_points': submission.assignment.max_score,})
+                             'status_display': 'Graded',
+                             'grade': submission.grade,
+                             'max_points': submission.assignment.max_score,})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})
