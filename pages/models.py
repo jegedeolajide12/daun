@@ -473,3 +473,11 @@ class Rubric(models.Model):
 
     def __str__(self):
         return f'Rubric for {self.assignment.title}'
+
+class RubricScore(models.Model):
+    rubric = models.ForeignKey(Rubric, on_delete=models.CASCADE, related_name='rubric_scores')
+    score = models.IntegerField()
+    submission = models.ForeignKey(Submission, on_delete=models.CASCADE, related_name='rubric_scores')
+    
+    def __str__(self):
+        return f'{self.user.username} - {self.rubric.assignment.title} - {self.score}'
