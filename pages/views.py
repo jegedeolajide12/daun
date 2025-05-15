@@ -22,7 +22,7 @@ from django.http import JsonResponse
 from actstream import action
 from students.forms import CourseEnrollForm
 
-from .models import Course, Content, Topic, Video, Faculty, Notification, Enrollment, Assignment,Submission, UserTask
+from .models import Course, Content, Topic, Video, Faculty, Notification, Enrollment, Assignment,Submission, UserTask, Grade
 from .forms import CourseForm, ModuleFormSet, FacultyForm, AssignmentForm, SubmissionForm
 
 def create_faculty(request):
@@ -274,6 +274,7 @@ def topic_detail(request, topic_id):
     assignment = topic.course.assignments.first()  # Example: Get the first assignment
     user_task = UserTask.objects.filter(task=assignment.assignment_task, user=request.user).first() if assignment else None
     total_completed_assignments = assignment.assignment_task.user_tasks.filter(is_completed=True).count()
+    topic_completion_percentage = int((float(total_completed_assignments)/float(assignments.count()))*100)
     # Get the ContentType for the Video model
     video_content_type = ContentType.objects.get_for_model(Video)
 
@@ -287,6 +288,7 @@ def topic_detail(request, topic_id):
                'user_task':user_task, 'video_count': video_count, 
                'assignments': assignments, 'now': now,
                'course_commpleted':course_completed, 'total_completed_assignments':total_completed_assignments,
+               'topic_completion_percentage':topic_completion_percentage
                }
     return render(request, 'courses/manage/module/module_detail.html', context)
 
@@ -489,3 +491,83 @@ def assignment_detail(request, course_id, topic_id, assignment_id):
         })
     
     return render(request, 'students/manage/assignment_detail.html', context)
+
+def grade_assignments(request):
+    assignments = Assignment.objects.filter(course__owner=request.user)
+    submissions = Submission.objects.filter(assignment__in=assignments, assignment__is_graded=False)
+    context = {'submissions':submissions, 'assignments':assignments}
+    return render(request, 'students/manage/grade_assignments.html', context)
+
+def get_submission_details(request, submission_id):
+    submission = get_object_or_404(Submission, id=submission_id)
+
+    # Ensure a Grade exists for this submission
+    grade, created = Grade.objects.get_or_create(
+        submission=submission,
+        defaults={'user': submission.user, 'score': 0}
+    )
+    
+    # Handle files
+    files = submission.files.all() if hasattr(submission, 'files') else []
+    files_url = files[0].url if files else None
+
+    # Check if the submission has a grade
+    if hasattr(submission, 'submission_grade'):
+        rubric_items = submission.assignment.rubrics.all()
+        feedback = grade.feedback
+        current_grade = grade.score
+    else:
+        rubric_items = []
+        feedback = ''
+        current_grade = None
+
+
+
+    data = {
+        'student_name': submission.user.full_name,
+        'assignment_title': submission.assignment.title,
+        'submitted_at': submission.submitted_at.strftime('%b %d, %Y %H:%M'),
+        'is_late': submission.assignment.is_past_due,
+        'max_points': submission.assignment.max_score,
+        'current_grade': current_grade,
+        'content': submission.content,
+        'feedback': feedback,
+        'files_url': [f.file.url for f in files] if files else [],
+        'rubric': [
+            {
+                'criterion': item.criteria,
+                'max_points': item.max_score,
+                'current_points': item.score,
+                'description': item.description,
+                'id': str(item.id),
+            } for item in rubric_items
+        ],
+
+    }
+    print(submission.user.full_name)
+    print(submission.assignment.title)
+    print(submission.submitted_at.strftime('%b %d, %Y %H:%M'))
+    print(submission.assignment.is_past_due)
+    return JsonResponse(data, safe=False)
+
+def grade_submission(request, submission_id):
+    submission = get_object_or_404(Submission, id=submission_id)
+    grade = float(request.POST.get('grade', 0))
+    feedback = request.POST.get('feedback', '')
+    rubic_scores = request.POST.getlist('rubric_scores[]')
+    try:
+        submission.grade = grade
+        submission.save()
+        submission.assignment.is_graded = True
+        submission.submission_grade.feedback = feedback
+        submission.submission_grade.rubric_scores = rubic_scores
+        submission.submission_grade.score = grade
+        submission.submission_grade.save()
+        submission.assignment.save()
+        
+        return JsonResponse({'status': 'success',
+                            'status_display': 'Graded',
+                            'grade': submission.grade,
+                            'max_points': submission.assignment.max_score,})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})

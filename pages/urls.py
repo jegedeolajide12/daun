@@ -2,27 +2,11 @@ from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
 
-from .views import (index, 
-                    ManageCourseListView, 
-                    CourseCreateView, 
-                    CourseUpdateView, 
-                    CourseDeleteView, 
-                    course_detail,
-                    CourseModuleUpdateView,
-                    ContentCreateUpdateView,
-                    topic_detail,
-                    ContentDeleteView,
-                    CourseListView,
-                    course_unenroll,
-                    create_faculty,
-                    get_notifications,
-                    mark_notification_read,
-                    mark_all_notifications_read,
-                    create_assignment,
-                    load_topics,
-                    submit_assignment,
-                    assignment_detail
-                    )
+from .views import (index, ManageCourseListView, CourseCreateView, CourseUpdateView, CourseDeleteView, 
+                    course_detail, CourseModuleUpdateView, ContentCreateUpdateView, topic_detail, 
+                    ContentDeleteView, CourseListView, course_unenroll, create_faculty, get_notifications, 
+                    mark_notification_read, mark_all_notifications_read, create_assignment, load_topics, 
+                    submit_assignment, assignment_detail, grade_assignments, get_submission_details)
 
 
 app_name = 'course'
@@ -52,6 +36,8 @@ urlpatterns = [
     path('assignment/create/', create_assignment, name='create_assignment'),
     path('ajax/load-topics/', load_topics, name='ajax_load_topics'),  # AJAX endpoint to load topics
     path('course/<int:course_id>/topic/<int:topic_id>/assignment/<int:assignment_id>/submit', submit_assignment, name='submit_assignment'),
-    path('assignment/<int:assignment_id>/topic/<int:topic_id>/course/<int:course_id>/detail', assignment_detail, name='assignment_detail')
+    path('assignment/<int:assignment_id>/topic/<int:topic_id>/course/<int:course_id>/detail', assignment_detail, name='assignment_detail'),
+    path('students/assignments/grade', grade_assignments, name='grade_assignments'),
+    path('course/students/assignments/<int:submission_id>/detail', get_submission_details, name='get_submission_details'),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

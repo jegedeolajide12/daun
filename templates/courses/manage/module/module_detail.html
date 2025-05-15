@@ -230,12 +230,12 @@
                                         <div class="mb-3">
                                             <div class="d-flex justify-content-between mb-1">
                                                 <span>Topic Completion</span>
-                                                <span>65%</span>
+                                                <span>{{ topic_completion_percentage }}%</span>
                                             </div>
                                             <div class="progress" style="height: 8px;">
                                                 <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" 
-                                                    role="progressbar" style="width: 65%" 
-                                                    aria-valuenow="65" aria-valuemin="0" aria-valuemax="100">
+                                                    role="progressbar" style="width: {{ topic_completion_percentage }}%" 
+                                                    aria-valuenow="{{ topic_completion_percenage }}" aria-valuemin="0" aria-valuemax="100">
                                                 </div>
                                             </div>
                                         </div>

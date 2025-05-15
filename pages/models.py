@@ -442,4 +442,34 @@ class Notification(models.Model):
     def mark_as_read(self):
         self.is_read = True
         self.save()
+
+
+
+class Grade(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='grades')
+    submission = models.OneToOneField(Submission, on_delete=models.CASCADE, related_name='submission_grade')
+    score = models.IntegerField()
+    feedback = models.TextField(null=True, blank=True)
+    graded_at = models.DateTimeField(auto_now_add=True)
     
+    def save(self, *args, **kwargs):
+        # Update the submission's grade when a new grade is saved
+        self.submission.grade = self.score
+        self.submission.save()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f'{self.user.username} - {self.submission.assignment.title} - {self.score}'
+
+
+class Rubric(models.Model):
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    criteria = models.TextField()
+    max_score = models.IntegerField(default=100)
+    score = models.IntegerField(null=True, blank=True)
+    assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE, related_name='rubrics')
+
+
+    def __str__(self):
+        return f'Rubric for {self.assignment.title}'

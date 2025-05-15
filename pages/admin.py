@@ -2,7 +2,8 @@ from django.contrib import admin
 from .models import (Faculty, Course, Topic, Video, 
                      Image, Text, File, Task, 
                      UserTask, Enrollment, Notification, 
-                     Assignment, Submission, SubmissionFile)
+                     Assignment, Submission, SubmissionFile, Grade, 
+                     Rubric)
 
 # Register your models here.
 
@@ -64,3 +65,4 @@ admin.site.register(File)
 admin.site.register(Text)
 admin.site.register(Submission)
 admin.site.register(SubmissionFile)
+admin.site.register(Grade)

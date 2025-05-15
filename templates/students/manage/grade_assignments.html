@@ -1,0 +1,483 @@
+{% extends parent_template|default:"user_navbar.html" %}
+{% load static %}
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+{% endblock %}
+{% block content %}
+<main class="ttr-wrapper">
+    <div class="container-fluid">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="header-title">
+                <h1>Grade Assignments</h1>
+                <p>Review and evaluate student submissions</p>
+            </div>
+            <div class="header-actions">
+                <div class="filter-group">
+                    <select class="form-control" id="assignmentFilter">
+                        <option value="">All Assignments</option>
+                        {% for assignment in assignments %}
+                        <option value="{{ assignment.id }}">{{ assignment.title }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <select class="form-control" id="statusFilter">
+                        <option value="">All Statuses</option>
+                        <option value="submitted">Submitted</option>
+                        <option value="graded">Graded</option>
+                        <option value="late">Late</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" id="bulkGradeBtn">
+                    <i class="fas fa-tasks mr-2"></i>Bulk Grade
+                </button>
+            </div>
+        </div>
+
+        <!-- Assignment Grading Container -->
+        <div class="grading-container">
+            <!-- Student Submissions List -->
+            <div class="submissions-list">
+                <div class="list-header">
+                    <div class="student-col">Student</div>
+                    <div class="assignment-col">Assignment</div>
+                    <div class="status-col">Status</div>
+                    <div class="grade-col">Grade</div>
+                    <div class="actions-col">Actions</div>
+                </div>
+                
+                {% for submission in submissions %}
+                <div class="submission-item" data-status="{{ submission.status }}">
+                    <div class="student-info">
+                        <div class="avatar">
+                            {% if submission.user.profile_picture %}
+                            <img src="{{ submission.user.profile_picture.url }}" alt="{{ submission.user.get_full_name }}">
+                            {% else %}
+                            <div class="avatar-initials">{{ submission.student.get_initials }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="student-details">
+                            <h5>{% if submission.user.full_name %}{{ submission.user.full_name }}{% else %}{{ submission.user.username }}{% endif %}</h5>
+                            <p>{{ submission.user.email }}</p>
+                        </div>
+                    </div>
+                    <div class="assignment-info">
+                        <h5>{{ submission.assignment.title }}</h5>
+                        <p>Due: {{ submission.assignment.due_date|date:"M d, Y" }}</p>
+                        <p class="submission-time">
+                            Submitted: {{ submission.submitted_at|date:"M d, Y H:i" }}
+                            {% if submission.assignment.is_past_due %}
+                            <span class="late-badge">Late</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="status-info">
+                        <span class="status-badge {{ submission.status }}">
+                            {{ submission.get_status_display }}
+                        </span>
+                    </div>
+                    <div class="grade-info">
+                        {% if submission.grade %}
+                        <div class="current-grade">{{ submission.grade }}/{{ submission.assignment.max_points }}</div>
+                        {% else %}
+                        <div class="no-grade">Not graded</div>
+                        {% endif %}
+                    </div>
+                    <div class="submission-actions">
+                        <button class="btn btn-sm btn-outline-primary grade-btn" data-submission-id="{{ submission.id }}">
+                            <i class="fas fa-edit"></i> Grade
+                        </button>
+                        <a href="{{ submission.file.url }}" class="btn btn-sm btn-outline-secondary" download>
+                            <i class="fas fa-download"></i>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Grading Panel (initially hidden) -->
+            <div class="grading-panel" id="gradingPanel">
+                <div class="grading-header">
+                    <h4>Grade Submission</h4>
+                    <button class="btn btn-sm btn-close" id="closeGradingPanel">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="grading-content">
+                    <div id="gradingLoading" style="display:none;">
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="sr-only">Loading...</span>
+                            </div>
+                            <p class="mt-2">Loading submission...</p>
+                        </div>
+                    </div>
+                    <div id="gradingDetails">
+                        <div class="submission-details">
+                            <h5 id="gradingStudentName"></h5>
+                            <h6 id="gradingAssignmentTitle"></h6>
+                            <div class="submission-meta">
+                                <span id="gradingSubmissionDate"></span>
+                                <span id="gradingLateStatus"></span>
+                            </div>
+                        </div>
+                        
+                        <div class="submission-viewer">
+                            <!-- Embedded document viewer or file display area -->
+                            <div id="submissionContent" class="mb-3"></div>
+                            <iframe id="submissionViewer" frameborder="0" style="width:100%;min-height:300px;"></iframe>
+                        </div>
+                        
+                        <div class="grading-form">
+                            <form id="gradeForm">
+                                <div class="form-group">
+                                    <label>Grade (out of <span id="maxPoints"></span>)</label>
+                                    <input type="number" class="form-control" id="gradeInput" min="0" step="0.5">
+                                </div>
+                                <div class="form-group">
+                                    <label>Feedback</label>
+                                    <textarea class="form-control" id="feedbackInput" rows="4"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Rubric Assessment</label>
+                                    <div class="rubric-items" id="rubricContainer">
+                                        <!-- Rubric items will be loaded here -->
+                                    </div>
+                                </div>
+                                <div class="form-actions">
+                                    <button type="button" class="btn btn-secondary" id="saveDraftBtn">
+                                        Save Draft
+                                    </button>
+                                    <button type="submit" class="btn btn-primary">
+                                        Submit Grade
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-container">
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    <li class="page-item {% if not submissions.has_previous %}disabled{% endif %}">
+                        <a class="page-link" href="?page=1">First</a>
+                    </li>
+                    {% if submissions.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ submissions.previous_page_number }}">Previous</a>
+                    </li>
+                    {% endif %}
+                    {% for num in submissions.paginator.page_range %}
+                    <li class="page-item {% if num == submissions.number %}active{% endif %}">
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                    {% endfor %}
+                    {% if submissions.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ submissions.next_page_number }}">Next</a>
+                    </li>
+                    {% endif %}
+                    <li class="page-item {% if not submissions.has_next %}disabled{% endif %}">
+                        <a class="page-link" href="?page={{ submissions.paginator.num_pages }}">Last</a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="pagination-info">
+                Showing {{ submissions.start_index }}-{{ submissions.end_index }} of {{ submissions.paginator.count }} submissions
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Grading Modal -->
+    <div class="modal fade" id="bulkGradingModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Bulk Grade Assignments</h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Select Assignment:</label>
+                        <select class="form-control" id="bulkAssignmentSelect">
+                            {% for assignment in assignments %}
+                            <option value="{{ assignment.id }}">{{ assignment.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Grade (out of <span id="bulkMaxPoints"></span>)</label>
+                        <input type="number" class="form-control" id="bulkGradeInput" min="0" step="0.5">
+                    </div>
+                    <div class="form-group">
+                        <label>Common Feedback</label>
+                        <textarea class="form-control" id="bulkFeedbackInput" rows="3"></textarea>
+                    </div>
+                    <div class="selected-students">
+                        <h6>Selected Students (0)</h6>
+                        <div class="students-list" id="bulkStudentsList">
+                            <!-- Selected students will appear here -->
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="applyBulkGrade">Apply to Selected</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Include Bootstrap JS and jQuery -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Grade button click handler
+        document.querySelectorAll('.grade-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const submissionId = this.dataset.submissionId;
+                loadSubmissionForGrading(submissionId);
+                document.getElementById('gradingPanel').style.display = 'block';
+            });
+        });
+        
+        // Close grading panel
+        document.getElementById('closeGradingPanel').addEventListener('click', function() {
+            document.getElementById('gradingPanel').style.display = 'none';
+        });
+        
+        // Form submission handler
+        document.getElementById('gradeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            submitGrade();
+        });
+        
+        // Save draft handler
+        document.getElementById('saveDraftBtn').addEventListener('click', function() {
+            submitGrade(true);
+        });
+    });
+
+    let currentSubmissionId = null;
+
+    function loadSubmissionForGrading(submissionId) {
+        currentSubmissionId = submissionId;
+        document.getElementById('gradingLoading').style.display = 'block';
+        document.getElementById('gradingDetails').style.display = 'none';
+
+        fetch(`/course/students/assignments/${submissionId}/detail`)
+            .then(response => response.json())
+            .then(data => {
+                populateGradingPanel(data);
+                document.getElementById('gradingLoading').style.display = 'none';
+                document.getElementById('gradingDetails').style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('gradingLoading').innerHTML = `
+                    <div class="alert alert-danger">
+                        Failed to load submission. Please try again.
+                    </div>
+                `;
+            });
+    }
+
+    function populateGradingPanel(data) {
+        const gradingPanel = document.getElementById('gradingPanel');
+        
+        // Update basic info
+        console.log(document.getElementById('gradingStudentName'));
+        document.getElementById('gradingStudentName').textContent = data.student_name;
+        console.log(document.getElementById('gradingAssignmentTitle'));
+        document.getElementById('gradingAssignmentTitle').textContent = data.assignment_title;
+        console.log(document.getElementById('gradingSubmissionDate'));
+        document.getElementById('gradingSubmissionDate').textContent = `Submitted: ${data.submitted_at}`;
+        
+
+
+        // Update late status
+        const lateStatus = document.getElementById('gradingLateStatus');
+        if (data.is_late) {
+            lateStatus.innerHTML = '<span class="late-badge">Late Submission</span>';
+        } else {
+            lateStatus.textContent = '';
+        }
+        
+        // Update grade inputs
+        document.getElementById('maxPoints').textContent = data.max_points;
+        document.getElementById('gradeInput').value = data.current_grade || '';
+        document.getElementById('feedbackInput').value = data.feedback || '';
+        
+        // Show submission content (text answer)
+        const contentDiv = document.getElementById('submissionContent');
+        if (contentDiv) {
+            if (data.content && data.content.trim() !== "") {
+                contentDiv.innerHTML = `<div class="alert alert-secondary"><strong>Submission Text:</strong><br>${data.content}</div>`;
+            } else {
+                contentDiv.innerHTML = '';
+            }
+        }
+
+        // Show file (if any)
+        const iframe = document.getElementById('submissionViewer');
+        if (data.files_url && data.files_url.length > 0) {
+            // If files_url is a list, show the first file
+            let fileUrl = Array.isArray(data.files_url) ? data.files_url[0] : data.files_url;
+            iframe.src = fileUrl;
+            iframe.style.display = 'block';
+        } else {
+            iframe.srcdoc = '<p>No file submitted</p>';
+            iframe.style.display = 'block';
+        }
+        
+        if (data.files_url && data.files_url.length > 0) {
+            let links = data.files_url.map(url => `<a href="${url}" target="_blank">Download File</a>`).join('<br>');
+            contentDiv.innerHTML += `<div>${links}</div>`;
+        }
+
+        // Load rubric
+        const rubricContainer = document.getElementById('rubricContainer');
+        rubricContainer.innerHTML = '';
+
+        if (data.rubric && data.rubric.length > 0) {
+            data.rubric.forEach(item => {
+                const rubricItem = document.createElement('div');
+                rubricItem.className = 'rubric-item';
+                rubricItem.innerHTML = `
+                    <h6>${item.criterion} (${item.current_points || 0}/${item.max_points} points)</h6>
+                    <p class="text-muted">${item.description}</p>
+                    <div class="rubric-criteria">
+                        <input type="number" class="form-control form-control-sm rubric-score" 
+                            data-rubric-id="${item.id}"
+                            value="${item.current_points || ''}" 
+                            min="0" max="${item.max_points}" 
+                            style="width: 80px;">
+                        <span>out of ${item.max_points}</span>
+                    </div>
+                `;
+                rubricContainer.appendChild(rubricItem);
+            });
+        } else {
+            rubricContainer.innerHTML = '<p class="text-muted">No rubric available for this assignment</p>';
+        }
+    }
+
+    function submitGrade(isDraft = false) {
+        if (!currentSubmissionId) return;
+        
+        // Collect form data
+        const formData = new FormData();
+        formData.append('grade', document.getElementById('gradeInput').value);
+        formData.append('feedback', document.getElementById('feedbackInput').value);
+        formData.append('is_draft', isDraft);
+        
+        // Collect rubric scores
+        const rubricScores = {};
+        document.querySelectorAll('.rubric-score').forEach(input => {
+            rubricScores[input.dataset.rubricId] = input.value;
+        });
+        formData.append('rubric_scores', JSON.stringify(rubricScores));
+        
+        // Show loading state
+        const submitBtn = document.querySelector('#gradeForm button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = `
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            ${isDraft ? 'Saving...' : 'Submitting...'}
+        `;
+        submitBtn.disabled = true;
+        
+        // Submit to server
+        fetch(`/submission/${currentSubmissionId}/grade/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('success', isDraft ? 'Draft saved successfully' : 'Grade submitted successfully');
+                // Optionally update the list view
+                updateSubmissionInList(currentSubmissionId, data.updated_data);
+            } else {
+                showAlert('danger', data.error || 'Failed to submit grade');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('danger', 'An error occurred. Please try again.');
+        })
+        .finally(() => {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        });
+    }
+
+    // Helper function to get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function showAlert(type, message) {
+        const alert = document.createElement('div');
+        alert.className = `alert alert-${type} alert-dismissible fade show`;
+        alert.role = 'alert';
+        alert.innerHTML = `
+            ${message}
+            <button type="button" class="close" data-dismiss="alert">
+                <span>&times;</span>
+            </button>
+        `;
+        
+        const container = document.querySelector('.grading-content');
+        container.insertBefore(alert, container.firstChild);
+        
+        // Auto-dismiss after 5 seconds
+        setTimeout(() => {
+            alert.classList.remove('show');
+            setTimeout(() => alert.remove(), 150);
+        }, 5000);
+    }
+
+    function updateSubmissionInList(submissionId, data) {
+        // Find the submission in the list and update its status/grade
+        const submissionItem = document.querySelector(`.submission-item[data-id="${submissionId}"]`);
+        if (submissionItem) {
+            // Update status
+            const statusBadge = submissionItem.querySelector('.status-badge');
+            statusBadge.className = `status-badge ${data.status}`;
+            statusBadge.textContent = data.status_display;
+            
+            // Update grade
+            const gradeElement = submissionItem.querySelector('.grade-info');
+            if (data.grade) {
+                gradeElement.innerHTML = `<div class="current-grade">${data.grade}/${data.max_points}</div>`;
+            } else {
+                gradeElement.innerHTML = '<div class="no-grade">Not graded</div>';
+            }
+        }
+    }
+</script>
+
+
+{% endblock %}
