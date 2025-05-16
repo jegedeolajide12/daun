@@ -3,7 +3,8 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.forms.models import inlineformset_factory
 
-from .models import Course, Topic, Faculty, Assignment, Submission
+from .models import (Course, Topic, Faculty, Assignment, 
+                     Submission, Assessment, MCQOption)
 
 ModuleFormSet = inlineformset_factory(Course, Topic, fields=['name', 'description'], extra=2, can_delete=True)
 
@@ -141,3 +142,77 @@ class SubmissionForm(forms.ModelForm):
                 raise ValidationError(f"Invalid file type for {file.name}. Allowed types: PDF, DOC, images, text, Python, ZIP")
         
         return files
+
+class AssessmentForm(forms.ModelForm):
+    class Meta:
+        model = Assessment
+        fields = ['question', 'explanation', 'points', 'difficulty', 
+                  'due_date', 'time_limit', 'topic']
+        widgets = {
+            'question': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Enter Question',
+            }),
+            'explanation': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Enter Explanation',
+            }),
+            'points': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': 0,
+                'max': 100,
+                'placeholder': 'Enter Points',
+            }),
+            'difficulty': forms.Select(attrs={
+                'class': 'form-control',
+                'placeholder': 'Select Difficulty Level',
+            }),
+            'due_date': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date',
+                'placeholder': 'Select Due Date',
+            }),
+            'time_limit': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': 1,
+                'placeholder': 'Enter Time Limit (in minutes)',
+            }),
+        }
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super(AssessmentForm, self).__init__(*args, **kwargs)
+
+        if user and user.is_authenticated:
+            self.fields['topic'].queryset = Topic.objects.filter(course__owner=user)
+        else:
+            self.fields['topic'].queryset = Topic.objects.none()
+        
+        self.fields['topic'].empty_label = "Select Topic"
+    
+    def clean(self):
+        points = self.cleaned_data.get('points')
+        if points is not None and points < 0:
+            raise ValidationError("Points cannot be negative.")
+        return points
+    
+    def clean_time_limit(self):
+        time_limit = self.cleaned_data.get('time_limit')
+        if time_limit is not None and time_limit < 1:
+            raise ValidationError("Time limit must be at least 1 minute.")
+        return time_limit
+    
+class MCQOptionForm(forms.ModelForm):
+    class Meta:
+        model = MCQOption
+        fields = ['option_text', 'is_correct']
+        widgets = {
+            'option_text': forms.TextInput(attrs={
+                'class': 'form-control option-text',
+                'placeholder': 'Enter Option Text',
+            }),
+            'is_correct': forms.CheckboxInput(attrs={
+                'class': 'form-check-input is-correct-checkbox',
+            }),
+        }

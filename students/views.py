@@ -172,4 +172,3 @@ def bulk_student_actions(request):
             enrollments.update(is_active=(new_status == 'active'))
             return JsonResponse({'success': f"Status updated for {enrollments.count()} students"}, status=200)
         return JsonResponse({'error': 'Invalid action'}, status=400)
-            

@@ -586,6 +586,9 @@ class Assessment(models.Model):
         correct_options = self.get_correct_options().count()
         if correct_options == 0:
             raise ValidationError(_("At least one option must be marked as correct."))
+    
+    def get_absolute_url(self):
+        return reverse('course:create_assessment', args=[self.id])
 
 class MCQOption(models.Model):
     assessment = models.ForeignKey(
