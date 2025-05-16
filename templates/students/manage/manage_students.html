@@ -29,14 +29,14 @@
                         <button class="btn btn-secondary dropdown-toggle" type="button" id="moreActionsDropdown" data-toggle="dropdown">
                             <i class="fas fa-ellipsis-h mr-2"></i>More Actions
                         </button>
-                        <div class="dropdown-menu">
-                            <button class="dropdown-item" type="button">
+                        <div class="dropdown-menu" style="min-width: 14rem;">
+                            <button class="dropdown-item text-wrap" type="button">
                                 <i class="fas fa-tasks mr-2"></i>Grade Assessments
                             </button>
-                            <a href="{% url "course:create_assignment" %}" class="dropdown-item" type="button">
+                            <a href="{% url 'course:create_assignment' %}" class="dropdown-item text-wrap">
                                 <i class="fas fa-chart-pie mr-2"></i>Create Assignments
                             </a>
-                            <button class="dropdown-item" type="button">
+                            <button class="dropdown-item text-wrap" type="button">
                                 <i class="fas fa-download mr-2"></i>Export Data
                             </button>
                         </div>

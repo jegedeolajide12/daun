@@ -1,5 +1,6 @@
 {% extends parent_template|default:"user_navbar.html" %}
 {% load static %}
+{% load dict_extras %}
 {% block extra_head %}
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 {% endblock %}
@@ -12,27 +13,26 @@
                 <h1>Grade Assignments</h1>
                 <p>Review and evaluate student submissions</p>
             </div>
-            <div class="header-actions">
-                <div class="filter-group">
-                    <select class="form-control" id="assignmentFilter">
-                        <option value="">All Assignments</option>
-                        {% for assignment in assignments %}
-                        <option value="{{ assignment.id }}">{{ assignment.title }}</option>
-                        {% endfor %}
-                    </select>
+            <form method="get" id="filterForm">
+                <div class="header-actions">
+                    <div class="filter-group">
+                        <select class="form-control" name="assignment" onchange="this.form.submit()" id="assignmentFilter">
+                            <option value="">All Assignments</option>
+                            {% for assignment in assignments %}
+                            <option value="{{ assignment.id }}" {% if assignment.id|stringformat:"s" == selected_assignment %}selected{% endif %}>{{ assignment.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <select class="form-control" id="statusFilter" name="status" onchange="this.form.submit()">
+                            <option value="">All Statuses</option>
+                            {% for status in all_statuses %}
+                            <option value="{{ status }}" {% if status == selected_status %}selected{% endif %}>{{ status|capfirst }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
-                <div class="filter-group">
-                    <select class="form-control" id="statusFilter">
-                        <option value="">All Statuses</option>
-                        <option value="submitted">Submitted</option>
-                        <option value="graded">Graded</option>
-                        <option value="late">Late</option>
-                    </select>
-                </div>
-                <button class="btn btn-primary" id="bulkGradeBtn">
-                    <i class="fas fa-tasks mr-2"></i>Bulk Grade
-                </button>
-            </div>
+            </form>
         </div>
 
         <!-- Assignment Grading Container -->
@@ -48,7 +48,7 @@
                 </div>
                 
                 {% for submission in submissions %}
-                <div class="submission-item" data-status="{{ submission.status }}">
+                <div class="submission-item">
                     <div class="student-info">
                         <div class="avatar">
                             {% if submission.user.profile_picture %}
@@ -73,13 +73,12 @@
                         </p>
                     </div>
                     <div class="status-info">
-                        <span class="status-badge {{ submission.status }}">
-                            {{ submission.get_status_display }}
+                        <span class="status-badge {{ submission.get_status }}">
                         </span>
                     </div>
                     <div class="grade-info">
                         {% if submission.grade %}
-                        <div class="current-grade">{{ submission.grade }}/{{ submission.assignment.max_points }}</div>
+                        <div class="current-grade">{{ submission.grade }}/{{ submission.assignment.max_score }}</div>
                         {% else %}
                         <div class="no-grade">Not graded</div>
                         {% endif %}
@@ -395,7 +394,7 @@
         submitBtn.disabled = true;
         
         // Submit to server
-        fetch(`/submission/${currentSubmissionId}/grade/`, {
+        fetch(`/course/students/assignments/${currentSubmissionId}/grade`, {
             method: 'POST',
             headers: {
                 'X-CSRFToken': getCookie('csrftoken'),
@@ -408,6 +407,9 @@
                 showAlert('success', isDraft ? 'Draft saved successfully' : 'Grade submitted successfully');
                 // Optionally update the list view
                 updateSubmissionInList(currentSubmissionId, data.updated_data);
+                setTimeout(() => {
+                    location.reload();
+                }, 1200); // Wait 1.2 seconds so user sees the alert
             } else {
                 showAlert('danger', data.error || 'Failed to submit grade');
             }
@@ -478,6 +480,5 @@
         }
     }
 </script>
-
 
 {% endblock %}

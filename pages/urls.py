@@ -6,7 +6,8 @@ from .views import (index, ManageCourseListView, CourseCreateView, CourseUpdateV
                     course_detail, CourseModuleUpdateView, ContentCreateUpdateView, topic_detail, 
                     ContentDeleteView, CourseListView, course_unenroll, create_faculty, get_notifications, 
                     mark_notification_read, mark_all_notifications_read, create_assignment, load_topics, 
-                    submit_assignment, assignment_detail, grade_assignments, get_submission_details)
+                    submit_assignment, assignment_detail, grade_assignments, get_submission_details, 
+                    grade_submissions)
 
 
 app_name = 'course'
@@ -39,5 +40,6 @@ urlpatterns = [
     path('assignment/<int:assignment_id>/topic/<int:topic_id>/course/<int:course_id>/detail', assignment_detail, name='assignment_detail'),
     path('students/assignments/grade', grade_assignments, name='grade_assignments'),
     path('course/students/assignments/<int:submission_id>/detail', get_submission_details, name='get_submission_details'),
+    path('course/students/assignments/<int:submission_id>/grade', grade_submissions, name='grade_submissions'),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -9,6 +9,7 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 from .fields import OrderField
 
 from accounts.models import CustomUser
@@ -161,7 +162,7 @@ class UserTask(models.Model):
 
     
     class Meta:
-        ordering = ['task__due_date']
+        ordering = ['is_completed' ,'task__due_date']
 
 
     def get_average_score(self):
@@ -323,17 +324,13 @@ class Submission(models.Model):
     grade = models.PositiveIntegerField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
-
         task = self.assignment.assignment_task
-        
-    
         if task:
             user_task = UserTask.objects.filter(user=self.user, task=task).first()
             if user_task:
                 user_task.is_completed = True
                 user_task.status = 'submitted'
                 user_task.save()
-        
         course = self.assignment.course
         topic = self.assignment.topic
         all_assignments_completed = all(
@@ -343,6 +340,13 @@ class Submission(models.Model):
         if all_assignments_completed:
             topic.is_completed = True
             topic.save()
+        StudentActivity.objects.create(
+            user=self.user,
+            course=course,
+            activity_type='assignment_submit',
+            title=f'Assignment Submitted: {self.assignment.title}',
+            details=f'Assignment "{self.assignment.title}" submitted by {self.user.username}.'
+        )
         super().save(*args, **kwargs)
     
     def delete(self, *args, **kwargs):
@@ -371,6 +375,16 @@ class Submission(models.Model):
     def clean(self):
         if not self.files and not self.content:
             raise ValidationError('Either a file or content must be provided.')
+    @property
+    def get_status(self):
+        user_task = UserTask.objects.filter(
+            user=self.user, 
+            task=self.assignment.assignment_task
+            ).first()
+        if user_task:
+            return user_task.status
+        return 'pending'
+        
 
 
 class SubmissionFile(models.Model):
@@ -456,6 +470,10 @@ class Grade(models.Model):
         # Update the submission's grade when a new grade is saved
         self.submission.grade = self.score
         self.submission.save()
+        self.assignment.is_graded = True
+        self.assignment.save()
+        self.assignment.assignment_task.is_completed = True
+        self.assignment.assignment_task.save()
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -477,6 +495,152 @@ class RubricScore(models.Model):
     rubric = models.ForeignKey(Rubric, on_delete=models.CASCADE, related_name='rubric_scores')
     score = models.IntegerField(null=True, blank=True)
     submission = models.ForeignKey(Submission, on_delete=models.CASCADE, related_name='rubric_scores')
+
+    def save(self, *args, **kwargs):
+        self.rubric.score = self.score
+        self.rubric.save()
+        super().save(*args, **kwargs)
     
     def __str__(self):
         return f'{self.user.username} - {self.rubric.assignment.title} - {self.score}'
+    
+class Assessment(models.Model):
+    class DifficultyLevel(models.TextChoices):
+        EASY = 'E', _('Easy')
+        MEDIUM = 'M', _('Medium')
+        HARD = 'H', _('Hard')
+
+    question = models.TextField(
+        verbose_name=_("Question Text"),
+        help_text=_("Enter the question text in full")
+    )
+    explanation = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name=_("Explanation"),
+        help_text=_("Explanation to be shown after answering")
+    )
+    points = models.PositiveIntegerField(
+        default=1,
+        verbose_name=_("Points"),
+        help_text=_("Points awarded for correct answer")
+    )
+    difficulty = models.CharField(
+        max_length=1,
+        choices=DifficultyLevel.choices,
+        default=DifficultyLevel.MEDIUM,
+        verbose_name=_("Difficulty Level")
+    )
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name=_("Is Active"),
+        help_text=_("Whether this question is active for use")
+    )
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    due_date = models.DateTimeField(null=True, blank=True)
+    time_limit = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        verbose_name=_("Time Limit (seconds)"),
+        help_text=_("Time limit for this question in seconds")
+    )
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE,
+        related_name='mcq_assessments'
+    )
+    topic = models.ForeignKey(
+        Topic,
+        on_delete=models.CASCADE,
+        related_name='mcq_assessments',
+        null=True,
+        blank=True
+    )
+    order = OrderField(blank=True, for_fields=['topic'])
+
+    class Meta:
+        verbose_name = _("Assessment")
+        verbose_name_plural = _("Assessments")
+        ordering = ['order']
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(points__gte=1),
+                name="points_gte_1"
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.question[:50]}..." if len(self.question) > 50 else self.question
+
+    def clean(self):
+        if self.due_date and self.due_date < timezone.now():
+            raise ValidationError(_("Due date cannot be in the past."))
+        if self.time_limit and self.time_limit <= 0:
+            raise ValidationError(_("Time limit must be positive."))
+
+    def get_correct_options(self):
+        return self.options.filter(is_correct=True)
+
+    def validate_correct_options(self):
+        correct_options = self.get_correct_options().count()
+        if correct_options == 0:
+            raise ValidationError(_("At least one option must be marked as correct."))
+
+class MCQOption(models.Model):
+    assessment = models.ForeignKey(
+        Assessment,
+        on_delete=models.CASCADE,
+        related_name='options'
+    )
+    option_text = models.TextField(
+        verbose_name=_("Option Text")
+    )
+    is_correct = models.BooleanField(
+        default=False,
+        verbose_name=_("Is Correct")
+    )
+    order = OrderField(blank=True, for_fields=['assessment'])
+
+    class Meta:
+        verbose_name = _("MCQ Option")
+        verbose_name_plural = _("MCQ Options")
+        ordering = ['order']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['assessment', 'order'],
+                name='unique_option_order_per_assessment'
+            )
+        ]
+
+    def __str__(self):
+        return f'Option {self.order} for {self.assessment.question[:30]}'
+
+    def clean(self):
+        if not self.assessment:
+            raise ValidationError(_('Assessment must be provided.'))
+        if not self.option_text:
+            raise ValidationError(_('Option text must be provided.'))
+        if not isinstance(self.is_correct, bool):
+            raise ValidationError(_('is_correct must be a boolean value.'))
+        
+        # Ensure at least one correct option exists (but not during initial creation)
+        if self.pk and self.is_correct:
+            other_correct = self.assessment.options.exclude(pk=self.pk).filter(is_correct=True).exists()
+            if not other_correct and not self.is_correct:
+                raise ValidationError(_('At least one option must be marked as correct.'))
+
+class AssessmentAttempt(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    assessment = models.ForeignKey(Assessment, on_delete=models.CASCADE)
+    started_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    score = models.FloatField(null=True, blank=True)
+    is_completed = models.BooleanField(default=False)
+
+class MCQResponse(models.Model):
+    attempt = models.ForeignKey(AssessmentAttempt, on_delete=models.CASCADE, related_name='responses')
+    question = models.ForeignKey(Assessment, on_delete=models.CASCADE)
+    selected_option = models.ForeignKey(MCQOption, on_delete=models.CASCADE, null=True, blank=True)
+    is_correct = models.BooleanField(default=False)
+    responded_at = models.DateTimeField(auto_now_add=True)

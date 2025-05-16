@@ -276,8 +276,16 @@ def topic_detail(request, topic_id):
     contents = Content.objects.prefetch_related('content_type').filter(topic=topic)
     assignments = topic.course.assignments.all()
     assignment = topic.course.assignments.first()  # Example: Get the first assignment
-    user_task = UserTask.objects.filter(task=assignment.assignment_task, user=request.user).first() if assignment else None
-    total_completed_assignments = assignment.assignment_task.user_tasks.filter(is_completed=True).count()
+    user_tasks = {
+        a.id: UserTask.objects.filter(task=a.assignment_task, user=request.user).first()
+        for a in assignments
+    }
+    total_completed_assignments = UserTask.objects.filter(
+        user=request.user,
+        task__assignment__in=assignments,
+        is_completed=True
+    ).count()
+    print(total_completed_assignments)
     topic_completion_percentage = int((float(total_completed_assignments)/float(assignments.count()))*100)
     # Get the ContentType for the Video model
     video_content_type = ContentType.objects.get_for_model(Video)
@@ -289,7 +297,7 @@ def topic_detail(request, topic_id):
     context = {
                'topic': topic, 'completed_topics_count':completed_topics_count,
                'contents': contents, 'total_topics':total_topics,
-               'user_task':user_task, 'video_count': video_count, 
+               'user_tasks':user_tasks, 'video_count': video_count, 
                'assignments': assignments, 'now': now,
                'course_commpleted':course_completed, 'total_completed_assignments':total_completed_assignments,
                'topic_completion_percentage':topic_completion_percentage
@@ -509,8 +517,36 @@ def assignment_detail(request, course_id, topic_id, assignment_id):
 
 def grade_assignments(request):
     assignments = Assignment.objects.filter(course__owner=request.user)
-    submissions = Submission.objects.filter(assignment__in=assignments, assignment__is_graded=False)
-    context = {'submissions':submissions, 'assignments':assignments}
+    submissions = Submission.objects.filter(assignment__in=assignments)
+
+    assignment_id = request.GET.get('assignment')
+    status = request.GET.get('status')
+
+    if assignment_id:
+        submissions = submissions.filter(assignment__id=assignment_id)
+    if status:
+        filtered_ids = [
+            s.id for s in submissions
+            if UserTask.objects.filter(
+                task=s.assignment.assignment_task,
+                user=s.user,
+                status=status
+            ).exists()
+        ]
+        submissions = submissions.filter(id__in=filtered_ids)
+    
+
+
+    user_task_statuses = {
+        s.id: UserTask.objects.filter(task=s.assignment.assignment_task, user=s.user).first().status
+        for s in submissions
+    }
+    all_statuses = [choice[0] for choice in UserTask.AssignmentStatus]
+
+    context = {'submissions':submissions, 'assignments':assignments, 
+               'user_task_statuses':user_task_statuses, 'all_statuses':all_statuses, 
+               'selected_assignment':assignment_id, 'selected_status':status,
+               }
     return render(request, 'students/manage/grade_assignments.html', context)
 
 def get_submission_details(request, submission_id):
@@ -524,7 +560,6 @@ def get_submission_details(request, submission_id):
     
     # Handle files
     files = submission.files.all() if hasattr(submission, 'files') else []
-    files_url = files[0].url if files else None
 
     # Check if the submission has a grade
     if hasattr(submission, 'submission_grade'):
@@ -566,7 +601,7 @@ def get_submission_details(request, submission_id):
     return JsonResponse(data, safe=False)
 
 
-def grade_submission(request, submission_id):
+def grade_submissions(request, submission_id):
     submission = get_object_or_404(Submission, id=submission_id)
     grade = float(request.POST.get('grade', 0))
     feedback = request.POST.get('feedback', '')
@@ -581,15 +616,49 @@ def grade_submission(request, submission_id):
         # Update rubric scores
         for rubric_id, score in zip(rubric_ids, rubric_scores):
             rubric = submission.assignment.rubrics.get(id=rubric_id)
-            rubric.score = score
-            rubric.save()
+            RubricScore.objects.update_or_create(
+                rubric=rubric,
+                submission=submission,
+                defaults={'score': score}
+            )
+
         # Update feedback, etc.
         submission.submission_grade.feedback = feedback
         submission.submission_grade.score = grade
         submission.submission_grade.save()
-        return JsonResponse({'status': 'success',
-                             'status_display': 'Graded',
-                             'grade': submission.grade,
-                             'max_points': submission.assignment.max_score,})
+        
+
+        Notification.objects.create(
+            recipient=submission.user,
+            notification_type='Graded',
+            title=f"Assignment grading: {submission.assignment.title}",
+            message=f"Your {submission.assignment.title}'s assignment have been graded",
+            related_course=submission.assignment.course,
+            is_read=False
+        )
+        
+        # Create notification for instructor
+        Notification.objects.create(
+            recipient=submission.assignment.course.owner,
+            notification_type='Graded',
+            title=f"Assignment grading: {submission.assignment.title}",
+            message=f"You have successfully graded {submission.user.full_name}'s {submission.assignment.title}",
+            related_course=submission.assignment.course,
+            is_read=False
+        )
+
+        return JsonResponse({
+            'success': True,
+            'status_display': 'Graded',
+            'grade': submission.grade,
+            'max_points': submission.assignment.max_score,
+            'status': 'graded',  # if you want to update the badge
+            'updated_data': {
+                'status': 'graded',
+                'status_display': 'Graded',
+                'grade': submission.grade,
+                'max_points': submission.assignment.max_score,
+            }
+        })
     except Exception as e:
-        return JsonResponse({'status': 'error', 'message': str(e)})
+        return JsonResponse({'success': False, 'error': str(e)})

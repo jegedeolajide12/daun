@@ -5662,3 +5662,44 @@ textarea.form-control {
         justify-content: flex-start;
     }
 }
+/* Progress bar enhancements */
+.progress {
+    overflow: visible;
+    position: relative;
+    background-color: #f1f1f1;
+}
+
+.progress-bar {
+    position: relative;
+    border-radius: 12px;
+    transition: width 0.6s ease;
+}
+
+.progress-text {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.75rem;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.2);
+    white-space: nowrap;
+}
+
+/* Color adjustments for better contrast */
+.bg-warning {
+    background-color: #ffc107 !important;
+}
+
+/* Tooltip styling */
+[data-toggle="tooltip"] {
+    cursor: pointer;
+}
+
+/* Animation smoothing */
+.progress-bar-animated {
+    animation: progress-bar-stripes 1s linear infinite;
+}
+
+@keyframes progress-bar-stripes {
+    from { background-position: 24px 0; }
+    to { background-position: 0 0; }
+}
