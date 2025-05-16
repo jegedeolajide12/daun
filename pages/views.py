@@ -349,6 +349,14 @@ def get_notifications(request):
     return JsonResponse(data, safe=False)
 
 @login_required
+def manage_courses(request):
+    courses = Course.objects.filter(owner=request.user)
+    context = {'courses': courses}
+    return render(request, 'courses/manage/manage_courses.html', context)
+
+
+
+@login_required
 def create_assignment(request):
     if request.method == 'POST':
         form = AssignmentForm(request.POST, request.FILES, user=request.user)

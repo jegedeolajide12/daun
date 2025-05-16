@@ -1,81 +1,83 @@
 {% extends 'user_navbar.html' %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="card">
-        <div class="card-header">
-            <h2>Create Assessment</h2>
-        </div>
-        <div class="card-body">
-            <form id="assessmentForm" method="post">
-                {% csrf_token %}
-                
-                {{ form.non_field_errors }}
-                
-                <div class="row mb-4">
-                    <div class="col-md-12">
-                        {{ form.question.label_tag }}
-                        {{ form.question }}
-                        <div class="invalid-feedback">{{ form.question.errors }}</div>
+<main class="ttr-wrapper">
+    <div class="container py-4">
+        <div class="card">
+            <div class="card-header">
+                <h2>Create Assessment</h2>
+            </div>
+            <div class="card-body">
+                <form id="assessmentForm" method="post">
+                    {% csrf_token %}
+                    
+                    {{ form.non_field_errors }}
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            {{ form.question.label_tag }}
+                            {{ form.question }}
+                            <div class="invalid-feedback">{{ form.question.errors }}</div>
+                        </div>
                     </div>
-                </div>
-                
-                <div class="row g-3 mb-4">
-                    <div class="col-md-4">
-                        {{ form.points.label_tag }}
-                        {{ form.points }}
-                        <div class="invalid-feedback">{{ form.points.errors }}</div>
+                    
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            {{ form.points.label_tag }}
+                            {{ form.points }}
+                            <div class="invalid-feedback">{{ form.points.errors }}</div>
+                        </div>
+                        <div class="col-md-4">
+                            {{ form.difficulty.label_tag }}
+                            {{ form.difficulty }}
+                            <div class="invalid-feedback">{{ form.difficulty.errors }}</div>
+                        </div>
+                        <div class="col-md-4">
+                            {{ form.time_limit.label_tag }}
+                            {{ form.time_limit }}
+                            <div class="invalid-feedback">{{ form.time_limit.errors }}</div>
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.due_date.label_tag }}
+                            {{ form.due_date }}
+                            <div class="invalid-feedback">{{ form.due_date.errors }}</div>
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.topic.label_tag }}
+                            {{ form.topic }}
+                            <div class="invalid-feedback">{{ form.topic.errors }}</div>
+                        </div>
+                        <div class="col-12">
+                            {{ form.explanation.label_tag }}
+                            {{ form.explanation }}
+                            <div class="invalid-feedback">{{ form.explanation.errors }}</div>
+                        </div>
                     </div>
-                    <div class="col-md-4">
-                        {{ form.difficulty.label_tag }}
-                        {{ form.difficulty }}
-                        <div class="invalid-feedback">{{ form.difficulty.errors }}</div>
+                    
+                    <div class="mb-4">
+                        <h4>Options</h4>
+                        <div id="optionsContainer" class="mb-3">
+                            <!-- Options will be added here -->
+                        </div>
+                        <button type="button" id="addOptionBtn" class="btn btn-outline-primary">
+                            <i class="fas fa-plus"></i> Add Option
+                        </button>
+                        <div id="optionsError" class="text-danger mt-2"></div>
                     </div>
-                    <div class="col-md-4">
-                        {{ form.time_limit.label_tag }}
-                        {{ form.time_limit }}
-                        <div class="invalid-feedback">{{ form.time_limit.errors }}</div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="#" class="btn btn-secondary">
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            Create Assessment
+                        </button>
                     </div>
-                    <div class="col-md-6">
-                        {{ form.due_date.label_tag }}
-                        {{ form.due_date }}
-                        <div class="invalid-feedback">{{ form.due_date.errors }}</div>
-                    </div>
-                    <div class="col-md-6">
-                        {{ form.topic.label_tag }}
-                        {{ form.topic }}
-                        <div class="invalid-feedback">{{ form.topic.errors }}</div>
-                    </div>
-                    <div class="col-12">
-                        {{ form.explanation.label_tag }}
-                        {{ form.explanation }}
-                        <div class="invalid-feedback">{{ form.explanation.errors }}</div>
-                    </div>
-                </div>
-                
-                <div class="mb-4">
-                    <h4>Options</h4>
-                    <div id="optionsContainer" class="mb-3">
-                        <!-- Options will be added here -->
-                    </div>
-                    <button type="button" id="addOptionBtn" class="btn btn-outline-primary">
-                        <i class="fas fa-plus"></i> Add Option
-                    </button>
-                    <div id="optionsError" class="text-danger mt-2"></div>
-                </div>
-                
-                <div class="d-flex justify-content-between">
-                    <a href="#" class="btn btn-secondary">
-                        Cancel
-                    </a>
-                    <button type="submit" class="btn btn-primary">
-                        Create Assessment
-                    </button>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
-</div>
+</main>
 {% endblock %}
 
 {% block scripts %}
