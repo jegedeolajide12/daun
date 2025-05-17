@@ -574,7 +574,7 @@ class AssessmentQuestion(models.Model):
         help_text=_("Whether this question is active for use")
     )
     assessment = models.ForeignKey(Assessment, related_name='questions', on_delete=models.CASCADE)
-    order = OrderField(blank=True, for_fields=['topic'])
+    order = OrderField(blank=True, for_fields=['assessment'])
 
     class Meta:
         ordering = ['order']
@@ -605,7 +605,7 @@ class MCQOption(models.Model):
         default=False,
         verbose_name=_("Is Correct")
     )
-    order = OrderField(blank=True, for_fields=['assessment'])
+    order = OrderField(blank=True, for_fields=['question'])
 
     class Meta:
         verbose_name = _("MCQ Option")
@@ -614,7 +614,7 @@ class MCQOption(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=['question', 'order'],
-                name='unique_option_order_per_assessment'
+                name='unique_option_order_per_question'
             )
         ]
 

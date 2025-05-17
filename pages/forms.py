@@ -164,6 +164,11 @@ class AssessmentForm(forms.ModelForm):
                 'min': 1,
                 'placeholder': 'Enter Time Limit (in minutes)',
             }),
+            'topic': forms.Select(attrs={
+                'class': 'form-control',
+                'placeholder': 'Select Topic',
+                'id': 'id_topic',
+            }),
         }
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
@@ -180,7 +185,7 @@ class AssessmentForm(forms.ModelForm):
         points = self.cleaned_data.get('points')
         if points is not None and points < 0:
             raise ValidationError("Points cannot be negative.")
-        return points
+        return self.cleaned_data
     
     def clean_time_limit(self):
         time_limit = self.cleaned_data.get('time_limit')

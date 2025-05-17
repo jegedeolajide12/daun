@@ -26,7 +26,7 @@ from .models import (
                 Course, Content, Topic, Video, 
                 Faculty, Notification, Enrollment, Assignment,
                 Submission, UserTask, Grade, RubricScore, Rubric,
-                MCQOption, Assessment, SubmissionFile
+                MCQOption, Assessment, SubmissionFile, AssessmentQuestion
                 )
 from .forms import (CourseForm, ModuleFormSet, FacultyForm, 
                     AssignmentForm, SubmissionForm, AssessmentForm, 
@@ -289,6 +289,7 @@ def topic_detail(request, topic_id):
         is_completed=True
     ).count()
     print(total_completed_assignments)
+    assessments = topic.course.assessments.all()
     topic_completion_percentage = int((float(total_completed_assignments)/float(assignments.count()))*100)
     # Get the ContentType for the Video model
     video_content_type = ContentType.objects.get_for_model(Video)
@@ -685,64 +686,67 @@ def create_assessment(request, course_id):
 
     if request.method == 'POST':
         form = AssessmentForm(request.POST)
-        question_form = AssessmentQuestionForm(request.POST)
+        form.fields['topic'].queryset = Topic.objects.filter(course=course)
         options_valid = True
-        option_data = []
+        questions_data = []
+        # Find all questions
+        for key in request.POST:
+            if key.startswith('questions[') and key.endswith('][text]'):
+                q_index = key.split('[')[1].split(']')[0]
+                question_text = request.POST.get(f'questions[{q_index}][text]')
+                explanation = request.POST.get(f'questions[{q_index}][explanation]')
+                # Gather options for this question
+                options = []
+                option_index = 1
+                while True:
+                    opt_text = request.POST.get(f'questions[{q_index}][options][{option_index}][text]')
+                    if not opt_text:
+                        break
+                    is_correct = request.POST.get(f'questions[{q_index}][options][{option_index}][is_correct]')
+                    options.append({
+                        'option_text': opt_text,
+                        'is_correct': is_correct == 'true' or is_correct == 'on',
+                        'order': option_index
+                    })
+                    option_index += 1
+                questions_data.append({
+                    'text': question_text,
+                    'explanation': explanation,
+                    'options': options
+                })
 
-        option_texts = request.POST.getlist('options[]option_text[]')
-        is_corrects = request.POST.getlist('options[]is_correct[]')
+        # Validate questions and options
+        for q in questions_data:
+            if len(q['options']) < 2:
+                options_valid = False
+                messages.error(request, "Please provide at least two options for each question.")
+            if not any(opt['is_correct'] for opt in q['options']):
+                options_valid = False
+                messages.error(request, "Please select at least one correct option for each question.")
 
-        if len(option_texts) < 2:
-            options_valid = False
-            messages.error(request, "Please provide at least two options.")
-        
-        correct_options = 0
-        for i, (option_text, is_correct) in enumerate(zip(option_texts, is_corrects)):
-            if not option_text.strip():
-                continue
-            if is_correct == 'true':
-                correct_options += 1
-            option_data.append({
-                'option_text': option_text,
-                'is_correct': is_correct == 'true',
-                'order': i + 1
-            })
-        
-        if correct_options == 0:
-            options_valid = False
-            messages.error(request, "Please select at least one correct option.")
-        
-        if form.is_valid() and question_form.is_valid() and options_valid:
+        if form.is_valid() and options_valid and questions_data:
             assessment = form.save(commit=False)
             assessment.course = course
             assessment.created_by = request.user
             assessment.save()
-
-            question = question_form.save(commit=False)
-            question.assessment = assessment
-            question.save
-
-            for option in option_data:
-                MCQOption.objects.create(
-                    question=question,
-                    option_text=option['option_text'],
-                    is_correct=option['is_correct'],
-                    order=option['order']
+            for q in questions_data:
+                question = AssessmentQuestion.objects.create(
+                    assessment=assessment,
+                    question=q['text'],
+                    explanation=q['explanation']
                 )
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return JsonResponse({
-                    'success': True,
-                    'redirect_url': assessment.get_absolute_url()
-                    })
-        else:
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return JsonResponse({
-                    'success': False,
-                    'errors': form.errors.get_json_data(),
-                    'message': 'Please Correct the errors below'
-                    }, status=400)
+                for opt in q['options']:
+                    MCQOption.objects.create(
+                        question=question,
+                        option_text=opt['option_text'],
+                        is_correct=opt['is_correct'],
+                        order=opt['order']
+                    )
+            messages.success(request, "Assessment created successfully!")
+            return redirect('course:course', course.slug)
+        # else: errors will be shown
+
     else:
-        form = AssessmentForm(initial={'points':1, 'time_limit': 5})
-        question_form = AssessmentQuestionForm()
-    return render(request, 'students/manage/create_assessments.html', {'form': form, 'course': course, 
-                                                                       'question_form':question_form})
+        form = AssessmentForm(initial={'points': 1, 'time_limit': 5})
+        form.fields['topic'].queryset = Topic.objects.filter(course=course)
+    return render(request, 'students/manage/create_assessments.html', {'form': form, 'course': course})

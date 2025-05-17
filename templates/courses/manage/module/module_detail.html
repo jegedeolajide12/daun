@@ -143,6 +143,61 @@
                                     </div>
                                 </div>
                             </div>
+                            <!-- New Assignments Section -->
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h4 class="mb-0">Topic Assessments</h4>
+                                </div>
+                                <div class="card-body">
+                                    <div class="list-group">
+                                        {% for assessment in assessments %}
+                                        <div class="list-group-item">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <h5 class="mb-1"><a href="{{ assessment.get_absolute_url }}">{{ assessment.title }}</a> </h5>
+                                                    <small class="text-muted">Due: {{ assessment.due_date|date:"M j, Y" }}</small>
+                                                </div>
+                                                <span class="badge bg-{% if assessment.assessment_task.user_tasks.status == 'submitted' %}info{% elif assignment.status == 'graded' %}success{% elif assignment.status == 'overdue' %}danger{% else %}warning{% endif %}">
+                                                    {{ assessment.get_status_display }}
+                                                </span>
+                                            </div>
+                                            <p class="mt-2 mb-0">{{ assessment.description|truncatewords:20 }}</p>
+                                            
+                                            <!-- Submission Button (conditionally shown) -->
+                                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                                <small class="text-muted">
+                                                    {% if assessment.due_date|date:"U" < now|date:"U" %}
+                                                        Due date passed
+                                                    {% else %}
+                                                        Due in {{ assessment.due_date|timeuntil }}
+                                                    {% endif %}
+                                                </small>
+                                                
+                                                {% with user_task=user_tasks|dict_key:assignment.id %}
+                                                    {% if user_task and user_task.status != 'submitted' and assignment.due_date|date:"U" > now|date:"U" %}
+                                                        <a href="#" 
+                                                        class="btn btn-sm btn-primary">
+                                                            <i class="fa fa-paper-plane me-1"></i> Attempt
+                                                        </a>
+                                                    {% elif user_task and user_task.status == 'submitted' %}
+                                                        <span class="badge bg-success">
+                                                            <i class="fa fa-check me-1"></i> Attempted
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="text-danger small">
+                                                            <i class="fa fa-exclamation-circle me-1"></i> Assessment closed
+                                                        </span>
+                                                    {% endif %}
+                                                {% endwith %}
+                                            </div>
+                                        </div>
+                                        {% empty %}
+                                        <div class="text-muted">No assessments for this topic</div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+
 
                             <!-- Comments Section -->
                             <div class="clear" id="comment-list">
