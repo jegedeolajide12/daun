@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.forms.models import inlineformset_factory
 
 from .models import (Course, Topic, Faculty, Assignment, 
-                     Submission, Assessment, MCQOption)
+                     Submission, Assessment, MCQOption, AssessmentQuestion)
 
 ModuleFormSet = inlineformset_factory(Course, Topic, fields=['name', 'description'], extra=2, can_delete=True)
 
@@ -146,28 +146,13 @@ class SubmissionForm(forms.ModelForm):
 class AssessmentForm(forms.ModelForm):
     class Meta:
         model = Assessment
-        fields = ['question', 'explanation', 'points', 'difficulty', 
-                  'due_date', 'time_limit', 'topic']
+        fields = ['points', 'due_date', 'time_limit', 'topic']
         widgets = {
-            'question': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 3,
-                'placeholder': 'Enter Question',
-            }),
-            'explanation': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 3,
-                'placeholder': 'Enter Explanation',
-            }),
             'points': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'min': 0,
                 'max': 100,
                 'placeholder': 'Enter Points',
-            }),
-            'difficulty': forms.Select(attrs={
-                'class': 'form-control',
-                'placeholder': 'Select Difficulty Level',
             }),
             'due_date': forms.DateInput(attrs={
                 'class': 'form-control',
@@ -202,6 +187,23 @@ class AssessmentForm(forms.ModelForm):
         if time_limit is not None and time_limit < 1:
             raise ValidationError("Time limit must be at least 1 minute.")
         return time_limit
+
+class AssessmentQuestionForm(forms.ModelForm):
+    class Meta:
+        model = AssessmentQuestion
+        fields = ['question', 'explanation']
+        widgets = {
+            'question': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Enter Question',
+            }),
+            'explanation': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Enter Explanation',
+            }),
+        }
     
 class MCQOptionForm(forms.ModelForm):
     class Meta:

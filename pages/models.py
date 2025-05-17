@@ -503,38 +503,13 @@ class RubricScore(models.Model):
     
     def __str__(self):
         return f'{self.user.username} - {self.rubric.assignment.title} - {self.score}'
-    
-class Assessment(models.Model):
-    class DifficultyLevel(models.TextChoices):
-        EASY = 'E', _('Easy')
-        MEDIUM = 'M', _('Medium')
-        HARD = 'H', _('Hard')
 
-    question = models.TextField(
-        verbose_name=_("Question Text"),
-        help_text=_("Enter the question text in full")
-    )
-    explanation = models.TextField(
-        blank=True,
-        null=True,
-        verbose_name=_("Explanation"),
-        help_text=_("Explanation to be shown after answering")
-    )
+class Assessment(models.Model):
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_assessments')
     points = models.PositiveIntegerField(
         default=1,
         verbose_name=_("Points"),
         help_text=_("Points awarded for correct answer")
-    )
-    difficulty = models.CharField(
-        max_length=1,
-        choices=DifficultyLevel.choices,
-        default=DifficultyLevel.MEDIUM,
-        verbose_name=_("Difficulty Level")
-    )
-    is_active = models.BooleanField(
-        default=True,
-        verbose_name=_("Is Active"),
-        help_text=_("Whether this question is active for use")
     )
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -557,12 +532,10 @@ class Assessment(models.Model):
         null=True,
         blank=True
     )
-    order = OrderField(blank=True, for_fields=['topic'])
 
     class Meta:
         verbose_name = _("Assessment")
         verbose_name_plural = _("Assessments")
-        ordering = ['order']
         constraints = [
             models.CheckConstraint(
                 check=models.Q(points__gte=1),
@@ -571,7 +544,7 @@ class Assessment(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.question[:50]}..." if len(self.question) > 50 else self.question
+        return f"Assessment for {self.course.name} (ID: {self.id})"
 
     def clean(self):
         if self.due_date and self.due_date < timezone.now():
@@ -579,6 +552,35 @@ class Assessment(models.Model):
         if self.time_limit and self.time_limit <= 0:
             raise ValidationError(_("Time limit must be positive."))
 
+    
+    def get_absolute_url(self):
+        return reverse('course:create_assessment', args=[self.id])
+
+
+class AssessmentQuestion(models.Model):
+    question = models.TextField(
+        verbose_name=_("Question Text"),
+        help_text=_("Enter the question text in full" )
+    )
+    explanation = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name=_("Explanation"),
+        help_text=_("Explanation to be shown after answering")
+    )
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name=_("Is Active"),
+        help_text=_("Whether this question is active for use")
+    )
+    assessment = models.ForeignKey(Assessment, related_name='questions', on_delete=models.CASCADE)
+    order = OrderField(blank=True, for_fields=['topic'])
+
+    class Meta:
+        ordering = ['order']
+        verbose_name = _("Assessment Question")
+        verbose_name_plural = _("Assessment Questions")
+    
     def get_correct_options(self):
         return self.options.filter(is_correct=True)
 
@@ -586,13 +588,12 @@ class Assessment(models.Model):
         correct_options = self.get_correct_options().count()
         if correct_options == 0:
             raise ValidationError(_("At least one option must be marked as correct."))
+
     
-    def get_absolute_url(self):
-        return reverse('course:create_assessment', args=[self.id])
 
 class MCQOption(models.Model):
-    assessment = models.ForeignKey(
-        Assessment,
+    question = models.ForeignKey(
+        AssessmentQuestion,
         on_delete=models.CASCADE,
         related_name='options'
     )
@@ -611,7 +612,7 @@ class MCQOption(models.Model):
         ordering = ['order']
         constraints = [
             models.UniqueConstraint(
-                fields=['assessment', 'order'],
+                fields=['question', 'order'],
                 name='unique_option_order_per_assessment'
             )
         ]

@@ -29,7 +29,8 @@ from .models import (
                 MCQOption, Assessment, SubmissionFile
                 )
 from .forms import (CourseForm, ModuleFormSet, FacultyForm, 
-                    AssignmentForm, SubmissionForm, AssessmentForm, MCQOptionForm)
+                    AssignmentForm, SubmissionForm, AssessmentForm, 
+                    MCQOptionForm, AssessmentQuestionForm)
 
 def create_faculty(request):
     if request.method == "POST":
@@ -489,6 +490,9 @@ def load_topics(request):
     
     return JsonResponse(data, safe=False)
 
+
+
+
 @login_required
 def assignment_detail(request, course_id, topic_id, assignment_id):
     course = get_object_or_404(Course, id=course_id)
@@ -681,10 +685,11 @@ def create_assessment(request, course_id):
 
     if request.method == 'POST':
         form = AssessmentForm(request.POST)
+        question_form = AssessmentQuestionForm(request.POST)
         options_valid = True
         option_data = []
 
-        option_texts = request.POST.getlist('options[]text[]')
+        option_texts = request.POST.getlist('options[]option_text[]')
         is_corrects = request.POST.getlist('options[]is_correct[]')
 
         if len(option_texts) < 2:
@@ -692,13 +697,13 @@ def create_assessment(request, course_id):
             messages.error(request, "Please provide at least two options.")
         
         correct_options = 0
-        for i, (text, is_correct) in enumerate(zip(option_texts, is_corrects)):
-            if not text.strip():
+        for i, (option_text, is_correct) in enumerate(zip(option_texts, is_corrects)):
+            if not option_text.strip():
                 continue
             if is_correct == 'true':
                 correct_options += 1
             option_data.append({
-                'text': text,
+                'option_text': option_text,
                 'is_correct': is_correct == 'true',
                 'order': i + 1
             })
@@ -707,16 +712,20 @@ def create_assessment(request, course_id):
             options_valid = False
             messages.error(request, "Please select at least one correct option.")
         
-        if form.is_valid() and options_valid:
+        if form.is_valid() and question_form.is_valid() and options_valid:
             assessment = form.save(commit=False)
             assessment.course = course
             assessment.created_by = request.user
             assessment.save()
 
+            question = question_form.save(commit=False)
+            question.assessment = assessment
+            question.save
+
             for option in option_data:
                 MCQOption.objects.create(
-                    assessment=assessment,
-                    option_text=option['text'],
+                    question=question,
+                    option_text=option['option_text'],
                     is_correct=option['is_correct'],
                     order=option['order']
                 )
@@ -725,6 +734,7 @@ def create_assessment(request, course_id):
                     'success': True,
                     'redirect_url': assessment.get_absolute_url()
                     })
+        else:
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({
                     'success': False,
@@ -733,4 +743,6 @@ def create_assessment(request, course_id):
                     }, status=400)
     else:
         form = AssessmentForm(initial={'points':1, 'time_limit': 5})
-    return render(request, 'students/manage/create_assessments.html', {'form': form, 'course': course, 'difficulty_choices': Assessment.DifficultyLevel.choices})
+        question_form = AssessmentQuestionForm()
+    return render(request, 'students/manage/create_assessments.html', {'form': form, 'course': course, 
+                                                                       'question_form':question_form})

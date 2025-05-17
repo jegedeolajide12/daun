@@ -3,7 +3,7 @@ from .models import (Faculty, Course, Topic, Video,
                      Image, Text, File, Task, 
                      UserTask, Enrollment, Notification, 
                      Assignment, Submission, SubmissionFile, Grade, 
-                     Rubric, Assessment, MCQOption)
+                     Rubric, Assessment, MCQOption, AssessmentQuestion)
 
 # Register your models here.
 
@@ -59,12 +59,16 @@ class MCQOptionInline(admin.TabularInline):
     list_editable = ['is_correct']
     search_fields = ['option_text']
 
+@admin.register(AssessmentQuestion)
+class AssessmentQuestionAdmin(admin.ModelAdmin):
+    inlines = [MCQOptionInline]
+
+
 @admin.register(Assessment)
 class AssessmentAdmin(admin.ModelAdmin):
-    list_display = ['question', 'course', 'topic', 'due_date']
+    list_display = ['course', 'topic', 'due_date']
     list_filter = ['course', 'topic', 'due_date']
-    search_fields = ['question', 'course__name', 'topic__name']
-    inlines = [MCQOptionInline]
+    search_fields = ['course__name', 'topic__name']
 
 
 

@@ -78,9 +78,23 @@
         </div>
     </div>
 </main>
-{% endblock %}
 
-{% block scripts %}
+
+<script>
+    document.getElementById('id_course').addEventListener('change', function() {
+        const courseId = this.value;
+        fetch(`ajax/load-topics/?course_id=${courseId}`)
+            .then(response => response.json())
+            .then(data => {
+                const topicSelect = document.getElementById('id_topic');
+                topicSelect.innerHTML = '<option value="">Select Topic</option>';
+                data.forEach(topic => {
+                    topicSelect.innerHTML += `<option value="${topic.id}">${topic.name}</option>`;
+                });
+            });
+    });
+</script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const optionsContainer = document.getElementById('optionsContainer');
