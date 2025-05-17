@@ -505,7 +505,7 @@ class RubricScore(models.Model):
         return f'{self.user.username} - {self.rubric.assignment.title} - {self.score}'
 
 class Assessment(models.Model):
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_assessments')
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_assessments', null=True, blank=True)
     points = models.PositiveIntegerField(
         default=1,
         verbose_name=_("Points"),
@@ -560,7 +560,7 @@ class Assessment(models.Model):
 class AssessmentQuestion(models.Model):
     question = models.TextField(
         verbose_name=_("Question Text"),
-        help_text=_("Enter the question text in full" )
+        help_text=_("Enter the question text in full"),
     )
     explanation = models.TextField(
         blank=True,
@@ -595,7 +595,8 @@ class MCQOption(models.Model):
     question = models.ForeignKey(
         AssessmentQuestion,
         on_delete=models.CASCADE,
-        related_name='options'
+        related_name='options',
+        null=True, blank=True
     )
     option_text = models.TextField(
         verbose_name=_("Option Text")
