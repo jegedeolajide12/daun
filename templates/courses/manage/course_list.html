@@ -1,366 +1,405 @@
-{% extends parent_template|default:"navbar.html" %}
+{% extends parent_template|default:"user_navbar.html" %}
 {% load static %}
 {% block content %}
-    <!-- Content -->
-    <div class="page-content bg-white">
-        <!-- inner page banner -->
-        <div class="page-banner ovbl-dark" style="background-image:url(assets/images/banner/banner3.jpg);">
-            <div class="container">
-                <div class="page-banner-entry">
-                    <h1 class="text-white">Our Courses</h1>
-				 </div>
+
+<!-- Main Container -->
+<main class="ttr-wrapper">
+    <div class="container-fluid">
+        <!-- Breadcrumb -->
+        <div class="page-header">
+            <div class="header-title">
+                <h1>Your Courses</h1>
+                <p>Manage and organize your teaching materials</p>
+            </div>
+            <div class="header-actions">
+                <div class="search-box">
+                    <input type="text" placeholder="Search courses..." id="courseSearch">
+                    <i class="fas fa-search"></i>
+                </div>
+                <a href="{% url 'course:course_create' %}" class="btn btn-primary">
+                    <i class="fas fa-plus-circle mr-2"></i>Create Course
+                </a>
             </div>
         </div>
-		<!-- Breadcrumb row -->
-		<div class="breadcrumb-row">
-			<div class="container">
-				<ul class="list-inline">
-					<li><a href="#">Home</a></li>
-					<li>Our Courses</li>
-				</ul>
-			</div>
-		</div>
-		<!-- Breadcrumb row END -->
-        <!-- inner page banner END -->
-		<div class="content-block">
-            <!-- About Us -->
-			<div class="section-area section-sp1">
-                <div class="container">
-					 <div class="row">
-						<div class="col-lg-3 col-md-4 col-sm-12 m-b30">
-							<div class="widget courses-search-bx placeani">
-								<div class="form-group">
-									<div class="input-group">
-										<label>Search Courses</label>
-										<input name="dzName" type="text" required class="form-control">
-									</div>
-								</div>
-							</div>
-							<div class="widget widget_archive">
-                                <h5 class="widget-title style-1">All Courses</h5>
-                                <ul>
-                                    <li class="active"><a href="#">General</a></li>
-                                    <li><a href="#">IT & Software</a></li>
-                                    <li><a href="#">Photography</a></li>
-                                    <li><a href="#">Programming Language</a></li>
-                                    <li><a href="#">Technology</a></li>
-                                </ul>
-                            </div>
-							<div class="widget">
-								<a href="#"><img src="assets/images/adv/adv.jpg" alt=""/></a>
-							</div>
-							<div class="widget recent-posts-entry widget-courses">
-                                <h5 class="widget-title style-1">Recent Courses</h5>
-                                <div class="widget-post-bx">
-                                    <div class="widget-post clearfix">
-                                        <div class="ttr-post-media"> <img src="assets/images/blog/recent-blog/pic1.jpg" width="200" height="143" alt=""> </div>
-                                        <div class="ttr-post-info">
-                                            <div class="ttr-post-header">
-                                                <h6 class="post-title"><a href="#">Introduction EduChamp</a></h6>
-                                            </div>
-                                            <div class="ttr-post-meta">
-                                                <ul>
-                                                    <li class="price">
-														<del>$190</del>
-														<h5>$120</h5>
-													</li>
-                                                    <li class="review">03 Review</li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="widget-post clearfix">
-                                        <div class="ttr-post-media"> <img src="assets/images/blog/recent-blog/pic3.jpg" width="200" height="160" alt=""> </div>
-                                        <div class="ttr-post-info">
-                                            <div class="ttr-post-header">
-                                                <h6 class="post-title"><a href="#">English For Tommorow</a></h6>
-                                            </div>
-                                            <div class="ttr-post-meta">
-                                                <ul>
-                                                    <li class="price">
-														<h5 class="free">Free</h5>
-													</li>
-                                                    <li class="review">07 Review</li>
-                                                </ul>
-                                            </div>
-                                        </div>
+
+        <!-- Stats Cards -->
+        <div class="dashboard-stats">
+            <div class="stat-card">
+                <div class="stat-icon bg-primary">
+                    <i class="fas fa-book-open"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ courses.count }}</h3>
+                    <p>Total Courses</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon bg-success">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ total_students }}</h3>
+                    <p>Total Students</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon bg-warning">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ avg_rating|default:"0.0" }}</h3>
+                    <p>Avg. Rating</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon bg-info">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ completion_rate }}%</h3>
+                    <p>Completion Rate</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Courses Section -->
+        <div class="courses-container">
+            <!-- Filters -->
+            <div class="management-controls">
+                <div class="filters">
+                    <div class="filter-group">
+                        <label>Status:</label>
+                        <select class="form-control" id="statusFilter">
+                            <option value="">All Statuses</option>
+                            <option value="published">Published</option>
+                            <option value="draft">Draft</option>
+                            <option value="archived">Archived</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Sort By:</label>
+                        <select class="form-control" id="sortFilter">
+                            <option value="recent">Most Recent</option>
+                            <option value="popular">Most Popular</option>
+                            <option value="rating">Highest Rating</option>
+                            <option value="name">Alphabetical</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="view-options">
+                    <button class="view-btn active" data-view="grid"><i class="fas fa-th"></i></button>
+                    <button class="view-btn" data-view="list"><i class="fas fa-list"></i></button>
+                </div>
+            </div>
+
+            {% if courses %}
+                <!-- Courses Grid View -->
+                <div class="courses-grid">
+                    {% for course in courses %}
+                    <div class="course-card" data-status="{{ course.status }}">
+                        <!-- Course Badge -->
+                        <div class="course-badge {% if course.status == 'published' %}published{% elif course.status == 'draft' %}draft{% else %}archived{% endif %}">
+                            {{ course.status|title }}
+                        </div>
+                        
+                        <!-- Featured Badge -->
+                        {% if course.is_featured %}
+                        <div class="featured-badge">
+                            <i class="fas fa-star"></i>
+                            <span class="featured-tooltip">Featured Course</span>
+                        </div>
+                        {% endif %}
+
+                        <!-- Course Image -->
+                        <div class="course-image">
+                            {% if course.cover_image %}
+                                <img src="{{ course.cover_image.url }}" alt="{{ course.name }}">
+                            {% else %}
+                                <div class="course-image-placeholder">
+                                    <i class="fas fa-book-open"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Course Content -->
+                        <div class="course-content">
+                            <div class="course-header">
+                                <h3 class="course-title">
+                                    <a href="{% url 'course:course' course.slug %}">{{ course.name }}</a>
+                                </h3>
+                                <div class="course-meta">
+                                    <span class="faculty-badge">{{ course.faculty.name }}</span>
+                                    <div class="course-rating">
+                                        <i class="fas fa-star"></i>
+                                        <span>{{ course.average_rating|default:"0.0" }} ({{ course.review_count }})</span>
                                     </div>
                                 </div>
                             </div>
-						</div>
-						<div class="col-lg-9 col-md-8 col-sm-12">
-							<div class="row">
-								<div class="col-md-6 col-lg-4 col-sm-6 m-b30">
-									<div class="cours-bx">
-										<div class="action-box">
-											<img src="assets/images/courses/pic1.jpg" alt="">
-											<a href="#" class="btn">Read More</a>
-										</div>
-										<div class="info-bx text-center">
-											<h5><a href="#">Introduction EduChamp – LMS plugin</a></h5>
-											<span>Programming</span>
-										</div>
-										<div class="cours-more-info">
-											<div class="review">
-												<span>3 Review</span>
-												<ul class="cours-star">
-													<li class="active"><i class="fa fa-star"></i></li>
-													<li class="active"><i class="fa fa-star"></i></li>
-													<li class="active"><i class="fa fa-star"></i></li>
-													<li><i class="fa fa-star"></i></li>
-													<li><i class="fa fa-star"></i></li>
-												</ul>
-											</div>
-											<div class="price">
-												<del>$190</del>
-												<h5>$120</h5>
-											</div>
-										</div>
-									</div>
-								</div>
-								<div class="col-md-6 col-lg-4 col-sm-6 m-b30">
-									<div class="cours-bx">
-										<div class="action-box">
-											<img src="assets/images/courses/pic2.jpg" alt="">
-											<a href="#" class="btn">Read More</a>
-										</div>
-										<div class="info-bx text-center">
-											<h5><a href="#">Introduction EduChamp – LMS plugin</a></h5>
-											<span>Programming</span>
-										</div>
-										<div class="cours-more-info">
-											<div class="review">
-												<span>3 Review</span>
-												<ul class="cours-star">
-													<li class="active"><i class="fa fa-star"></i></li>
-													<li class="active"><i class="fa fa-star"></i></li>
-													<li class="active"><i class="fa fa-star"></i></li>
-													<li><i class="fa fa-star"></i></li>
-													<li><i class="fa fa-star"></i></li>
-												</ul>
-											</div>
-											<div class="price">
-												<del>$190</del>
-												<h5>$120</h5>
-											</div>
-										</div>
-									</div>
-								</div>
-								<div class="col-md-6 col-lg-4 col-sm-6 m-b30">
-									<div class="cours-bx">
-										<div class="action-box">
-											<img src="assets/images/courses/pic3.jpg" alt="">
-											<a href="#" class="btn">Read More</a>
-										</div>
-										<div class="info-bx text-center">
-											<h5><a href="#">Introduction EduChamp – LMS plugin</a></h5>
-											<span>Programming</span>
-										</div>
-										<div class="cours-more-info">
-											<div class="review">
-												<span>3 Review</span>
-												<ul class="cours-star">
-													<li class="active"><i class="fa fa-star"></i></li>
-													<li class="active"><i class="fa fa-star"></i></li>
-													<li class="active"><i class="fa fa-star"></i></li>
-													<li><i class="fa fa-star"></i></li>
-													<li><i class="fa fa-star"></i></li>
-												</ul>
-											</div>
-											<div class="price">
-												<del>$190</del>
-												<h5>$120</h5>
-											</div>
-										</div>
-									</div>
-								</div>
-								<div class="col-md-6 col-lg-4 col-sm-6 m-b30">
-									<div class="cours-bx">
-										<div class="action-box">
-											<img src="assets/images/courses/pic4.jpg" alt="">
-											<a href="#" class="btn">Read More</a>
-										</div>
-										<div class="info-bx text-center">
-											<h5><a href="#">Introduction EduChamp – LMS plugin</a></h5>
-											<span>Programming</span>
-										</div>
-										<div class="cours-more-info">
-											<div class="review">
-												<span>3 Review</span>
-												<ul class="cours-star">
-													<li class="active"><i class="fa fa-star"></i></li>
-													<li class="active"><i class="fa fa-star"></i></li>
-													<li class="active"><i class="fa fa-star"></i></li>
-													<li><i class="fa fa-star"></i></li>
-													<li><i class="fa fa-star"></i></li>
-												</ul>
-											</div>
-											<div class="price">
-												<del>$190</del>
-												<h5>$120</h5>
-											</div>
-										</div>
-									</div>
-								</div>
-								<div class="col-md-6 col-lg-4 col-sm-6 m-b30">
-									<div class="cours-bx">
-										<div class="action-box">
-											<img src="assets/images/courses/pic5.jpg" alt="">
-											<a href="#" class="btn">Read More</a>
-										</div>
-										<div class="info-bx text-center">
-											<h5><a href="#">Introduction EduChamp – LMS plugin</a></h5>
-											<span>Programming</span>
-										</div>
-										<div class="cours-more-info">
-											<div class="review">
-												<span>3 Review</span>
-												<ul class="cours-star">
-													<li class="active"><i class="fa fa-star"></i></li>
-													<li class="active"><i class="fa fa-star"></i></li>
-													<li class="active"><i class="fa fa-star"></i></li>
-													<li><i class="fa fa-star"></i></li>
-													<li><i class="fa fa-star"></i></li>
-												</ul>
-											</div>
-											<div class="price">
-												<del>$190</del>
-												<h5>$120</h5>
-											</div>
-										</div>
-									</div>
-								</div>
-								<div class="col-md-6 col-lg-4 col-sm-6 m-b30">
-									<div class="cours-bx">
-										<div class="action-box">
-											<img src="assets/images/courses/pic6.jpg" alt="">
-											<a href="#" class="btn">Read More</a>
-										</div>
-										<div class="info-bx text-center">
-											<h5><a href="#">Introduction EduChamp – LMS plugin</a></h5>
-											<span>Programming</span>
-										</div>
-										<div class="cours-more-info">
-											<div class="review">
-												<span>3 Review</span>
-												<ul class="cours-star">
-													<li class="active"><i class="fa fa-star"></i></li>
-													<li class="active"><i class="fa fa-star"></i></li>
-													<li class="active"><i class="fa fa-star"></i></li>
-													<li><i class="fa fa-star"></i></li>
-													<li><i class="fa fa-star"></i></li>
-												</ul>
-											</div>
-											<div class="price">
-												<del>$190</del>
-												<h5>$120</h5>
-											</div>
-										</div>
-									</div>
-								</div>
-								<div class="col-md-6 col-lg-4 col-sm-6 m-b30">
-									<div class="cours-bx">
-										<div class="action-box">
-											<img src="assets/images/courses/pic7.jpg" alt="">
-											<a href="#" class="btn">Read More</a>
-										</div>
-										<div class="info-bx text-center">
-											<h5><a href="#">Introduction EduChamp – LMS plugin</a></h5>
-											<span>Programming</span>
-										</div>
-										<div class="cours-more-info">
-											<div class="review">
-												<span>3 Review</span>
-												<ul class="cours-star">
-													<li class="active"><i class="fa fa-star"></i></li>
-													<li class="active"><i class="fa fa-star"></i></li>
-													<li class="active"><i class="fa fa-star"></i></li>
-													<li><i class="fa fa-star"></i></li>
-													<li><i class="fa fa-star"></i></li>
-												</ul>
-											</div>
-											<div class="price">
-												<del>$190</del>
-												<h5>$120</h5>
-											</div>
-										</div>
-									</div>
-								</div>
-								<div class="col-md-6 col-lg-4 col-sm-6 m-b30">
-									<div class="cours-bx">
-										<div class="action-box">
-											<img src="assets/images/courses/pic8.jpg" alt="">
-											<a href="#" class="btn">Read More</a>
-										</div>
-										<div class="info-bx text-center">
-											<h5><a href="#">Introduction EduChamp – LMS plugin</a></h5>
-											<span>Programming</span>
-										</div>
-										<div class="cours-more-info">
-											<div class="review">
-												<span>3 Review</span>
-												<ul class="cours-star">
-													<li class="active"><i class="fa fa-star"></i></li>
-													<li class="active"><i class="fa fa-star"></i></li>
-													<li class="active"><i class="fa fa-star"></i></li>
-													<li><i class="fa fa-star"></i></li>
-													<li><i class="fa fa-star"></i></li>
-												</ul>
-											</div>
-											<div class="price">
-												<del>$190</del>
-												<h5>$120</h5>
-											</div>
-										</div>
-									</div>
-								</div>
-								<div class="col-md-6 col-lg-4 col-sm-6 m-b30">
-									<div class="cours-bx">
-										<div class="action-box">
-											<img src="assets/images/courses/pic9.jpg" alt="">
-											<a href="#" class="btn">Read More</a>
-										</div>
-										<div class="info-bx text-center">
-											<h5><a href="#">Introduction EduChamp – LMS plugin</a></h5>
-											<span>Programming</span>
-										</div>
-										<div class="cours-more-info">
-											<div class="review">
-												<span>3 Review</span>
-												<ul class="cours-star">
-													<li class="active"><i class="fa fa-star"></i></li>
-													<li class="active"><i class="fa fa-star"></i></li>
-													<li class="active"><i class="fa fa-star"></i></li>
-													<li><i class="fa fa-star"></i></li>
-													<li><i class="fa fa-star"></i></li>
-												</ul>
-											</div>
-											<div class="price">
-												<del>$190</del>
-												<h5>$120</h5>
-											</div>
-										</div>
-									</div>
-								</div>
-								<div class="col-lg-12 m-b20">
-									<div class="pagination-bx rounded-sm gray clearfix">
-										<ul class="pagination">
-											<li class="previous"><a href="#"><i class="ti-arrow-left"></i> Prev</a></li>
-											<li class="active"><a href="#">1</a></li>
-											<li><a href="#">2</a></li>
-											<li><a href="#">3</a></li>
-											<li class="next"><a href="#">Next <i class="ti-arrow-right"></i></a></li>
-										</ul>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-            </div>
+
+                            <div class="course-description">
+                                {{ course.overview|truncatewords:25 }}
+                            </div>
+
+                            <div class="course-footer">
+                                <div class="course-stats">
+                                    <div class="stat-item">
+                                        <i class="fas fa-users"></i>
+                                        <span>{{ course.enrollment_count }} students</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <i class="fas fa-chart-line"></i>
+                                        <span>{{ course.completion_rate }}% completion</span>
+                                    </div>
+                                </div>
+
+                                <div class="course-actions">
+                                    <a href="{% url 'course:course' course.slug %}" class="btn btn-view">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'course:course_update' course.slug %}" class="btn btn-edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    
+                                    <!-- Dropdown Menu -->
+                                    <div class="dropdown">
+                                        <button class="btn btn-more dropdown-toggle" type="button" id="dropdownMenuButton-{{ course.id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ course.id }}">
+                                            <li><a class="dropdown-item" href="#"><i class="fas fa-chart-bar me-2"></i>Analytics</a></li>
+                                            <li><a class="dropdown-item" href="#"><i class="fas fa-users me-2"></i>Students</a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            {% if course.status == 'published' %}
+                                            <li><a class="dropdown-item" href="#"><i class="fas fa-archive me-2"></i>Archive</a></li>
+                                            {% else %}
+                                            <li><a class="dropdown-item" href="#"><i class="fas fa-check-circle me-2"></i>Publish</a></li>
+                                            {% endif %}
+                                            <li><a class="dropdown-item text-danger" href="{% url 'course:course_delete' course.slug %}"><i class="fas fa-trash-alt me-2"></i>Delete</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Courses List View (Hidden by default) -->
+                <div class="courses-list-view" style="display: none;">
+                    <table class="table course-table">
+                        <thead>
+                            <tr>
+                                <th>Course</th>
+                                <th>Faculty</th>
+                                <th>Students</th>
+                                <th>Rating</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for course in courses %}
+                            <tr data-status="{{ course.status }}">
+                                <td>
+                                    <div class="course-cell">
+                                        <div class="course-thumbnail">
+                                            {% if course.cover_image %}
+                                            <img src="{{ course.cover_image.url }}" alt="{{ course.name }}">
+                                            {% else %}
+                                            <div class="thumbnail-placeholder">
+                                                <i class="fas fa-book-open"></i>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="course-info">
+                                            <h6><a href="{% url 'course:course' course.slug %}">{{ course.name }}</a></h6>
+                                            <p>{{ course.overview|truncatewords:15 }}</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ course.faculty.name }}</td>
+                                <td>{{ course.enrollment_count }}</td>
+                                <td>
+                                    <div class="rating-stars">
+                                        <i class="fas fa-star {% if course.average_rating >= 1 %}filled{% endif %}"></i>
+                                        <i class="fas fa-star {% if course.average_rating >= 2 %}filled{% endif %}"></i>
+                                        <i class="fas fa-star {% if course.average_rating >= 3 %}filled{% endif %}"></i>
+                                        <i class="fas fa-star {% if course.average_rating >= 4 %}filled{% endif %}"></i>
+                                        <i class="fas fa-star {% if course.average_rating >= 5 %}filled{% endif %}"></i>
+                                        <span>({{ course.review_count }})</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="status-badge {% if course.status == 'published' %}published{% elif course.status == 'draft' %}draft{% else %}archived{% endif %}">
+                                        {{ course.status|title }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="table-actions">
+                                        <a href="{% url 'course:course' course.slug %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{% url 'course:course_update' course.slug %}" class="btn btn-sm btn-outline-info">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <div class="dropdown d-inline-block">
+                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown">
+                                                <i class="fas fa-ellipsis-v"></i>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li><a class="dropdown-item" href="#"><i class="fas fa-chart-bar me-2"></i>Analytics</a></li>
+                                                <li><a class="dropdown-item" href="#"><i class="fas fa-users me-2"></i>Students</a></li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                {% if course.status == 'published' %}
+                                                <li><a class="dropdown-item" href="#"><i class="fas fa-archive me-2"></i>Archive</a></li>
+                                                {% else %}
+                                                <li><a class="dropdown-item" href="#"><i class="fas fa-check-circle me-2"></i>Publish</a></li>
+                                                {% endif %}
+                                                <li><a class="dropdown-item text-danger" href="{% url 'course:course_delete' course.slug %}"><i class="fas fa-trash-alt me-2"></i>Delete</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination-container">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination">
+                            {% if courses.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ courses.previous_page_number }}">Previous</a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" tabindex="-1">Previous</a>
+                            </li>
+                            {% endif %}
+                            
+                            {% for num in courses.paginator.page_range %}
+                                {% if courses.number == num %}
+                                <li class="page-item active"><a class="page-link" href="#">{{ num }}</a></li>
+                                {% else %}
+                                <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if courses.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ courses.next_page_number }}">Next</a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#">Next</a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    <div class="pagination-info">
+                        Showing <span>{{ courses.start_index }}-{{ courses.end_index }}</span> of <span>{{ courses.paginator.count }}</span> courses
+                    </div>
+                </div>
+            {% else %}
+                <!-- Empty State -->
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <h3>No Courses Yet</h3>
+                    <p>You haven't created any courses. Get started by creating your first course!</p>
+                    <a href="{% url 'course:course_create' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-plus-circle mr-2"></i>Create First Course
+                    </a>
+                </div>
+            {% endif %}
         </div>
-		<!-- contact area END -->
-		
     </div>
-    <!-- Content END-->
+</main>
+
+<!-- Overlay -->
+<div class="ttr-overlay"></div>
+
+<script>
+    // Toggle between grid and list view
+    document.querySelectorAll('.view-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            if (this.dataset.view === 'grid') {
+                document.querySelector('.courses-grid').style.display = 'grid';
+                document.querySelector('.courses-list-view').style.display = 'none';
+            } else {
+                document.querySelector('.courses-grid').style.display = 'none';
+                document.querySelector('.courses-list-view').style.display = 'block';
+            }
+        });
+    });
+
+    // Filter courses
+    document.querySelectorAll('#statusFilter, #sortFilter').forEach(filter => {
+        filter.addEventListener('change', function() {
+            const status = document.getElementById('statusFilter').value;
+            const sort = document.getElementById('sortFilter').value;
+            
+            // Construct the URL with query parameters
+            let url = window.location.pathname + '?';
+            if (status) url += `status=${status}&`;
+            if (sort) url += `sort=${sort}`;
+            
+            // Remove trailing & if no sort parameter
+            if (url.endsWith('&')) url = url.slice(0, -1);
+            
+            // Reload the page with new filters
+            window.location.href = url;
+        });
+    });
+
+    // Search functionality
+    document.addEventListener('DOMContentLoaded', function () {
+        const courseSearch = document.getElementById('courseSearch');
+        let searchTimer;
+
+        if (courseSearch) {
+            courseSearch.addEventListener('input', function () {
+                clearTimeout(searchTimer);
+                const searchTerm = this.value.trim().toLowerCase();
+                
+                // Only search after user stops typing for 500ms
+                searchTimer = setTimeout(() => {
+                    if (searchTerm.length >= 2 || searchTerm.length === 0) {
+                        // In grid view
+                        document.querySelectorAll('.course-card').forEach(card => {
+                            const title = card.querySelector('.course-title').textContent.toLowerCase();
+                            const description = card.querySelector('.course-description').textContent.toLowerCase();
+                            
+                            if (title.includes(searchTerm) || description.includes(searchTerm)) {
+                                card.style.display = 'block';
+                            } else {
+                                card.style.display = 'none';
+                            }
+                        });
+                        
+                        // In list view
+                        document.querySelectorAll('.course-table tbody tr').forEach(row => {
+                            const title = row.querySelector('.course-info h6').textContent.toLowerCase();
+                            const description = row.querySelector('.course-info p').textContent.toLowerCase();
+                            
+                            if (title.includes(searchTerm) || description.includes(searchTerm)) {
+                                row.style.display = 'table-row';
+                            } else {
+                                row.style.display = 'none';
+                            }
+                        });
+                    }
+                }, 500);
+            });
+        }
+    });
+</script>
+
 {% endblock %}

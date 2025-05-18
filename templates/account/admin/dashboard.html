@@ -1,5 +1,6 @@
 {% extends parent_template|default:"user_navbar.html" %}
 {% load static %}
+{% load dict_extras %}
 {% block content %}
 	<!--Main container start -->
 	<main class="ttr-wrapper">
@@ -249,11 +250,20 @@
 											<div class="badge ml-2">
 												<a href="#" class="btn button-sm green radius-xl">ENROLLED</a>
 											</div>
-											<li class="d-flex align-items-center py-2 border-bottom">
-												<div class="progress progress-bar-striped progress-bar-animated bg-success" style="height: 20px;">
-													<div class="progress-bar bg-success" role="progressbar" style="width: {{ progress }}%;" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100">
-														<span style="color: {% if progress >= 75 %}white{% elif progress >= 50 %}orange{% else %}red{% endif %};">
-															{{ progress }}% Completed
+											<li class="d-flex align-items-center py-3 border-bottom">
+												<div class="progress flex-grow-1" style="height: 24px; width: {{ course_progress|dict_key:course.id }}; border-radius: 12px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
+													<div class="progress-bar progress-bar-striped progress-bar-animated 
+																{% if course_progress|dict_key:course.id >= 75 %}bg-success
+																{% elif course_progress|dict_key:course.id >= 50 %}bg-warning
+																{% else %}bg-danger{% endif %}"
+														role="progressbar"
+														style="width: {{ course_progress|dict_key:course.id }}%; height: 100%;"
+														aria-valuenow="{{ course_progress|dict_key:course.id }}" 
+														aria-valuemin="0" 
+														aria-valuemax="100">
+														<span class="progress-text font-weight-bold">
+															{{ course_progress|dict_key:course.id }}% Complete
+															{% if course_progress|dict_key:course.id >= 100 %}<i class="fas fa-check-circle ml-2"></i>{% endif %}
 														</span>
 													</div>
 												</div>
@@ -490,29 +500,22 @@
 												<a href="#" class="btn button-sm green radius-xl">ENROLLED</a>
 											</div>
 											<li class="d-flex align-items-center py-3 border-bottom">
-												<div class="progress flex-grow-1" style="height: 24px; border-radius: 12px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
+												<div class="progress flex-grow-1" style="height: 24px; width: {{ course_progress|dict_key:course.id }}; border-radius: 12px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
 													<div class="progress-bar progress-bar-striped progress-bar-animated 
-																{% if progress >= 75 %}bg-success
-																{% elif progress >= 50 %}bg-warning
+																{% if course_progress|dict_key:course.id >= 75 %}bg-success
+																{% elif course_progress|dict_key:course.id >= 50 %}bg-warning
 																{% else %}bg-danger{% endif %}"
 														role="progressbar"
-														style="width: {{ progress }}%; height: 100%;"
-														aria-valuenow="{{ progress }}" 
+														style="width: {{ course_progress|dict_key:course.id }}%; height: 100%;"
+														aria-valuenow="{{ course_progress|dict_key:course.id }}" 
 														aria-valuemin="0" 
 														aria-valuemax="100">
 														<span class="progress-text font-weight-bold">
-															{{ progress }}% Complete
-															{% if progress >= 100 %}<i class="fas fa-check-circle ml-2"></i>{% endif %}
+															{{ course_progress|dict_key:course.id }}% Complete
+															{% if course_progress|dict_key:course.id >= 100 %}<i class="fas fa-check-circle ml-2"></i>{% endif %}
 														</span>
 													</div>
 												</div>
-												{% if progress < 100 %}
-												<button class="btn btn-sm btn-link ml-2 text-muted" 
-														data-toggle="tooltip" 
-														title="Click for details">
-													<i class="fas fa-ellipsis-h"></i>
-												</button>
-												{% endif %}
 											</li>
 											{% else %}
 											<div class="badge ml-2">

@@ -309,8 +309,12 @@ def topic_detail(request, topic_id):
         is_completed=True
     ).count()
     assignment_total = assignments.count()
-    if assignment_total > 0:
-        topic_completion_percentage = int((float(total_completed_assignments)/float(assignments.count()))*100)
+    assessment_total = assessments.count()
+    total_tasks = assignment_total + assessment_total
+
+    total_completed_tasks = total_completed_assessments + total_completed_assignments
+    if total_tasks > 0:
+        topic_completion_percentage = int((float(total_completed_tasks)/float(total_tasks))*100)
     else:
         topic_completion_percentage = 0
     
@@ -324,7 +328,7 @@ def topic_detail(request, topic_id):
     context = {
                'topic': topic, 'completed_topics_count':completed_topics_count,
                'contents': contents, 'total_topics':total_topics,
-               'user_tasks':assignment_user_tasks, 'video_count': video_count, 
+               'assignment_user_tasks':assignment_user_tasks, 'video_count': video_count, 
                'assignments': assignments, 'now': now, 'assessments':assessments,
                'course_commpleted':course_completed, 'total_completed_assignments':total_completed_assignments,
                'topic_completion_percentage':topic_completion_percentage,

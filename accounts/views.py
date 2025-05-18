@@ -274,18 +274,19 @@ def admin_dashboard(request):
     )
 
     #STUDENTS
-    progress = 0  # Initialize progress
+    course_progress = {}
     for enrollment in enrolled_courses:
         total_tasks = Task.objects.filter(course=enrollment).count()
         completed = user_tasks.filter(task__course=enrollment, is_completed=True).count()
-        progress = int((completed/total_tasks) * 100) if total_tasks > 0 else 0
+        percent = int((completed / total_tasks) * 100) if total_tasks > 0 else 0
+        course_progress[enrollment.id] = percent
 
     
     context = {
         'enrolled_courses': enrolled_courses,
         avg_monthly_student_enrollment: avg_monthly_student_enrollment,
         'user_courses': user_courses,
-        'progress': progress,
+        'course_progress': course_progress,
         'actions': actions,
         'applications': applications,
         'is_instructor': is_instructor,

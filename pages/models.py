@@ -225,6 +225,18 @@ class Enrollment(models.Model):
         unique_together = ('student', 'course')
         ordering = ['-date_enrolled']
     
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)  # Save the Enrollment instance first
+        self.course.students.add(self.student)
+        self.course.save()
+        for task in self.course.course_tasks.all():
+            UserTask.objects.get_or_create(user=self.student, task=task)
+        
+        
+            
+
+
+    
     def get_progress(self):
         total_topics = self.course.course_topics.count()
         completed_topics = self.completed_topics.count()
