@@ -335,13 +335,20 @@ class Submission(models.Model):
                 user_task.save()
         course = self.assignment.course
         topic = self.assignment.topic
-        all_assignments_completed = all(
-            UserTask.objects.filter(task=assignment.assignment_task, is_completed=False).count() == 0
-            for assignment in topic.assignments.all()
+        enrollment = Enrollment.objects.filter(student=self.user, course=course).first()
+        if enrollment and topic:
+            # Check all assignments
+            all_assignments_completed = all(
+                UserTask.objects.filter(user=self.user, task=assignment.assignment_task, is_completed=True).exists()
+                for assignment in topic.assignments.all()
             )
-        if all_assignments_completed:
-            topic.is_completed = True
-            topic.save()
+            # Check all assessments
+            all_assessments_completed = all(
+                AssessmentAttempt.objects.filter(user=self.user, assessment=assessment, is_completed=True).exists()
+                for assessment in topic.assessments.all()
+            )
+            if all_assignments_completed and all_assessments_completed:
+                enrollment.completed_topics.add(topic)
         StudentActivity.objects.create(
             user=self.user,
             course=course,
@@ -656,6 +663,35 @@ class AssessmentAttempt(models.Model):
     completed_at = models.DateTimeField(null=True, blank=True)
     score = models.FloatField(null=True, blank=True)
     is_completed = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        task = self.assessment.assessment_task
+        if task:
+            user_task = UserTask.objects.filter(user=self.user, task=task).first()
+            if user_task:
+                user_task.is_completed = True
+                user_task.status = 'submitted'
+                user_task.save()
+        # Only check when marking as completed
+        if self.is_completed:
+            topic = self.assessment.topic
+            course = self.assessment.course
+            enrollment = Enrollment.objects.filter(student=self.user, course=course).first()
+            if enrollment and topic:
+                # Check all assignments
+                all_assignments_completed = all(
+                    UserTask.objects.filter(user=self.user, task=assignment.assignment_task, is_completed=True).exists()
+                    for assignment in topic.assignments.all()
+                )
+                # Check all assessments
+                all_assessments_completed = all(
+                    AssessmentAttempt.objects.filter(user=self.user, assessment=assessment, is_completed=True).exists()
+                    for assessment in topic.assessments.all()
+                )
+                if all_assignments_completed and all_assessments_completed:
+                    enrollment.completed_topics.add(topic)
+        super().save(*args, **kwargs)
+        
 
 class MCQResponse(models.Model):
     attempt = models.ForeignKey(AssessmentAttempt, on_delete=models.CASCADE, related_name='responses')

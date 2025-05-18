@@ -51,7 +51,7 @@ class FacultyForm(forms.ModelForm):
 class AssignmentForm(forms.ModelForm):
     class Meta:
         model = Assignment
-        fields = ['title', 'description','due_date', 'course', 'topic', 'file', 'max_score']
+        fields = ['title', 'description', 'course', 'topic', 'file', 'max_score']
         widgets = {
             'title': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -68,12 +68,6 @@ class AssignmentForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Select Course',
                 'id': 'id_course',
-            }),
-            'due_date': forms.DateInput(attrs={
-                'class': 'form-control',
-                'type': 'date',
-                'placeholder': 'Select Due Date',
-                'id': 'id_due_date',
             }),
             'topic': forms.Select(attrs={
                 'class': 'form-control',
@@ -146,18 +140,13 @@ class SubmissionForm(forms.ModelForm):
 class AssessmentForm(forms.ModelForm):
     class Meta:
         model = Assessment
-        fields = ['points', 'due_date', 'time_limit', 'topic']
+        fields = ['points', 'time_limit', 'topic']
         widgets = {
             'points': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'min': 0,
                 'max': 100,
                 'placeholder': 'Enter Points',
-            }),
-            'due_date': forms.DateInput(attrs={
-                'class': 'form-control',
-                'type': 'date',
-                'placeholder': 'Select Due Date',
             }),
             'time_limit': forms.NumberInput(attrs={
                 'class': 'form-control',

@@ -273,7 +273,13 @@ def topic_detail(request, topic_id):
     topic = get_object_or_404(Topic, id=topic_id)
     total_topics = topic.course.course_topics.count()
     topics_check = topic.course.course_topics.all()
-    completed_topics_count = topics_check.filter(is_completed=True).count()
+    # Get the student's enrollment for this course
+    enrollment = Enrollment.objects.filter(student=request.user, course=topic.course).first()
+
+    if enrollment:
+        completed_topics_count = enrollment.completed_topics.count()
+    else:
+        completed_topics_count = 0
     course_completed = False  # Initialize with a default value
     if not topics_check.filter(is_completed=False):
         course_completed = True
@@ -281,7 +287,7 @@ def topic_detail(request, topic_id):
     contents = Content.objects.prefetch_related('content_type').filter(topic=topic)
     assignments = topic.course.assignments.all()
     assignment = topic.course.assignments.first()  # Example: Get the first assignment
-    user_tasks = {
+    assignment_user_tasks = {
         a.id: UserTask.objects.filter(task=a.assignment_task, user=request.user).first()
         for a in assignments
     }
@@ -292,7 +298,7 @@ def topic_detail(request, topic_id):
     ).count()
     print(total_completed_assignments)
     assessments = topic.course.assessments.all()
-    user_tasks = {
+    assessment_user_tasks = {
         a.id: UserTask.objects.filter(task=a.assessment_task, user=request.user).first()
         if hasattr(a, 'assessment_task') else None
         for a in assessments
@@ -302,7 +308,12 @@ def topic_detail(request, topic_id):
         task__assessment__in=assessments,
         is_completed=True
     ).count()
-    topic_completion_percentage = int((float(total_completed_assignments)/float(assignments.count()))*100)
+    assignment_total = assignments.count()
+    if assignment_total > 0:
+        topic_completion_percentage = int((float(total_completed_assignments)/float(assignments.count()))*100)
+    else:
+        topic_completion_percentage = 0
+    
     # Get the ContentType for the Video model
     video_content_type = ContentType.objects.get_for_model(Video)
 
@@ -313,11 +324,11 @@ def topic_detail(request, topic_id):
     context = {
                'topic': topic, 'completed_topics_count':completed_topics_count,
                'contents': contents, 'total_topics':total_topics,
-               'user_tasks':user_tasks, 'video_count': video_count, 
+               'user_tasks':assignment_user_tasks, 'video_count': video_count, 
                'assignments': assignments, 'now': now, 'assessments':assessments,
                'course_commpleted':course_completed, 'total_completed_assignments':total_completed_assignments,
                'topic_completion_percentage':topic_completion_percentage,
-               'total_completed_assessments':total_completed_assessments
+               'total_completed_assessments':total_completed_assessments, 'assessment_user_tasks':assessment_user_tasks
                }
     return render(request, 'courses/manage/module/module_detail.html', context)
 
@@ -702,7 +713,7 @@ def create_assessment(request, course_id):
         form.fields['topic'].queryset = Topic.objects.filter(course=course)
         options_valid = True
         questions_data = []
-        # Find all questions
+        
         for key in request.POST:
             if key.startswith('questions[') and key.endswith('][text]'):
                 q_index = key.split('[')[1].split(']')[0]
@@ -736,6 +747,25 @@ def create_assessment(request, course_id):
             if not any(opt['is_correct'] for opt in q['options']):
                 options_valid = False
                 messages.error(request, "Please select at least one correct option for each question.")
+        
+        # Remove duplicate questions by text (case-insensitive)
+        unique_questions = []
+        seen_questions = set()
+        for q in questions_data:
+            q_text = (q['text'] or '').strip().lower()
+            if q_text and q_text not in seen_questions:
+                # Deduplicate options for this question by option_text
+                unique_options = []
+                seen_options = set()
+                for opt in q['options']:
+                    opt_text = (opt['option_text'] or '').strip().lower()
+                    if opt_text and opt_text not in seen_options:
+                        unique_options.append(opt)
+                        seen_options.add(opt_text)
+                q['options'] = unique_options
+                unique_questions.append(q)
+                seen_questions.add(q_text)
+        questions_data = unique_questions
 
         if form.is_valid() and options_valid and questions_data:
             assessment = form.save(commit=False)
@@ -830,7 +860,7 @@ def attempt_assessment(request, assessment_id):
             attempt.save()
             
             messages.success(request, f"Assessment submitted! Your score: {score:.2f}%")
-            return redirect('assessment_result', attempt_id=attempt.id)
+            return redirect('course:assessment_result', attempt_id=attempt.id)
         
         # For AJAX requests (next question)
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
