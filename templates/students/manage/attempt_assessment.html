@@ -84,6 +84,61 @@
 </main>
 
 
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set these variables as needed
+    const timerDisplay = document.getElementById('timer');
+    const timeLimitMinutes = parseInt('{{ assessment.time_limit }}', 10); // Django context variable
+
+    // Unique key for this assessment (so different assessments don't conflict)
+    const assessmentId = '{{ assessment.id|default:"assessment" }}';
+    const timerKey = `assessment_timer_start_${assessmentId}`;
+
+    // Get or set the start time
+    let startTime = localStorage.getItem(timerKey);
+    if (!startTime) {
+        startTime = Date.now();
+        localStorage.setItem(timerKey, startTime);
+    } else {
+        startTime = parseInt(startTime, 10);
+    }
+
+    const timeLimitMs = timeLimitMinutes * 60 * 1000;
+
+    function updateTimer() {
+        const now = Date.now();
+        const elapsed = now - startTime;
+        const remaining = Math.max(0, timeLimitMs - elapsed);
+
+        const minutes = Math.floor(remaining / 60000);
+        const seconds = Math.floor((remaining % 60000) / 1000);
+
+        timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+        if (remaining <= 0) {
+            clearInterval(timerInterval);
+            timerDisplay.textContent = "0:00";
+            // Optionally, auto-submit the form or show a message
+            // document.getElementById('assessmentForm').submit();
+        }
+    }
+
+    updateTimer();
+    const timerInterval = setInterval(updateTimer, 1000);
+
+    // Optional: Clear timer from storage when assessment is submitted
+    const form = document.getElementById('assessmentForm');
+    if (form) {
+        form.addEventListener('submit', function() {
+            localStorage.removeItem(timerKey);
+        });
+    }
+});
+</script>
+
+
 <script>
 // Timer functionality
 const testDuration = {{ assessment.time_limit }} * 60; // Convert minutes to seconds
