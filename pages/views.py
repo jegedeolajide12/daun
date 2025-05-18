@@ -18,6 +18,7 @@ from django.forms.models import modelform_factory
 from django.apps import apps
 from django.contrib.auth.models import Group
 from django.http import JsonResponse
+from django.core.paginator import Paginator
 
 from actstream import action
 from students.forms import CourseEnrollForm
@@ -26,7 +27,8 @@ from .models import (
                 Course, Content, Topic, Video, 
                 Faculty, Notification, Enrollment, Assignment,
                 Submission, UserTask, Grade, RubricScore, Rubric,
-                MCQOption, Assessment, SubmissionFile, AssessmentQuestion
+                MCQOption, Assessment, SubmissionFile, AssessmentQuestion,
+                AssessmentAttempt, MCQResponse
                 )
 from .forms import (CourseForm, ModuleFormSet, FacultyForm, 
                     AssignmentForm, SubmissionForm, AssessmentForm, 
@@ -290,6 +292,16 @@ def topic_detail(request, topic_id):
     ).count()
     print(total_completed_assignments)
     assessments = topic.course.assessments.all()
+    user_tasks = {
+        a.id: UserTask.objects.filter(task=a.assessment_task, user=request.user).first()
+        if hasattr(a, 'assessment_task') else None
+        for a in assessments
+    }
+    total_completed_assessments = UserTask.objects.filter(
+        user=request.user,
+        task__assessment__in=assessments,
+        is_completed=True
+    ).count()
     topic_completion_percentage = int((float(total_completed_assignments)/float(assignments.count()))*100)
     # Get the ContentType for the Video model
     video_content_type = ContentType.objects.get_for_model(Video)
@@ -302,9 +314,10 @@ def topic_detail(request, topic_id):
                'topic': topic, 'completed_topics_count':completed_topics_count,
                'contents': contents, 'total_topics':total_topics,
                'user_tasks':user_tasks, 'video_count': video_count, 
-               'assignments': assignments, 'now': now,
+               'assignments': assignments, 'now': now, 'assessments':assessments,
                'course_commpleted':course_completed, 'total_completed_assignments':total_completed_assignments,
-               'topic_completion_percentage':topic_completion_percentage
+               'topic_completion_percentage':topic_completion_percentage,
+               'total_completed_assessments':total_completed_assessments
                }
     return render(request, 'courses/manage/module/module_detail.html', context)
 
@@ -750,3 +763,125 @@ def create_assessment(request, course_id):
         form = AssessmentForm(initial={'points': 1, 'time_limit': 5})
         form.fields['topic'].queryset = Topic.objects.filter(course=course)
     return render(request, 'students/manage/create_assessments.html', {'form': form, 'course': course})
+
+
+@login_required
+def attempt_assessment(request, assessment_id):
+    assessment = get_object_or_404(Assessment, id=assessment_id)
+    questions_list = assessment.questions.prefetch_related('options').all()
+    
+    # Check for existing completed attempt
+    existing_attempt = AssessmentAttempt.objects.filter(
+        user=request.user, 
+        assessment=assessment, 
+        is_completed=True
+    ).first()
+    
+    if existing_attempt:
+        messages.info(request, "You have already completed this assessment.")
+        return redirect('course:assessment_result', attempt_id=existing_attempt.id)
+    
+    # Paginate questions (1 per page)
+    paginator = Paginator(questions_list, 1)
+    page_number = request.GET.get('page', 1)
+    questions = paginator.get_page(page_number)
+    
+    # Get answered pages for pagination styling
+    answered_pages = []
+    if request.method == 'POST':
+        # Handle form submission
+        attempt, created = AssessmentAttempt.objects.get_or_create(
+            user=request.user,
+            assessment=assessment,
+            defaults={'started_at': now()}
+        )
+        
+        # Process the answer
+        question_id = request.POST.get('question_id')
+        if question_id:
+            question = get_object_or_404(AssessmentQuestion, id=question_id)
+            selected_option_id = request.POST.get(f'question_{question_id}')
+            
+            if selected_option_id:
+                selected_option = get_object_or_404(MCQOption, id=selected_option_id)
+                
+                # Save or update response
+                MCQResponse.objects.update_or_create(
+                    attempt=attempt,
+                    question=question,
+                    defaults={
+                        'selected_option': selected_option,
+                        'is_correct': selected_option.is_correct
+                    }
+                )
+        
+        # Check if this is a final submission
+        if 'finish' in request.POST:
+            # Calculate score
+            responses = attempt.responses.all()
+            total_questions = assessment.questions.count()
+            correct_count = responses.filter(is_correct=True).count()
+            score = (correct_count / total_questions) * 100 if total_questions > 0 else 0
+            
+            # Complete the attempt
+            attempt.score = score
+            attempt.completed_at = now()
+            attempt.is_completed = True
+            attempt.save()
+            
+            messages.success(request, f"Assessment submitted! Your score: {score:.2f}%")
+            return redirect('assessment_result', attempt_id=attempt.id)
+        
+        # For AJAX requests (next question)
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True})
+    
+    # Get answered pages for pagination styling
+    if request.user.is_authenticated:
+        attempt = AssessmentAttempt.objects.filter(
+            user=request.user,
+            assessment=assessment
+        ).first()
+        
+        if attempt:
+            answered_pages = list(attempt.responses.values_list(
+                'question__id', flat=True
+            ))
+            answered_pages = [i for i, q in enumerate(questions_list, 1) if q.id in answered_pages]
+    
+    return render(request, 'students/manage/attempt_assessment.html', {
+        'assessment': assessment,
+        'questions': questions,
+        'answered_pages': answered_pages,
+        'test_duration': assessment.time_limit * 60  # Convert to seconds
+    })
+
+
+@login_required
+def assessment_result(request, attempt_id):
+    attempt = get_object_or_404(AssessmentAttempt, id=attempt_id, user=request.user)
+    assessment = attempt.assessment
+
+    # Calculate correct/incorrect counts
+    responses = attempt.responses.select_related('question', 'selected_option')
+    correct_count = responses.filter(is_correct=True).count()
+    incorrect_count = responses.filter(is_correct=False).count()
+
+    # Calculate completion time (if available)
+    if attempt.completed_at and attempt.started_at:
+        delta = attempt.completed_at - attempt.started_at
+        minutes, seconds = divmod(int(delta.total_seconds()), 60)
+        if minutes:
+            completion_time = f"{minutes} min {seconds} sec"
+        else:
+            completion_time = f"{seconds} sec"
+    else:
+        completion_time = "N/A"
+
+    return render(request, 'students/manage/assessment_result.html', {
+        'assessment': assessment,
+        'attempt': attempt,
+        'correct_count': correct_count,
+        'incorrect_count': incorrect_count,
+        'completion_time': completion_time,
+    })

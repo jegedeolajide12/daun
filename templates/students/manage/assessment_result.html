@@ -1,0 +1,154 @@
+{% extends 'user_navbar.html' %}
+{% load static %}
+
+{% block content %}
+    <main class="ttr-wrapper">
+    <div class="assessment-result-container">
+        <!-- Confetti Background Elements -->
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        
+        <!-- Main Result Card -->
+        <div class="result-card animate__animated animate__fadeInUp">
+            <div class="result-header">
+                <h1 class="animate__animated animate__bounceIn">
+                    <i class="fas fa-trophy gold-icon"></i> Assessment Results
+                </h1>
+                <div class="divider animate__animated animate__fadeIn"></div>
+            </div>
+            
+            <!-- Score Display -->
+            <div class="score-display animate__animated animate__zoomIn">
+                <div class="score-circle {% if attempt.score >= 70 %}score-excellent{% elif attempt.score >= 50 %}score-good{% else %}score-poor{% endif %}">
+                    <svg class="progress-ring" width="200" height="200">
+                        <circle class="progress-ring-circle" stroke-width="10" fill="transparent" r="90" cx="100" cy="100"/>
+                    </svg>
+                    <div class="score-text">
+                        <span class="score-percent">{{ attempt.score|floatformat:0 }}</span>
+                        <span class="score-label">%</span>
+                    </div>
+                </div>
+                <h3 class="score-message mt-3 animate__animated animate__fadeIn">
+                    {% if attempt.score >= 70 %}
+                    Excellent Work! <i class="fas fa-star gold-icon"></i>
+                    {% elif attempt.score >= 50 %}
+                    Good Effort! <i class="fas fa-thumbs-up blue-icon"></i>
+                    {% else %}
+                    Keep Practicing! <i class="fas fa-redo green-icon"></i>
+                    {% endif %}
+                </h3>
+            </div>
+            
+            <!-- Stats Summary -->
+            <div class="stats-summary animate__animated animate__fadeInUp">
+                <div class="stat-item correct">
+                    <i class="fas fa-check-circle"></i>
+                    <span>{{ correct_count }} Correct</span>
+                </div>
+                <div class="stat-item incorrect">
+                    <i class="fas fa-times-circle"></i>
+                    <span>{{ incorrect_count }} Incorrect</span>
+                </div>
+                <div class="stat-item time">
+                    <i class="fas fa-clock"></i>
+                    <span>Completed in {{ completion_time }}</span>
+                </div>
+            </div>
+            
+            <!-- Detailed Breakdown -->
+            <div class="detailed-results animate__animated animate__fadeIn">
+                <h3><i class="fas fa-list-ol"></i> Question Breakdown</h3>
+                <div class="questions-list">
+                    {% for response in attempt.responses.all %}
+                    <div class="question-item {% if response.is_correct %}correct{% else %}incorrect{% endif %}">
+                        <div class="question-header">
+                            <span class="question-number">Q{{ forloop.counter }}</span>
+                            <span class="question-status">
+                                {% if response.is_correct %}
+                                <i class="fas fa-check correct-icon"></i> Correct
+                                {% else %}
+                                <i class="fas fa-times incorrect-icon"></i> Incorrect
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="question-text">{{ response.question.text }}</div>
+                        {% if not response.is_correct and response.question.explanation %}
+                        <div class="explanation">
+                            <i class="fas fa-lightbulb"></i> {{ response.question.explanation }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Actions -->
+            <div class="result-actions animate__animated animate__fadeInUp">
+                <a href="{% url 'course:course' assessment.course.id %}" class="btn btn-outline-primary">
+                    <i class="fas fa-book"></i> Back to Course
+                </a>
+                <a href="#" class="btn btn-primary">
+                    <i class="fas fa-clipboard-list"></i> View Other Assessments
+                </a>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate the progress circle
+    const circle = document.querySelector('.progress-ring-circle');
+    const radius = circle.r.baseVal.value;
+    const circumference = 2 * Math.PI * radius;
+    const offset = circumference - ({{ attempt.score }} / 100) * circumference;
+    
+    circle.style.strokeDasharray = `${circumference} ${circumference}`;
+    circle.style.strokeDashoffset = circumference;
+    
+    setTimeout(() => {
+        circle.style.strokeDashoffset = offset;
+    }, 300);
+    
+    // Bounce animation for score
+    anime({
+        targets: '.score-percent',
+        scale: [1, 1.2, 1],
+        duration: 1000,
+        delay: 800,
+        easing: 'easeInOutQuad'
+    });
+    
+    // Confetti effect for good scores
+    {% if attempt.score >= 70 %}
+    setTimeout(() => {
+        const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff'];
+        
+        for (let i = 0; i < 50; i++) {
+            const confetti = document.createElement('div');
+            confetti.className = 'confetti';
+            confetti.style.left = Math.random() * 100 + 'vw';
+            confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            confetti.style.animationDelay = Math.random() * 2 + 's';
+            confetti.style.width = Math.random() * 10 + 5 + 'px';
+            confetti.style.height = confetti.style.width;
+            document.querySelector('.assessment-result-container').appendChild(confetti);
+        }
+    }, 1500);
+    {% endif %}
+    
+    // Sequential fade-in for question items
+    anime({
+        targets: '.question-item',
+        opacity: [0, 1],
+        translateY: [20, 0],
+        delay: anime.stagger(100),
+        duration: 800,
+        easing: 'easeOutQuad'
+    });
+});
+</script>
+{% endblock %}

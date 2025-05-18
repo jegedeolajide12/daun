@@ -1,0 +1,162 @@
+{% extends 'user_navbar.html' %}
+{% load static %}
+
+{% block content %}
+<main class="ttr-wrapper">
+    <div class="container-fluid">
+        <!-- Header with Timer and Progress -->
+        <div class="test-header d-flex flex-column flex-md-row justify-content-between align-items-center p-3 bg-light border-bottom">
+            <div class="timer-container d-flex align-items-center mb-2 mb-md-0">
+                <span class="timer-icon text-danger me-2"><i class="fas fa-clock"></i></span>
+                <span id="timer" class="fw-bold">{{ assessment.time_limit }}:00</span>
+            </div>
+            
+            <div class="progress-indicator d-flex align-items-center">
+                <span class="me-2">Question <span id="current-question">{{ questions.number }}</span> of {{ questions.paginator.num_pages }}</span>
+            </div>
+        </div>
+
+        <!-- Question Card -->
+        <div class="card question-card mt-3">
+            <div class="card-body">
+                <form id="testForm" method="post" action="{% url 'course:attempt_assessment' assessment.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="question_id" value="{{ questions.0.id }}">
+                    
+                    <!-- Current Question -->
+                    <div class="question-container">
+                        <h4 class="question-text mb-4">{{ questions.0.question }}</h4>
+                        
+                        <div class="options-container">
+                            {% for option in questions.0.options.all %}
+                            <div class="option-item mb-3">
+                                <input type="radio" name="question_{{ questions.0.id }}" 
+                                       id="option{{ forloop.counter }}" value="{{ option.id }}"
+                                       {% if option.id == selected_answer %}checked{% endif %}>
+                                <label for="option{{ forloop.counter }}" class="option-label">
+                                    <span class="option-letter">{{ forloop.counter|stringformat:"c"|upper }}</span>
+                                    <span class="option-text">{{ option.option_text }}</span>
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <!-- Pagination Controls -->
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mt-4">
+                        <!-- Previous Button -->
+                        {% if questions.has_previous %}
+                        <button type="button" class="btn btn-outline-primary prev-btn mb-2 mb-md-0" 
+                                onclick="window.location.href='?page={{ questions.previous_page_number }}'">
+                            <i class="fas fa-arrow-left me-1"></i> Previous
+                        </button>
+                        {% else %}
+                        <div class="mb-2 mb-md-0"></div> <!-- Spacer -->
+                        {% endif %}
+                        
+                        <!-- Question Numbers -->
+                        <div class="pagination-numbers mb-2 mb-md-0">
+                            {% for num in questions.paginator.page_range %}
+                            <a href="?page={{ num }}" class="page-number 
+                                {% if questions.number == num %}current-page
+                                {% elif num in answered_pages %}answered-page
+                                {% endif %}">
+                                {{ num }}
+                            </a>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Next/Submit Button -->
+                        {% if questions.has_next %}
+                        <button type="button" class="btn btn-primary next-btn" onclick="submitAndGoNext()">
+                            Next <i class="fas fa-arrow-right ms-1"></i>
+                        </button>
+                        {% else %}
+                        <button type="submit" class="btn btn-success finish-btn" name="finish">
+                            Submit Assessment <i class="fas fa-check ms-1"></i>
+                        </button>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+
+
+<script>
+// Timer functionality
+const testDuration = {{ assessment.time_limit }} * 60; // Convert minutes to seconds
+let timeLeft = testDuration;
+
+function updateTimer() {
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
+    document.getElementById('timer').textContent = 
+        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    
+    // Change color when time is running low
+    if (timeLeft <= 300) { // 5 minutes left
+        document.getElementById('timer').classList.add('text-danger');
+        document.getElementById('timer').classList.add('blink');
+    }
+    
+    if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        alert("Time's up! Your test will be submitted automatically.");
+        document.getElementById('testForm').submit();
+    } else {
+        timeLeft--;
+    }
+}
+
+// Start timer
+const timerInterval = setInterval(updateTimer, 1000);
+updateTimer(); // Initial call
+
+// Submit and go to next question
+function submitAndGoNext() {
+    const form = document.getElementById('testForm');
+    const currentPage = {{ questions.number }};
+    const nextPage = currentPage + 1;
+    
+    // Submit via AJAX to save progress
+    fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            window.location.href = `?page=${nextPage}`;
+        } else {
+            alert('Error saving your answer. Please try again.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+    });
+}
+
+// Auto-save when leaving page
+window.addEventListener('beforeunload', function(e) {
+    if (timeLeft > 0) {
+        const form = document.getElementById('testForm');
+        form.insertAdjacentHTML('beforeend', '<input type="hidden" name="auto_save" value="1">');
+        navigator.sendBeacon(form.action, new FormData(form));
+    }
+});
+
+// Blink animation for timer
+setInterval(function() {
+    if (timeLeft <= 300) { // Only blink if 5 minutes or less
+        const timer = document.getElementById('timer');
+        timer.classList.toggle('blink');
+    }
+}, 1000);
+</script>
+{% endblock %}

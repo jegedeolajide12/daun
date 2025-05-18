@@ -117,6 +117,7 @@ class Video(ItemBase):
 class TaskType(models.TextChoices):
     QUIZ = 'quiz', 'Quiz'
     ASSIGNMENT = 'assignment', 'Assignment'
+    ASSESSMENT = 'assessment', 'Assessment'
     EXAM = 'exam', 'Exam'
     PROJECT = 'project', 'Project'
 
@@ -128,6 +129,7 @@ class Task(models.Model):
     due_date = models.DateTimeField(null=True, blank=True)
     type = models.CharField(max_length=20, choices=TaskType.choices, default=TaskType.QUIZ)
     assignment = models.OneToOneField('Assignment', on_delete=models.CASCADE, related_name='assignment_task', null=True,blank=True)
+    assessment = models.OneToOneField('Assessment', on_delete=models.CASCADE, related_name='assessment_task', null=True, blank=True)
     description = models.TextField()
 
     def __str__(self):
@@ -523,12 +525,12 @@ class Assessment(models.Model):
     course = models.ForeignKey(
         Course,
         on_delete=models.CASCADE,
-        related_name='mcq_assessments'
+        related_name='assessments'
     )
     topic = models.ForeignKey(
         Topic,
         on_delete=models.CASCADE,
-        related_name='mcq_assessments',
+        related_name='assessments',
         null=True,
         blank=True
     )
@@ -552,6 +554,18 @@ class Assessment(models.Model):
         if self.time_limit and self.time_limit <= 0:
             raise ValidationError(_("Time limit must be positive."))
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        title = f"Assessment for {self.course.name} (ID: {self.id})"
+        task, created = Task.objects.get_or_create(
+            assessment=self,
+            title=title,
+            course=self.course,
+            start_date=self.created,
+            due_date=self.due_date,
+            type=TaskType.ASSESSMENT,
+            description=getattr(self, 'description', '')
+        )
     
     def get_absolute_url(self):
         return reverse('course:create_assessment', args=[self.id])
@@ -619,7 +633,7 @@ class MCQOption(models.Model):
         ]
 
     def __str__(self):
-        return f'Option {self.order} for {self.assessment.question[:30]}'
+        return f'Option {self.order} for {str(self.question)[:30]}'
 
     def clean(self):
         if not self.assessment:
@@ -645,7 +659,7 @@ class AssessmentAttempt(models.Model):
 
 class MCQResponse(models.Model):
     attempt = models.ForeignKey(AssessmentAttempt, on_delete=models.CASCADE, related_name='responses')
-    question = models.ForeignKey(Assessment, on_delete=models.CASCADE)
+    question = models.ForeignKey(AssessmentQuestion, on_delete=models.CASCADE)
     selected_option = models.ForeignKey(MCQOption, on_delete=models.CASCADE, null=True, blank=True)
     is_correct = models.BooleanField(default=False)
     responded_at = models.DateTimeField(auto_now_add=True)
