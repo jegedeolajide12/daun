@@ -1,0 +1,51 @@
+.ed-nav {
+    position: relative;
+    z-index: 50;
+}
+
+.ed-course-card {
+    transition: transform 0.2s ease;
+}
+
+.ed-course-card:hover {
+    transform: translateY(-4px);
+}
+
+.ed-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #ef4444;
+    color: white;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ed-user-menu:hover .ed-user-dropdown {
+    display: block;
+}
+/* HERO RESPONSIVE SECTION */
+@media (max-width: 640px) {
+    .ed-search-form {
+        width: 100%;
+        max-width: 100%;
+        padding: 0 8px;
+    }
+    
+    .ed-hero input {
+        border-radius: 28px 28px 0 0 !important;
+    }
+    
+    .ed-hero button {
+        border-radius: 0 0 28px 28px !important;
+    }
+    
+    .ed-stats div[class*="col-span-1"] {
+        padding: 0 4px;
+    }
+}

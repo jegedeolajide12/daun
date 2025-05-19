@@ -1,266 +1,238 @@
-{% extends parent_template|default:"navbar.html" %}
+<!-- home.html -->
+{% extends 'navbar.html' %}
 {% load static %}
+
 {% block content %}
-<!-- Content -->
-<div class="page-content bg-white">
-    <!-- Main Slider -->
-    <div class="section-area section-sp1 ovpr-dark bg-fix online-cours" style="background-image:url({% static 'assets/images/background/bg1.jpg' %});">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-12 text-center text-white">
-                    <h2>Online Courses To Learn</h2>
-                    <h5>Own Your Feature Learning New Skills Online</h5>
-                    <form class="cours-search">
-                        <div class="input-group">
-                            <input type="text" class="form-control" placeholder="What do you want to learn today?">
-                            <div class="input-group-append">
-                                <button class="btn" type="submit">Search</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
+<!-- Hero Section -->
+<section class="ed-hero bg-gradient-to-b from-blue-900 to-blue-700 text-white py-12 md:py-20">
+    <div class="container mx-auto px-4 text-center">
+        <h1 class="text-3xl md:text-5xl font-bold mb-4 md:mb-6 leading-tight px-2">
+            Advance Your Career with<br class="hidden md:block"> Expert-Led Courses
+        </h1>
+        
+        <p class="text-base md:text-xl text-blue-100 mb-6 md:mb-8 max-w-2xl mx-auto px-2">
+            Master new skills through immersive learning experiences taught by industry leaders 
+            from top companies and universities.
+        </p>
+        
+        <div class="ed-search-form max-w-3xl mx-auto px-2">
+            <div class="flex flex-col md:flex-row rounded-full overflow-hidden shadow-xl mx-2">
+                <input type="text" placeholder="What do you want to learn today?" 
+                       class="flex-1 px-4 md:px-8 py-3 md:py-4 text-gray-700 text-sm focus:outline-none">
+                <button class="bg-blue-500 text-white px-6 md:px-10 py-3 md:py-4 hover:bg-blue-600 transition-colors font-medium whitespace-nowrap">
+                    Search Courses
+                </button>
             </div>
-            <div class="mw800 m-auto">
-                <div class="row">
-                    <div class="col-md-4 col-sm-6">
-                        <div class="cours-search-bx m-b30">
-                            <div class="icon-box">
-                                <h3><i class="ti-user"></i><span class="counter">5</span>M</h3>
-                            </div>
-                            <span class="cours-search-text">Over 5 million students</span>
-                        </div>
-                    </div>
-                    <div class="col-md-4 col-sm-6">
-                        <div class="cours-search-bx m-b30">
-                            <div class="icon-box">
-                                <h3><i class="ti-book"></i><span class="counter">30</span>K</h3>
-                            </div>
-                            <span class="cours-search-text">30,000 Courses</span>
-                        </div>
-                    </div>
-                    <div class="col-md-4 col-sm-12">
-                        <div class="cours-search-bx m-b30">
-                            <div class="icon-box">
-                                <h3><i class="ti-layout-list-post"></i><span class="counter">20</span>K</h3>
-                            </div>
-                            <span class="cours-search-text">Learn Anything Online</span>
-                        </div>
-                    </div>
-                </div>
+        </div>
+        
+        <div class="ed-stats grid grid-cols-3 gap-4 md:flex md:justify-center md:space-x-12 mt-8 md:mt-14 text-center px-2">
+            <div class="col-span-1">
+                <div class="text-xl md:text-3xl font-bold">180K+</div>
+                <div class="text-xs md:text-sm text-blue-200">Courses</div>
+            </div>
+            <div class="hidden md:block border-l border-blue-400"></div>
+            <div class="col-span-1">
+                <div class="text-xl md:text-3xl font-bold">25K+</div>
+                <div class="text-xs md:text-sm text-blue-200">Instructors</div>
+            </div>
+            <div class="hidden md:block border-l border-blue-400"></div>
+            <div class="col-span-1">
+                <div class="text-xl md:text-3xl font-bold">Lifetime</div>
+                <div class="text-xs md:text-sm text-blue-200">Access</div>
             </div>
         </div>
     </div>
-    <!-- Main Slider -->
-    <div class="content-block">
-        <!-- Popular Courses -->
-        <div class="section-area section-sp2 popular-courses-bx">
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-12 heading-bx left">
-                        <h2 class="title-head">Popular <span>Courses</span></h2>
-                        <p>It is a long established fact that a reader will be distracted by the readable content of a page</p>
+</section>
+
+<!-- Featured Courses -->
+<section class="ed-courses py-16 bg-gray-50">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-2">Most Popular Courses</h2>
+            <p class="text-gray-600 max-w-xl mx-auto">Discover our top-rated courses chosen by thousands of learners worldwide</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for course in courses %}
+            <div class="ed-course-card bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                <div class="relative">
+                    <img src="{{ course.cover_image.url }}" alt="{{ course.name }}" 
+                         class="w-full h-48 object-cover">
+                    <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
+                        <span class="text-white text-sm font-medium">{{ course.category }}</span>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="courses-carousel owl-carousel owl-btn-1 col-12 p-lr0">
-                        {% for course in courses %}
-                        <div class="item">
-                            <div class="cours-bx">
-                                <div class="action-box">
-                                    <img src="{{ course.cover_image.url }}" alt="">
-                                    <a href="#" class="btn">Read More</a>
-                                </div>
-                                <div class="info-bx text-center">
-                                    <h5><a href="#">{{ course.name|title }}</a></h5>
-                                    <span>Faculty of {{ course.faculty.name|title }}</span>
-                                </div>
-                                <div class="cours-more-info">
-                                    <div class="review">
-                                        <span>3 Review</span>
-                                        <ul class="cours-star">
-                                            <li class="active"><i class="fa fa-star"></i></li>
-                                            <li class="active"><i class="fa fa-star"></i></li>
-                                            <li class="active"><i class="fa fa-star"></i></li>
-                                            <li><i class="fa fa-star"></i></li>
-                                            <li><i class="fa fa-star"></i></li>
-                                        </ul>
-                                    </div>
-                                    <div class="price">
-                                        <del>$190</del>
-                                        <h5>$120</h5>
-                                    </div>
-                                </div>
-                            </div>
+                
+                <div class="p-6">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">{{ course.name }}</h3>
+                    <p class="text-gray-600 text-sm mb-4">{{ course.short_description|truncatechars:80 }}</p>
+                    
+                    <!-- Instructor Section -->
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="ed-instructor-avatar w-8 h-8 rounded-full overflow-hidden border-2 border-white shadow-sm">
+                            <img src="{{ course.instructor.profile.image.url }}" 
+                                 alt="{{ course.instructor.get_full_name }}"
+                                 class="w-full h-full object-cover">
                         </div>
-						{% empty %}
-						<div class="no-courses-message text-center" style="padding: 20px; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px;">
-							<p>No courses available at the moment. Please check back later.</p>
-						</div>
-                        {% endfor %}
+                        <div class="text-sm text-gray-600">
+                            <span class="font-medium">{{ course.instructor.get_full_name }}</span>
+                            <span class="text-gray-500">・{{ course.instructor.title }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <div class="ed-rating flex items-center space-x-1">
+                            <div class="text-yellow-500 text-sm">★ 4.8</div>
+                            <span class="text-gray-500 text-sm">(12,345)</span>
+                        </div>
+                        <div class="ed-price">
+                            {% if course.discount_price %}
+                            <span class="text-gray-500 line-through mr-2">${{ course.price }}</span>
+                            <span class="text-lg font-bold text-blue-600">${{ course.discount_price }}</span>
+                            {% else %}
+                            <span class="text-lg font-bold text-blue-600">${{ course.price }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="border-t px-6 py-3 bg-gray-50">
+                    <div class="flex items-center justify-between text-sm text-gray-500">
+                        <span>
+                            <i class="far fa-clock mr-1"></i>{{ course.duration }} hours
+                        </span>
+                        <span>
+                            <i class="far fa-file-alt mr-1"></i>{{ course.lessons_count }} lessons
+                        </span>
                     </div>
                 </div>
             </div>
+            {% endfor %}
         </div>
-        <!-- Popular Courses END -->
-        <div class="section-area section-sp2 bg-fix ovbl-dark join-bx text-center" style="background-image:url({% static 'assets/images/background/bg1.jpg' %});">
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="join-content-bx text-white">
-                            <h2>Learn a new skill online on <br> your time</h2>
-                            <h4><span class="counter">57,000</span> Online Courses</h4>
-                            <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.</p>
-                            <a href="#" class="btn button-md">Join Now</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Form END -->
-        <div class="section-area section-sp1">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-6 m-b30">
-                        <h2 class="title-head">Learn a new skill online<br> <span class="text-primary">on your time</span></h2>
-                        <h4><span class="counter">57,000</span> Online Courses</h4>
-                        <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
-                        <a href="#" class="btn button-md">Join Now</a>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="row">
-                            <div class="col-lg-6 col-md-6 col-sm-6 m-b30">
-                                <div class="feature-container">
-                                    <div class="feature-md text-white m-b20">
-                                        <a href="#" class="icon-cell"><img src="{% static 'assets/images/icon/icon1.png' %}" alt=""></a>
-                                    </div>
-                                    <div class="icon-content">
-                                        <h5 class="ttr-tilte">Our Philosophy</h5>
-                                        <p>Lorem ipsum dolor sit amet, consectetuer adipiscing.</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-6 col-md-6 col-sm-6 m-b30">
-                                <div class="feature-container">
-                                    <div class="feature-md text-white m-b20">
-                                        <a href="#" class="icon-cell"><img src="{% static 'assets/images/icon/icon2.png' %}" alt=""></a>
-                                    </div>
-                                    <div class="icon-content">
-                                        <h5 class="ttr-tilte">Kingster's Principle</h5>
-                                        <p>Lorem ipsum dolor sit amet, consectetuer adipiscing.</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-6 col-md-6 col-sm-6 m-b30">
-                                <div class="feature-container">
-                                    <div class="feature-md text-white m-b20">
-                                        <a href="#" class="icon-cell"><img src="{% static 'assets/images/icon/icon3.png' %}" alt=""></a>
-                                    </div>
-                                    <div class="icon-content">
-                                        <h5 class="ttr-tilte">Key Of Success</h5>
-                                        <p>Lorem ipsum dolor sit amet, consectetuer adipiscing.</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-6 col-md-6 col-sm-6 m-b30">
-                                <div class="feature-container">
-                                    <div class="feature-md text-white m-b20">
-                                        <a href="#" class="icon-cell"><img src="{% static 'assets/images/icon/icon4.png' %}" alt=""></a>
-                                    </div>
-                                    <div class="icon-content">
-                                        <h5 class="ttr-tilte">Our Philosophy</h5>
-                                        <p>Lorem ipsum dolor sit amet, consectetuer adipiscing.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Testimonials -->
-        <div class="section-area section-sp1 bg-fix ovbl-dark text-white" style="background-image:url({% static 'assets/images/background/bg1.jpg' %});">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-3 col-md-6 col-sm-6 col-6 m-b30">
-                        <div class="counter-style-1">
-                            <div class="text-white">
-                                <span class="counter">3000</span><span>+</span>
-                            </div>
-                            <span class="counter-text">Completed Projects</span>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-md-6 col-sm-6 col-6 m-b30">
-                        <div class="counter-style-1">
-                            <div class="text-white">
-                                <span class="counter">2500</span><span>+</span>
-                            </div>
-                            <span class="counter-text">Happy Clients</span>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-md-6 col-sm-6 col-6 m-b30">
-                        <div class="counter-style-1">
-                            <div class="text-white">
-                                <span class="counter">1500</span><span>+</span>
-                            </div>
-                            <span class="counter-text">Questions Answered</span>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-md-6 col-sm-6 col-6 m-b30">
-                        <div class="counter-style-1">
-                            <div class="text-white">
-                                <span class="counter">1000</span><span>+</span>
-                            </div>
-                            <span class="counter-text">Ordered Coffee's</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Testimonials END -->
-        <!-- Testimonials ==== -->
-        <div class="section-area section-sp2">
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-12 heading-bx left">
-                        <h2 class="title-head text-uppercase">what people <span>say</span></h2>
-                        <p>It is a long established fact that a reader will be distracted by the readable content of a page</p>
-                    </div>
-                </div>
-                <div class="testimonial-carousel owl-carousel owl-btn-1 col-12 p-lr0">
-                    <div class="item">
-                        <div class="testimonial-bx">
-                            <div class="testimonial-thumb">
-                                <img src="{% static 'assets/images/testimonials/pic1.jpg' %}" alt="">
-                            </div>
-                            <div class="testimonial-info">
-                                <h5 class="name">Peter Packer</h5>
-                                <p>-Art Director</p>
-                            </div>
-                            <div class="testimonial-content">
-                                <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="item">
-                        <div class="testimonial-bx">
-                            <div class="testimonial-thumb">
-                                <img src="{% static 'assets/images/testimonials/pic2.jpg' %}" alt="">
-                            </div>
-                            <div class="testimonial-info">
-                                <h5 class="name">Peter Packer</h5>
-                                <p>-Art Director</p>
-                            </div>
-                            <div class="testimonial-content">
-                                <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Testimonials END ==== -->
     </div>
-    <!-- contact area END -->
-</div>
-<!-- Content END-->
+</section>
+
+<!-- Why Choose Section -->
+<section class="ed-why-choose py-16 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-2">Why Learn with EduMaster?</h2>
+            <p class="text-gray-600 max-w-xl mx-auto">Transform your learning experience with our unique advantages</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="p-6 text-center">
+                <div class="ed-feature-icon text-blue-600 text-4xl mb-4">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                </div>
+                <h3 class="font-semibold text-lg mb-2">Expert Instructors</h3>
+                <p class="text-gray-600 text-sm">Learn from industry professionals and academic experts</p>
+            </div>
+            
+            <div class="p-6 text-center">
+                <div class="ed-feature-icon text-blue-600 text-4xl mb-4">
+                    <i class="fas fa-laptop-code"></i>
+                </div>
+                <h3 class="font-semibold text-lg mb-2">Hands-On Learning</h3>
+                <p class="text-gray-600 text-sm">Interactive projects and real-world case studies</p>
+            </div>
+            
+            <div class="p-6 text-center">
+                <div class="ed-feature-icon text-blue-600 text-4xl mb-4">
+                    <i class="fas fa-certificate"></i>
+                </div>
+                <h3 class="font-semibold text-lg mb-2">Certification</h3>
+                <p class="text-gray-600 text-sm">Earn recognized certificates upon completion</p>
+            </div>
+            
+            <div class="p-6 text-center">
+                <div class="ed-feature-icon text-blue-600 text-4xl mb-4">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <h3 class="font-semibold text-lg mb-2">Mobile Learning</h3>
+                <p class="text-gray-600 text-sm">Access courses anytime, anywhere</p>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Events Section -->
+<section class="ed-events py-16 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-2">Upcoming Live Events</h2>
+            <p class="text-gray-600 max-w-xl mx-auto">Join interactive sessions with experts and fellow learners</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for event in events %}
+            <div class="ed-event-card bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                <div class="relative">
+                    <img src="{{ event.image.url }}" alt="{{ event.title }}" 
+                         class="w-full h-48 object-cover">
+                    <div class="absolute top-4 left-4 bg-white/90 px-4 py-2 rounded-lg shadow-sm">
+                        <div class="text-blue-600 font-bold text-lg">{{ event.date|date:"d" }}</div>
+                        <div class="text-gray-600 text-sm uppercase">{{ event.date|date:"M" }}</div>
+                    </div>
+                </div>
+                
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-sm font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
+                            {{ event.event_type }}
+                        </span>
+                        <span class="text-sm text-gray-500">
+                            <i class="far fa-clock mr-1"></i>{{ event.time }}
+                        </span>
+                    </div>
+                    
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">{{ event.title }}</h3>
+                    <p class="text-gray-600 text-sm mb-4">{{ event.short_description|truncatechars:100 }}</p>
+                    
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-map-marker-alt text-gray-500"></i>
+                            <span class="text-sm text-gray-600">{{ event.location }}</span>
+                        </div>
+                        <a href="{{ event.get_absolute_url }}" 
+                           class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 transition-colors">
+                            Register Now
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Host/Instructor Section -->
+                <div class="border-t px-6 py-3 bg-gray-50">
+                    <div class="flex items-center space-x-3">
+                        <div class="ed-host-avatar w-8 h-8 rounded-full overflow-hidden border-2 border-white shadow-sm">
+                            <img src="{{ event.host.profile.image.url }}" 
+                                 alt="{{ event.host.get_full_name }}"
+                                 class="w-full h-full object-cover">
+                        </div>
+                        <div class="text-sm text-gray-600">
+                            <span class="font-medium">Hosted by</span>
+                            {{ event.host.get_full_name }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-span-full text-center py-12">
+                <div class="text-gray-500 mb-4">
+                    <i class="fas fa-calendar-alt text-4xl"></i>
+                </div>
+                <p class="text-gray-600">No upcoming events scheduled. Check back later!</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if events %}
+        <div class="text-center mt-8">
+            <a href="{% url 'events:list' %}" 
+               class="inline-block px-8 py-3 text-blue-600 font-medium hover:text-blue-700 transition-colors">
+                View All Events <i class="fas fa-arrow-right ml-2"></i>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</section>
 {% endblock %}

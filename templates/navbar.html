@@ -1,432 +1,104 @@
+<!-- navbar.html -->
 <!DOCTYPE html>
 {% load static %}
 <html lang="en">
-
 <head>
-
-    <!-- META ============================================= -->
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="keywords" content="" />
-    <meta name="author" content="" />
-    <meta name="robots" content="" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduMaster - Online Learning Platform</title>
     
-    <!-- DESCRIPTION -->
-    <meta name="description" content="EduChamp : Education HTML Template" />
-    
-    <!-- OG -->
-    <meta property="og:title" content="EduChamp : Education HTML Template" />
-    <meta property="og:description" content="EduChamp : Education HTML Template" />
-    <meta property="og:image" content="" />
-    <meta name="format-detection" content="telephone=no">
-    
-    <!-- FAVICONS ICON ============================================= -->
-    <link rel="icon" href="{% static 'assets/images/favicon.ico' %}" type="image/x-icon" />
-    <link rel="shortcut icon" type="image/x-icon" href="{% static 'assets/images/favicon.png' %}" />
-    
-    <!-- PAGE TITLE HERE ============================================= -->
-    <title>EduChamp : Education HTML Template </title>
-    
-    <!-- MOBILE SPECIFIC ============================================= -->
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    
-    <!--[if lt IE 9]>
-    <script src="{% static 'assets/js/html5shiv.min.js' %}"></script>
-    <script src="{% static 'assets/js/respond.min.js' %}"></script>
-    <![endif]-->
-    
-    <!-- All PLUGINS CSS ============================================= -->
-    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/assets.css' %}">
-    
-    <!-- TYPOGRAPHY ============================================= -->
-    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/typography.css' %}">
-    
-    <!-- SHORTCODES ============================================= -->
-    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/shortcodes/shortcodes.css' %}">
-    
-    <!-- STYLESHEETS ============================================= -->
-    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/style.css' %}">
-    <link class="skin" rel="stylesheet" type="text/css" href="{% static 'assets/css/color/color-1.css' %}">
-    <!-- REVOLUTION SLIDER CSS ============================================= -->
-    <link rel="stylesheet" type="text/css" href="{% static 'assets/vendors/revolution/css/layers.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'assets/vendors/revolution/css/settings.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'assets/vendors/revolution/css/navigation.css' %}">
-    <!-- REVOLUTION SLIDER END -->
+    <!-- Modern CSS Framework -->
+    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
 </head>
-<body id="bg">
-<div class="page-wraper">
-<div id="loading-icon-bx"></div>
-<!-- Header Top ==== -->
-    <header class="header rs-nav">
-        <div class="top-bar">
-            <div class="container">
-                <div class="row d-flex justify-content-between">
-                    <div class="topbar-left">
-                        <ul>
-                            <li><a href="faq-1.html"><i class="fa fa-question-circle"></i>Ask a Question</a></li>
-                            <li><a href="javascript:;"><i class="fa fa-envelope-o"></i>Support@website.com</a></li>
-                        </ul>
+<body class="bg-gray-50">
+    <!-- navbar.html -->
+    <nav class="ed-nav sticky top-0 z-50 shadow-sm">
+        <div class="ed-nav-top bg-gray-900 text-gray-300 py-3 text-sm">
+            <div class="container mx-auto px-4 flex justify-between items-center">
+                <div class="flex items-center space-x-6">
+                    <a href="#" class="hover:text-white transition-colors">Teach on EduMaster</a>
+                    <a href="#" class="hover:text-white transition-colors">For Business</a>
+                </div>
+                <div class="flex items-center space-x-6">
+                    {% if request.user.is_authenticated %}
+                    <div class="relative ed-notification">
+                        <button class="hover:text-white relative">
+                            <i class="far fa-bell"></i>
+                            <span class="ed-badge bg-red-500">2</span>
+                        </button>
                     </div>
-                    <div class="topbar-right">
-                        <ul style="display: flex; align-items: center; gap: 20px;">
-                            <!-- Language Switcher -->
-                            <li>
-                                <select class="header-lang-bx">
-                                    <option data-icon="flag flag-uk">English UK</option>
-                                    <option data-icon="flag flag-us">English US</option>
-                                </select>
-                            </li>
-                    
-                            {% if request.user.is_authenticated %}
-                                
-                                <li class="notification-box" style="position: relative;">
-                                    <a href="#" class="ttr-material-button ttr-submenu-toggle" id="notificationToggle" style="position: relative;">
-                                        <i class="fa fa-bell" style="font-size: 20px; color: navy; position: relative;"></i>
-                                        {% if recent_notifications %}
-                                            <span style="position: absolute; top: -5px; right: -5px; width: 10px; height: 10px; background-color: green; border-radius: 50%; border: 2px solid white;"></span>
-                                        {% endif %}
-                                    </a>
-                                
-                                    <div class="ttr-header-submenu noti-menu" id="notificationDropdown">
-                                        <div class="ttr-notify-header">
-                                            <span class="ttr-notify-text-top">{{ unread_notifications|length }} New</span>
-                                            <span class="ttr-notify-text">User Notifications</span>
-                                        </div>
-                                        <div class="noti-box-list">
-                                            <ul>
-                                                {% if recent_notifications %}
-                                                {% for message in recent_notifications %}
-                                                <li>
-                                                    <span class="notification-icon dashbg-gray">
-                                                        <i class="fa fa-check"></i>
-                                                    </span>
-                                                    <span class="notification-text">
-                                                        <span>{{ message.message }}</span>
-                                                    </span>
-                                                    <span class="notification-time">
-                                                        <a href="#" class="fa fa-close"></a>
-                                                        <span>{{ message.created_at|timesince }} ago</span> <!-- Optional: use timestamp from message if available -->
-                                                    </span>
-                                                </li>
-                                                {% endfor %}
-                                                {% else %}
-                                                <li style="text-align:center; padding: 10px;">No new notifications</li>
-                                                {% endif %}
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </li>
-                            
-                            
-
-                                <!-- Avatar Dropdown -->
-                                <li class="has-sub-menu" style="position: relative;">
-                                    <a href="javascript:;" style="display: flex; align-items: center; gap: 8px;">
-                                        <div style="width: 30px; height: 30px; background-color: navy; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
-                                            {{ request.user.username|slice:":1"|upper }}
-                                        </div>
-                                        <i class="fa fa-chevron-down" style="color: navy;"></i>
-                                    </a>
-                                    <ul class="sub-menu">
-                                        <li><a href="{% url "account:dashboard" %}">Dashboard</a></li>
-                                        <li><a href="#">Profile</a></li>
-                                        <li><a href="javascript:;" id="logoutBtn">Logout</a></li>
-                                    </ul>
-                                </li>
-                            {% else %}
-                                <li><a href="{% url 'account_login' %}">Login</a></li>
-                                <li><a href="{% url 'account_signup' %}">register</a></li>
-                            {% endif %}
-                        </ul>
+                    <div class="ed-user-menu relative group">
+                        <button class="flex items-center space-x-2 hover:text-white">
+                            <div class="ed-user-avatar w-8 h-8 bg-blue-600 text-white rounded-full overflow-hidden">
+                                {% if user.profile.image %}
+                                    <img src="{{ user.profile.image.url }}" alt="Avatar" class="w-full h-full object-cover">
+                                {% else %}
+                                    {{ request.user.username|slice:":1"|upper }}
+                                {% endif %}
+                            </div>
+                            <span class="hidden lg:inline">{{ request.user.username }}</span>
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </button>
+                        <!-- User Dropdown -->
+                        <div class="ed-user-dropdown hidden group-hover:block absolute right-0 top-full mt-2 w-48 bg-white shadow-xl rounded-lg py-2">
+                            <a href="{% url 'account:dashboard' %}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Dashboard</a>
+                            <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Profile</a>
+                            <a href="{% url 'account_logout' %}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Log Out</a>
+                        </div>
                     </div>
-                    </div>
+                    {% else %}
+                    <a href="{% url 'account_login' %}" class="ed-nav-link hover:text-white">Log in</a>
+                    <a href="{% url 'account_signup' %}" class="ed-nav-btn bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Sign up</a>
+                    {% endif %}
                 </div>
             </div>
         </div>
-        <div class="sticky-header navbar-expand-lg">
-            <div class="menu-bar clearfix">
-                <div class="container clearfix">
-                    <!-- Header Logo ==== -->
-                        <div class="menu-logo">
-                            <a href="{% url 'course:index' %}"><img src="{% static 'assets/images/logo.png' %}" alt=""></a>
-                        </div>
-                    
-                    <!-- Mobile Nav Button ==== -->
-                    <button class="navbar-toggler collapsed menuicon justifycontent-end" type="button" data-toggle="collapse" data-target="#menuDropdown" aria-controls="menuDropdown" aria-expanded="false" aria-label="Toggle navigation">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </button>
-                    <!-- Author Nav ==== -->
-                    <div class="secondary-menu">
-                        <div class="secondary-inner">
-                            <ul>
-                                <li><a href="javascript:;" class="btn-link"><i class="fa fa-facebook"></i></a></li>
-                                <li><a href="javascript:;" class="btn-link"><i class="fa fa-google-plus"></i></a></li>
-                                <li><a href="javascript:;" class="btn-link"><i class="fa fa-linkedin"></i></a></li>
-                                <!-- Search Button ==== -->
-                                <li class="search-btn"><button id="quik-search-btn" type="button" class="btn-link"><i class="fa fa-search"></i></button></li>
-                            </ul>
-                        </div>
-                    </div>
-                    <!-- Search Box ==== -->
-                    <div class="nav-search-bar">
-                        <form action="#">
-                            <input name="search" value="" type="text" class="form-control" placeholder="Type to search">
-                            <span><i class="ti-search"></i></span>
-                        </form>
-                        <span id="search-remove"><i class="ti-close"></i></span>
-                    </div>
-                    <!-- Navigation Menu ==== -->
-                    <div class="menu-links navbar-collapse collapse justify-content-start" id="menuDropdown">
-                        {% if request.user.is_authenticated %}
-                            <div class="menu-logo">
-                                <a href="{% url 'course:index' %}"><img src="{% static 'assets/images/logo.png' %}" alt=""></a>
-                            </div>
-                        {% else %}
-                            <div class="menu-logo">
-                                <a href="{% url 'course:index' %}"><img src="{% static 'assets/images/logo.png' %}" alt=""></a>
-                            </div>
-                        {% endif %}
-                        <ul class="nav navbar-nav">
-                            {% if request.user.is_authenticated %}
-                                <li class="active"><a href="{% url "course:index" %}">Home </a></li>
-                            {% else %}
-                                <li class="active"><a href="{% url "course:index" %}">Home </a></li>
-                            {% endif %}
-                            <li>
-                                <a href="{% url "course:course_list" %}">Explore Courses</a>
-                            </li>
-                            <li>
-                                <a href="{% url "student:student_home" %}">Enrolled Courses </a>
-                            </li>
-                            
-                            <li><a href="javascript:;">Blog <i class="fa fa-chevron-down"></i></a>
-                                <ul class="sub-menu">
-                                    <li><a href="blog-classic-grid.html">Blog Classic</a></li>
-                                    <li><a href="blog-classic-sidebar.html">Blog Classic Sidebar</a></li>
-                                    <li><a href="blog-list-sidebar.html">Blog List Sidebar</a></li>
-                                    <li><a href="blog-standard-sidebar.html">Blog Standard Sidebar</a></li>
-                                    <li><a href="blog-details.html">Blog Details</a></li>
-                                </ul>
-                            </li>
-                            {% if request.user.is_authenticated and is_instructor %}
-                                <li><a href="{% url 'account:dashboard' %}">Dashboard</a></li>
-                            {% else %}
-                                <li><a href="{% url 'account:instructor_application' %}">Apply as an Instructor</a></li>
-                            {% endif %}
-                            <li><a href="javascript:;">Support <i class="fa fa-chevron-down"></i></a>
-                                <ul class="sub-menu">
-                                    <li><a href="blog-classic-grid.html">Profile</a></li>
-                                    <li><a href="blog-classic-sidebar.html">FAQ</a></li>
-                                    <li><a href="blog-list-sidebar.html">Contact Us</a></li>
-                                </ul>
-                            </li>
-                        </ul>
-                        <div class="nav-social-link">
-                            <a href="javascript:;"><i class="fa fa-facebook"></i></a>
-                            <a href="javascript:;"><i class="fa fa-google-plus"></i></a>
-                            <a href="javascript:;"><i class="fa fa-linkedin"></i></a>
-                        </div>
-                    </div>
-                    <!-- Navigation Menu END ==== -->
+        
+        <div class="ed-nav-main bg-white border-b">
+            <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+                <a href="{% url 'course:index' %}" class="ed-logo flex items-center">
+                    <img src="{% static 'images/logo.svg' %}" alt="EduMaster" class="h-8">
+                    <span class="ml-2 text-xl font-bold text-gray-800">Example</span>
+                </a>
+                
+                <div class="ed-nav-links hidden lg:flex space-x-8">
+                    <a href="{% url 'course:course_list' %}" class="ed-nav-link text-gray-600 hover:text-blue-600 font-medium">Browse</a>
+                    <a href="{% url 'student:student_home' %}" class="ed-nav-link text-gray-600 hover:text-blue-600 font-medium">My Learning</a>
+                    <a href="#" class="ed-nav-link text-gray-600 hover:text-blue-600 font-medium">Resources</a>
                 </div>
+                
+                <div class="ed-search flex-1 max-w-xl mx-8 hidden lg:block">
+                    <form class="relative">
+                        <input type="search" placeholder="Search courses, skills, instructors..." 
+                            class="w-full px-6 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+                        <button type="submit" class="absolute right-4 top-3 text-gray-500 hover:text-blue-600">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Mobile Menu Button -->
+                <button class="lg:hidden text-gray-600">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
             </div>
         </div>
-    </header>
-    <!-- header END ==== -->
-{% if messages %}
-    <div class="messages">
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}">
-                {{ message }}
-            </div>
-        {% endfor %}
-    </div>
-    <script>
-        // Automatically hide messages after 5 seconds
-        setTimeout(function() {
-            const messages = document.querySelector('.messages');
-            if (messages) {
-                messages.style.transition = 'opacity 0.5s ease';
-                messages.style.opacity = '0';
-                setTimeout(() => messages.remove(), 500); // Remove from DOM after fade-out
-            }
-        }, 5000); // 5000ms = 5 seconds
-    </script>
-{% endif %}
-{% block content %}
+    </nav>
 
-{% endblock %}
+    <!-- Main Content -->
+    {% block content %}{% endblock %}
 
-<!-- Logout Confirmation Modal -->
-<div id="logoutModal" class="modal">
-    <div class="modal-content">
-        <h2>Confirm Logout</h2>
-        <p>Are you sure you want to logout?</p>
-        <div class="modal-actions" style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
-            <form action="{% url 'account_logout' %}" method="post" style="flex: 1; text-align: center;">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-danger" style="width: 100%;">Yes, Logout</button>
-            </form></form>
-            <button class="btn btn-secondary" id="cancelLogout" style="flex: 1;">Cancel</button>
+    <!-- Footer -->
+    <footer class="ed-footer bg-gray-800 text-white py-8 mt-16">
+        <div class="container mx-auto px-4">
+            <!-- Footer content -->
         </div>
-    </div>
-</div>
+    </footer>
 
-<script src="{% static 'assets/js/jquery.min.js' %}"></script>
-<script src="{% static 'assets/vendors/bootstrap/js/popper.min.js' %}"></script>
-<script src="{% static 'assets/vendors/bootstrap/js/bootstrap.min.js' %}"></script>
-<script src="{% static 'assets/vendors/bootstrap-select/bootstrap-select.min.js' %}"></script>
-<script src="{% static 'assets/vendors/bootstrap-touchspin/jquery.bootstrap-touchspin.js' %}"></script>
-<script src="{% static 'assets/vendors/magnific-popup/magnific-popup.js' %}"></script>
-<script src="{% static 'assets/vendors/counter/waypoints-min.js' %}"></script>
-<script src="{% static 'assets/vendors/counter/counterup.min.js' %}"></script>
-<script src="{% static 'assets/vendors/imagesloaded/imagesloaded.js' %}"></script>
-<script src="{% static 'assets/vendors/masonry/masonry.js' %}"></script>
-<script src="{% static 'assets/vendors/masonry/filter.js' %}"></script>
-<script src="{% static 'assets/vendors/owl-carousel/owl.carousel.js' %}"></script>
-<script src="{% static 'assets/js/jquery.scroller.js' %}"></script>
-<script src="{% static 'assets/js/functions.js' %}"></script>
-<script src="{% static 'assets/js/contact.js' %}"></script>
-<script src="{% static 'assets/vendors/switcher/switcher.js' %}"></script>
-<!-- Revolution Slider core JS -->
-<script src="{% static 'assets/vendors/revolution/js/jquery.themepunch.tools.min.js' %}"></script>
-<script src="{% static 'assets/vendors/revolution/js/jquery.themepunch.revolution.min.js' %}"></script>
-<script>
-	jQuery(document).ready(function() {
-		var ttrevapi;
-		var tpj =jQuery;
-		if(tpj("#rev_slider_486_1").revolution == undefined){
-			revslider_showDoubleJqueryError("#rev_slider_486_1");
-		}else{
-			ttrevapi = tpj("#rev_slider_486_1").show().revolution({
-				sliderType:"standard",
-				jsFileLocation:"assets/vendors/revolution/js/",
-				sliderLayout:"fullwidth",
-				dottedOverlay:"none",
-				delay:9000,
-				navigation: {
-					keyboardNavigation:"on",
-					keyboard_direction: "horizontal",
-					mouseScrollNavigation:"off",
-					mouseScrollReverse:"default",
-					onHoverStop:"on",
-					touch:{
-						touchenabled:"on",
-						swipe_threshold: 75,
-						swipe_min_touches: 1,
-						swipe_direction: "horizontal",
-						drag_block_vertical: false
-					}
-					,
-					arrows: {
-						style: "uranus",
-						enable: true,
-						hide_onmobile: false,
-						hide_onleave: false,
-						tmp: '',
-						left: {
-							h_align: "left",
-							v_align: "center",
-							h_offset: 10,
-							v_offset: 0
-						},
-						right: {
-							h_align: "right",
-							v_align: "center",
-							h_offset: 10,
-							v_offset: 0
-						}
-					},
-					
-				},
-				viewPort: {
-					enable:true,
-					outof:"pause",
-					visible_area:"80%",
-					presize:false
-				},
-				responsiveLevels:[1240,1024,778,480],
-				visibilityLevels:[1240,1024,778,480],
-				gridwidth:[1240,1024,778,480],
-				gridheight:[768,600,600,600],
-				lazyType:"none",
-				parallax: {
-					type:"scroll",
-					origo:"enterpoint",
-					speed:400,
-					levels:[5,10,15,20,25,30,35,40,45,50,46,47,48,49,50,55],
-					type:"scroll",
-				},
-				shadow:0,
-				spinner:"off",
-				stopLoop:"off",
-				stopAfterLoops:-1,
-				stopAtSlide:-1,
-				shuffle:"off",
-				autoHeight:"off",
-				hideThumbsOnMobile:"off",
-				hideSliderAtLimit:0,
-				hideCaptionAtLimit:0,
-				hideAllCaptionAtLilmit:0,
-				debugMode:false,
-				fallbacks: {
-					simplifyAll:"off",
-					nextSlideOnWindowFocus:"off",
-					disableFocusListener:false,
-				}
-			});
-		}
-	});	
-</script>
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const logoutModal = document.getElementById("logoutModal");
-        const logoutBtn = document.getElementById("logoutBtn");
-        const cancelLogoutBtn = document.getElementById("cancelLogout");
-
-        if (logoutBtn) {
-            // Show modal
-            logoutBtn.addEventListener("click", () => {
-                logoutModal.style.display = "block";
-            });
-        }
-
-        if (cancelLogoutBtn) {
-            // Close modal with "Cancel" button
-            cancelLogoutBtn.addEventListener("click", () => {
-                logoutModal.style.display = "none";
-            });
-        }
-
-        // Optional: click outside modal to close
-        window.addEventListener("click", (e) => {
-            if (e.target === logoutModal) {
-                logoutModal.style.display = "none";
-            }
-        });
-    });
-</script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const toggle = document.getElementById('notificationToggle');
-        const dropdown = document.getElementById('notificationDropdown');
-
-        toggle.addEventListener('click', function (e) {
-            e.preventDefault();
-            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-        });
-
-        // Hide on click outside
-        document.addEventListener('click', function (e) {
-            if (!toggle.contains(e.target) && !dropdown.contains(e.target)) {
-                dropdown.style.display = 'none';
-            }
-        });
-    });
-</script>
-
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{% static 'js/main.js' %}"></script>
 </body>
-
 </html>
