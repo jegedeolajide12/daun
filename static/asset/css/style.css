@@ -5957,7 +5957,7 @@ textarea.form-control {
     gap: 0.5rem;
 }
 
-.progress-bar {
+.progress-info .progress-bar {
     flex-grow: 1;
     height: 6px;
     background: #ecf0f1;

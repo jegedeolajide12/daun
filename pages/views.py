@@ -285,7 +285,7 @@ def topic_detail(request, topic_id):
         course_completed = True
 
     contents = Content.objects.prefetch_related('content_type').filter(topic=topic)
-    assignments = topic.course.assignments.all()
+    assignments = topic.course.assignments.filter(topic=topic)
     assignment = topic.course.assignments.first()  # Example: Get the first assignment
     assignment_user_tasks = {
         a.id: UserTask.objects.filter(task=a.assignment_task, user=request.user).first()
@@ -297,7 +297,7 @@ def topic_detail(request, topic_id):
         is_completed=True
     ).count()
     print(total_completed_assignments)
-    assessments = topic.course.assessments.all()
+    assessments = topic.course.assessments.filter(topic=topic)
     assessment_user_tasks = {
         a.id: UserTask.objects.filter(task=a.assessment_task, user=request.user).first()
         if hasattr(a, 'assessment_task') else None

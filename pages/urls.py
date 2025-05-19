@@ -16,7 +16,7 @@ app_name = 'course'
 urlpatterns = [
     path('', index, name='index'),
     path('courses/', CourseListView.as_view(), name='course_list'),
-    path('cousrses/manage/', manage_courses, name='manage_courses'),
+    path('coures/manage/', manage_courses, name='manage_courses'),
 
     path('faculty/create/', create_faculty, name='create_faculty'),
     path('home/', ManageCourseListView.as_view(), name='home'),
