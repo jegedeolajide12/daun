@@ -251,7 +251,7 @@
 												<a href="#" class="btn button-sm green radius-xl">ENROLLED</a>
 											</div>
 											<li class="d-flex align-items-center py-3 border-bottom">
-												<div class="progress flex-grow-1" style="height: 24px; width: {{ course_progress|dict_key:course.id }}; border-radius: 12px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
+												<div class="progress flex-grow-1" style="height: 24px; border-radius: 12px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
 													<div class="progress-bar progress-bar-striped progress-bar-animated 
 																{% if course_progress|dict_key:course.id >= 75 %}bg-success
 																{% elif course_progress|dict_key:course.id >= 50 %}bg-warning
@@ -729,7 +729,7 @@
 												{% endif %}
 												<div class="course-details flex-grow-1">
 													<h5 class="mb-1">
-														<a href="#" class="text-primary">{{ course.name|title }}</a>
+														<a href="{{ course.get_absolute_url }}" class="text-primary">{{ course.name|title }}</a>
 													</h5>
 													<p class="mb-0 text-muted small">
 														Instructor: {{ course.instructor.get_full_name }} · 
@@ -740,11 +740,20 @@
 													<a href="#" class="btn button-sm green radius-xl">CONTINUE</a>
 												</div>
 											</li>
-											<li class="d-flex align-items-center py-2 border-bottom">
-												<div class="progress flex-grow-1 mr-3" style="height: 20px;">
-													<div class="progress-bar bg-success" role="progressbar" style="width: {{ progress }}%;" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100">
-														<span style="color: {% if progress >= 75 %}white{% elif progress >= 50 %}orange{% else %}red{% endif %};">
-															{{ progress }}% Completed
+											<li class="d-flex align-items-center py-3 border-bottom">
+												<div class="progress flex-grow-1" style="height: 24px; border-radius: 12px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
+													<div class="progress-bar progress-bar-striped progress-bar-animated 
+																{% if course_progress|dict_key:course.id >= 75 %}bg-success
+																{% elif course_progress|dict_key:course.id >= 50 %}bg-warning
+																{% else %}bg-danger{% endif %}"
+														role="progressbar"
+														style="width: {{ course_progress|dict_key:course.id }}%; height: 100%;"
+														aria-valuenow="{{ course_progress|dict_key:course.id }}" 
+														aria-valuemin="0" 
+														aria-valuemax="100">
+														<span class="progress-text font-weight-bold">
+															{{ course_progress|dict_key:course.id }}% Complete
+															{% if course_progress|dict_key:course.id >= 100 %}<i class="fas fa-check-circle ml-2"></i>{% endif %}
 														</span>
 													</div>
 												</div>

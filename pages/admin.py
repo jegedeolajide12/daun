@@ -3,7 +3,8 @@ from .models import (Faculty, Course, Topic, Video,
                      Image, Text, File, Task, 
                      UserTask, Enrollment, Notification, 
                      Assignment, Submission, SubmissionFile, Grade, 
-                     Rubric, Assessment, MCQOption, AssessmentQuestion)
+                     Rubric, Assessment, MCQOption, AssessmentQuestion,
+                     AssessmentAttempt, MCQResponse)
 
 # Register your models here.
 
@@ -88,3 +89,5 @@ admin.site.register(Submission)
 admin.site.register(SubmissionFile)
 admin.site.register(Grade)
 admin.site.register(Rubric)
+admin.site.register(AssessmentAttempt)
+

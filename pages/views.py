@@ -464,6 +464,7 @@ def submit_assignment(request, course_id, topic_id, assignment_id):
             submission.user = request.user
             submission.assignment = assignment
             submission.save()
+            Submission.handle_submission_side_effects(submission)
             
             # Handle file uploads
             for file in request.FILES.getlist('files'):
@@ -862,6 +863,7 @@ def attempt_assessment(request, assessment_id):
             attempt.completed_at = now()
             attempt.is_completed = True
             attempt.save()
+            AssessmentAttempt.handle_assessment_attempt_side_effects(attempt)
             
             messages.success(request, f"Assessment submitted! Your score: {score:.2f}%")
             return redirect('course:assessment_result', attempt_id=attempt.id)
