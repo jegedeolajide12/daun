@@ -1,0 +1,38 @@
+<!-- Breadcrumbs -->
+<nav class="edu-breadcrumbs">
+  <ol class="flex items-center space-x-2">
+    {% for item in items %}
+    <li>
+      {% if not forloop.last %}
+      <a href="{{ item.url }}" class="edu-breadcrumb-link">{{ item.label }}</a>
+      <span class="edu-breadcrumb-separator">/</span>
+      {% else %}
+      <span class="edu-breadcrumb-current">{{ item.label }}</span>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ol>
+</nav>
+
+<!-- Pagination -->
+<div class="edu-pagination">
+  {% if page.has_previous %}
+  <a href="?page={{ page.previous_page_number }}" class="edu-pagination-prev">
+    Previous
+  </a>
+  {% endif %}
+  
+  <div class="edu-pagination-pages">
+    {% for num in page.paginator.page_range %}
+    <a href="?page={{ num }}" class="edu-pagination-page {% if num == page.number %}active{% endif %}">
+      {{ num }}
+    </a>
+    {% endfor %}
+  </div>
+  
+  {% if page.has_next %}
+  <a href="?page={{ page.next_page_number }}" class="edu-pagination-next">
+    Next
+  </a>
+  {% endif %}
+</div>

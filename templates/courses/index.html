@@ -1,109 +1,105 @@
-<!-- home.html -->
 {% extends 'navbar.html' %}
 {% load static %}
 
 {% block content %}
+
 <!-- Hero Section -->
-<section class="ed-hero bg-gradient-to-b from-blue-900 to-blue-700 text-white py-12 md:py-20">
-    <div class="container mx-auto px-4 text-center">
-        <h1 class="text-3xl md:text-5xl font-bold mb-4 md:mb-6 leading-tight px-2">
-            Advance Your Career with<br class="hidden md:block"> Expert-Led Courses
+<section class="bg-primary text-white py-5">
+    <div class="container py-5 text-center">
+        <h1 class="display-4 fw-bold mb-4">
+            Advance Your Career with Expert-Led Courses
         </h1>
         
-        <p class="text-base md:text-xl text-blue-100 mb-6 md:mb-8 max-w-2xl mx-auto px-2">
+        <p class="lead mb-5 opacity-75">
             Master new skills through immersive learning experiences taught by industry leaders 
             from top companies and universities.
         </p>
         
-        <div class="ed-search-form max-w-3xl mx-auto px-2">
-            <div class="flex flex-col md:flex-row rounded-full overflow-hidden shadow-xl mx-2">
-                <input type="text" placeholder="What do you want to learn today?" 
-                       class="flex-1 px-4 md:px-8 py-3 md:py-4 text-gray-700 text-sm focus:outline-none">
-                <button class="bg-blue-500 text-white px-6 md:px-10 py-3 md:py-4 hover:bg-blue-600 transition-colors font-medium whitespace-nowrap">
-                    Search Courses
-                </button>
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-8">
+                <div class="input-group mb-3 shadow-lg rounded-pill">
+                    <input type="text" class="form-control form-control-lg border-0 rounded-start-pill ps-4" 
+                           placeholder="What do you want to learn today?">
+                    <button class="btn btn-light text-primary fw-bold rounded-end-pill px-4">
+                        Search Courses
+                    </button>
+                </div>
             </div>
         </div>
         
-        <div class="ed-stats grid grid-cols-3 gap-4 md:flex md:justify-center md:space-x-12 mt-8 md:mt-14 text-center px-2">
-            <div class="col-span-1">
-                <div class="text-xl md:text-3xl font-bold">180K+</div>
-                <div class="text-xs md:text-sm text-blue-200">Courses</div>
+        <div class="row justify-content-center mt-5 g-4">
+            <div class="col-4 col-md-auto text-center">
+                <div class="h2 fw-bold">180K+</div>
+                <div class="small opacity-75">Courses</div>
             </div>
-            <div class="hidden md:block border-l border-blue-400"></div>
-            <div class="col-span-1">
-                <div class="text-xl md:text-3xl font-bold">25K+</div>
-                <div class="text-xs md:text-sm text-blue-200">Instructors</div>
+            <div class="col-4 col-md-auto text-center">
+                <div class="h2 fw-bold">25K+</div>
+                <div class="small opacity-75">Instructors</div>
             </div>
-            <div class="hidden md:block border-l border-blue-400"></div>
-            <div class="col-span-1">
-                <div class="text-xl md:text-3xl font-bold">Lifetime</div>
-                <div class="text-xs md:text-sm text-blue-200">Access</div>
+            <div class="col-4 col-md-auto text-center">
+                <div class="h2 fw-bold">Lifetime</div>
+                <div class="small opacity-75">Access</div>
             </div>
         </div>
     </div>
 </section>
 
 <!-- Featured Courses -->
-<section class="ed-courses py-16 bg-gray-50">
-    <div class="container mx-auto px-4">
-        <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold text-gray-800 mb-2">Most Popular Courses</h2>
-            <p class="text-gray-600 max-w-xl mx-auto">Discover our top-rated courses chosen by thousands of learners worldwide</p>
+<section class="py-5 bg-light">
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <h2 class="display-6 fw-bold mb-3">Most Popular Courses</h2>
+            <p class="text-muted">Discover our top-rated courses chosen by thousands of learners worldwide</p>
         </div>
         
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div class="row g-4">
             {% for course in courses %}
-            <div class="ed-course-card bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
-                <div class="relative">
-                    <img src="{{ course.cover_image.url }}" alt="{{ course.name }}" 
-                         class="w-full h-48 object-cover">
-                    <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
-                        <span class="text-white text-sm font-medium">{{ course.category }}</span>
-                    </div>
-                </div>
-                
-                <div class="p-6">
-                    <h3 class="text-xl font-semibold text-gray-800 mb-2">{{ course.name }}</h3>
-                    <p class="text-gray-600 text-sm mb-4">{{ course.short_description|truncatechars:80 }}</p>
-                    
-                    <!-- Instructor Section -->
-                    <div class="flex items-center space-x-3 mb-4">
-                        <div class="ed-instructor-avatar w-8 h-8 rounded-full overflow-hidden border-2 border-white shadow-sm">
-                            <img src="{{ course.instructor.profile.image.url }}" 
-                                 alt="{{ course.instructor.get_full_name }}"
-                                 class="w-full h-full object-cover">
-                        </div>
-                        <div class="text-sm text-gray-600">
-                            <span class="font-medium">{{ course.instructor.get_full_name }}</span>
-                            <span class="text-gray-500">・{{ course.instructor.title }}</span>
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0 overflow-hidden">
+                    <div class="position-relative">
+                        <img src="{{ course.cover_image.url }}" class="card-img-top" alt="{{ course.name }}" style="height: 200px; object-fit: cover;">
+                        <div class="position-absolute bottom-0 start-0 end-0 p-3 bg-dark bg-opacity-50">
+                            <span class="text-white small">{{ course.category }}</span>
                         </div>
                     </div>
                     
-                    <div class="flex items-center justify-between">
-                        <div class="ed-rating flex items-center space-x-1">
-                            <div class="text-yellow-500 text-sm">★ 4.8</div>
-                            <span class="text-gray-500 text-sm">(12,345)</span>
+                    <div class="card-body">
+                        <h3 class="h5 fw-bold mb-3">{{ course.name }}</h3>
+                        <p class="text-muted small mb-4">{{ course.short_description|truncatechars:80 }}</p>
+                        
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="me-3">
+                                <img src="{{ course.instructor.profile.image.url }}" 
+                                     class="rounded-circle border-2 border-white" 
+                                     style="width: 40px; height: 40px; object-fit: cover;">
+                            </div>
+                            <div class="small">
+                                <div class="fw-semibold">{{ course.instructor.get_full_name }}</div>
+                                <div class="text-muted">{{ course.instructor.title }}</div>
+                            </div>
                         </div>
-                        <div class="ed-price">
-                            {% if course.discount_price %}
-                            <span class="text-gray-500 line-through mr-2">${{ course.price }}</span>
-                            <span class="text-lg font-bold text-blue-600">${{ course.discount_price }}</span>
-                            {% else %}
-                            <span class="text-lg font-bold text-blue-600">${{ course.price }}</span>
-                            {% endif %}
+                        
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="small">
+                                <span class="text-warning">★ 4.8</span>
+                                <span class="text-muted ms-2">(12,345)</span>
+                            </div>
+                            <div class="h5 mb-0">
+                                {% if course.discount_price %}
+                                <span class="text-muted text-decoration-line-through me-2">${{ course.price }}</span>
+                                <span class="text-primary">${{ course.discount_price }}</span>
+                                {% else %}
+                                <span class="text-primary">${{ course.price }}</span>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
-                </div>
-                
-                <div class="border-t px-6 py-3 bg-gray-50">
-                    <div class="flex items-center justify-between text-sm text-gray-500">
-                        <span>
-                            <i class="far fa-clock mr-1"></i>{{ course.duration }} hours
-                        </span>
-                        <span>
-                            <i class="far fa-file-alt mr-1"></i>{{ course.lessons_count }} lessons
-                        </span>
+                    
+                    <div class="card-footer bg-white border-0 small text-muted">
+                        <div class="d-flex justify-content-between">
+                            <span><i class="far fa-clock me-1"></i>{{ course.duration }} hours</span>
+                            <span><i class="far fa-file-alt me-1"></i>{{ course.lessons_count }} lessons</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -113,108 +109,72 @@
 </section>
 
 <!-- Why Choose Section -->
-<section class="ed-why-choose py-16 bg-white">
-    <div class="container mx-auto px-4">
-        <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold text-gray-800 mb-2">Why Learn with EduMaster?</h2>
-            <p class="text-gray-600 max-w-xl mx-auto">Transform your learning experience with our unique advantages</p>
+<section class="py-5">
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <h2 class="display-6 fw-bold mb-3">Why Learn with EduMaster?</h2>
+            <p class="text-muted">Transform your learning experience with our unique advantages</p>
         </div>
         
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div class="p-6 text-center">
-                <div class="ed-feature-icon text-blue-600 text-4xl mb-4">
-                    <i class="fas fa-chalkboard-teacher"></i>
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 text-center p-4">
+                    <div class="card-body">
+                        <div class="text-primary mb-4 display-6">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                        </div>
+                        <h3 class="h5 fw-bold mb-3">Expert Instructors</h3>
+                        <p class="text-muted small">Learn from industry professionals and academic experts</p>
+                    </div>
                 </div>
-                <h3 class="font-semibold text-lg mb-2">Expert Instructors</h3>
-                <p class="text-gray-600 text-sm">Learn from industry professionals and academic experts</p>
             </div>
             
-            <div class="p-6 text-center">
-                <div class="ed-feature-icon text-blue-600 text-4xl mb-4">
-                    <i class="fas fa-laptop-code"></i>
-                </div>
-                <h3 class="font-semibold text-lg mb-2">Hands-On Learning</h3>
-                <p class="text-gray-600 text-sm">Interactive projects and real-world case studies</p>
-            </div>
-            
-            <div class="p-6 text-center">
-                <div class="ed-feature-icon text-blue-600 text-4xl mb-4">
-                    <i class="fas fa-certificate"></i>
-                </div>
-                <h3 class="font-semibold text-lg mb-2">Certification</h3>
-                <p class="text-gray-600 text-sm">Earn recognized certificates upon completion</p>
-            </div>
-            
-            <div class="p-6 text-center">
-                <div class="ed-feature-icon text-blue-600 text-4xl mb-4">
-                    <i class="fas fa-mobile-alt"></i>
-                </div>
-                <h3 class="font-semibold text-lg mb-2">Mobile Learning</h3>
-                <p class="text-gray-600 text-sm">Access courses anytime, anywhere</p>
-            </div>
+            <!-- Repeat similar structure for other features -->
         </div>
     </div>
 </section>
-<!-- Events Section -->
-<section class="ed-events py-16 bg-white">
-    <div class="container mx-auto px-4">
-        <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold text-gray-800 mb-2">Upcoming Live Events</h2>
-            <p class="text-gray-600 max-w-xl mx-auto">Join interactive sessions with experts and fellow learners</p>
-        </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+<!-- Events Section -->
+<section class="py-5 bg-light">
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <h2 class="display-6 fw-bold mb-3">Upcoming Live Events</h2>
+            <p class="text-muted">Join interactive sessions with experts and fellow learners</p>
+        </div>
+        
+        <div class="row g-4">
             {% for event in events %}
-            <div class="ed-event-card bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
-                <div class="relative">
-                    <img src="{{ event.image.url }}" alt="{{ event.title }}" 
-                         class="w-full h-48 object-cover">
-                    <div class="absolute top-4 left-4 bg-white/90 px-4 py-2 rounded-lg shadow-sm">
-                        <div class="text-blue-600 font-bold text-lg">{{ event.date|date:"d" }}</div>
-                        <div class="text-gray-600 text-sm uppercase">{{ event.date|date:"M" }}</div>
-                    </div>
-                </div>
-                
-                <div class="p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <span class="text-sm font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
-                            {{ event.event_type }}
-                        </span>
-                        <span class="text-sm text-gray-500">
-                            <i class="far fa-clock mr-1"></i>{{ event.time }}
-                        </span>
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0 overflow-hidden">
+                    <div class="position-relative">
+                        <img src="{{ event.image.url }}" class="card-img-top" alt="{{ event.title }}" style="height: 200px; object-fit: cover;">
+                        <div class="position-absolute top-0 start-0 m-3 bg-white rounded p-2 shadow-sm">
+                            <div class="text-primary fw-bold text-center">{{ event.date|date:"d" }}</div>
+                            <div class="text-uppercase small text-muted">{{ event.date|date:"M" }}</div>
+                        </div>
                     </div>
                     
-                    <h3 class="text-xl font-semibold text-gray-800 mb-2">{{ event.title }}</h3>
-                    <p class="text-gray-600 text-sm mb-4">{{ event.short_description|truncatechars:100 }}</p>
-                    
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-2">
-                            <i class="fas fa-map-marker-alt text-gray-500"></i>
-                            <span class="text-sm text-gray-600">{{ event.location }}</span>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="badge bg-primary bg-opacity-10 text-primary">{{ event.event_type }}</span>
+                            <span class="text-muted small"><i class="far fa-clock me-1"></i>{{ event.time }}</span>
                         </div>
-                        <a href="{{ event.get_absolute_url }}" 
-                           class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 transition-colors">
-                            Register Now
-                        </a>
-                    </div>
-                </div>
-                
-                <!-- Host/Instructor Section -->
-                <div class="border-t px-6 py-3 bg-gray-50">
-                    <div class="flex items-center space-x-3">
-                        <div class="ed-host-avatar w-8 h-8 rounded-full overflow-hidden border-2 border-white shadow-sm">
-                            <img src="{{ event.host.profile.image.url }}" 
-                                 alt="{{ event.host.get_full_name }}"
-                                 class="w-full h-full object-cover">
-                        </div>
-                        <div class="text-sm text-gray-600">
-                            <span class="font-medium">Hosted by</span>
-                            {{ event.host.get_full_name }}
+                        
+                        <h3 class="h5 fw-bold mb-3">{{ event.title }}</h3>
+                        <p class="text-muted small mb-4">{{ event.short_description|truncatechars:100 }}</p>
+                        
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="small text-muted">
+                                <i class="fas fa-map-marker-alt me-2"></i>{{ event.location }}
+                            </div>
+                            <a href="{{ event.get_absolute_url }}" class="btn btn-primary btn-sm">
+                                Register Now
+                            </a>
                         </div>
                     </div>
                 </div>
             </div>
+            
             {% empty %}
             <div class="col-span-full text-center py-12">
                 <div class="text-gray-500 mb-4">
@@ -224,15 +184,25 @@
             </div>
             {% endfor %}
         </div>
-
-        {% if events %}
-        <div class="text-center mt-8">
-            <a href="{% url 'events:list' %}" 
-               class="inline-block px-8 py-3 text-blue-600 font-medium hover:text-blue-700 transition-colors">
-                View All Events <i class="fas fa-arrow-right ml-2"></i>
-            </a>
-        </div>
-        {% endif %}
     </div>
 </section>
+<aside class="widget">
+    <h3 class="widget-title">Recent Courses</h3>
+    <ul class="widget-list">
+        <li>
+            <a href="#">
+                <span class="recent-post__date">Apr 15</span>
+                Advanced Web Development
+            </a>
+        </li>
+        <!-- More items -->
+    </ul>
+</aside>
+
+<div class="widget newsletter">
+    <i class="newsletter__icon">✉️</i>
+    <h3 class="widget-title">Subscribe</h3>
+    <input type="email" placeholder="Enter your email">
+    <button>Subscribe</button>
+</div>
 {% endblock %}

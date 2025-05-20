@@ -1,0 +1,12 @@
+<div class="edu-alert edu-alert-{{ type|default:'info' }} {% if dismissible %}alert-dismissible{% endif %}">
+  <div class="edu-alert-content">
+    {% if title %}<h4 class="edu-alert-title">{{ title }}</h4>{% endif %}
+    <p class="edu-alert-message">{{ message }}</p>
+  </div>
+  
+  {% if dismissible %}
+  <button class="edu-alert-close" aria-label="Close">
+    &times;
+  </button>
+  {% endif %}
+</div>

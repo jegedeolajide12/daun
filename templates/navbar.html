@@ -1,104 +1,305 @@
-<!-- navbar.html -->
 <!DOCTYPE html>
 {% load static %}
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EduMaster - Online Learning Platform</title>
+
+    <!-- META ============================================= -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="keywords" content="" />
+    <meta name="author" content="" />
+    <meta name="robots" content="" />
     
-    <!-- Modern CSS Framework -->
-    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+    <!-- DESCRIPTION -->
+    <meta name="description" content="EduChamp : Education HTML Template" />
+    
+    <!-- OG -->
+    <meta property="og:title" content="EduChamp : Education HTML Template" />
+    <meta property="og:description" content="EduChamp : Education HTML Template" />
+    <meta property="og:image" content="" />
+    <meta name="format-detection" content="telephone=no">
+    
+    <!-- FAVICONS ICON ============================================= -->
+    <link rel="icon" href="{% static 'assets/images/favicon.ico' %}" type="image/x-icon" />
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'assets/images/favicon.png' %}" />
+    
+    <!-- PAGE TITLE HERE ============================================= -->
+    <title>EduChamp : Education HTML Template </title>
+    
+    
+    <!-- MOBILE SPECIFIC ============================================= -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <!--[if lt IE 9]>
+    <script src="{% static 'assets/js/html5shiv.min.js' %}"></script>
+    <script src="{% static 'assets/js/respond.min.js' %}"></script>
+    <![endif]-->
+    
+    <!-- All PLUGINS CSS ============================================= -->
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/assets.css' %}">
+    
+    <!-- TYPOGRAPHY ============================================= -->
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/typography.css' %}">
+    
+    <!-- SHORTCODES ============================================= -->
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/shortcodes/shortcodes.css' %}">
+    
+    <!-- SHORTCODES ============================================= -->
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/shortcodes/shortcodes.css' %}">
+
+    <!-- STYLESHEETS ============================================= -->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
+    <!-- Font Awesome 5 CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+
+
+    <!-- REVOLUTION SLIDER END -->
 </head>
-<body class="bg-gray-50">
-    <!-- navbar.html -->
-    <nav class="ed-nav sticky top-0 z-50 shadow-sm">
-        <div class="ed-nav-top bg-gray-900 text-gray-300 py-3 text-sm">
-            <div class="container mx-auto px-4 flex justify-between items-center">
-                <div class="flex items-center space-x-6">
-                    <a href="#" class="hover:text-white transition-colors">Teach on EduMaster</a>
-                    <a href="#" class="hover:text-white transition-colors">For Business</a>
+<body class="bg-light">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom border-2 border-primary">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between w-100 align-items-center py-2">
+                <div class="d-flex gap-3">
+                    <a href="#" class="text-white-50 text-decoration-none small hover-text-white">Teach on EduMaster</a>
+                    <a href="#" class="text-white-50 text-decoration-none small hover-text-white">For Business</a>
                 </div>
-                <div class="flex items-center space-x-6">
+                
+                <div class="d-flex align-items-center gap-3">
                     {% if request.user.is_authenticated %}
-                    <div class="relative ed-notification">
-                        <button class="hover:text-white relative">
+                    <div class="position-relative">
+                        <button class="btn btn-link text-white-50 p-0 position-relative">
                             <i class="far fa-bell"></i>
-                            <span class="ed-badge bg-red-500">2</span>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                2
+                            </span>
                         </button>
                     </div>
-                    <div class="ed-user-menu relative group">
-                        <button class="flex items-center space-x-2 hover:text-white">
-                            <div class="ed-user-avatar w-8 h-8 bg-blue-600 text-white rounded-full overflow-hidden">
+                    
+                    <div class="dropdown">
+                        <a class="dropdown-toggle text-decoration-none d-flex align-items-center gap-2" 
+                                type="button" data-bs-toggle="dropdown">
+                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" 
+                                 style="width: 32px; height: 32px;">
                                 {% if user.profile.image %}
-                                    <img src="{{ user.profile.image.url }}" alt="Avatar" class="w-full h-full object-cover">
+                                    <img src="{{ user.profile.image.url }}" alt="Avatar" 
+                                         class="rounded-circle" style="width: 32px; height: 32px;">
                                 {% else %}
                                     {{ request.user.username|slice:":1"|upper }}
                                 {% endif %}
                             </div>
-                            <span class="hidden lg:inline">{{ request.user.username }}</span>
-                            <i class="fas fa-chevron-down text-xs"></i>
-                        </button>
-                        <!-- User Dropdown -->
-                        <div class="ed-user-dropdown hidden group-hover:block absolute right-0 top-full mt-2 w-48 bg-white shadow-xl rounded-lg py-2">
-                            <a href="{% url 'account:dashboard' %}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Dashboard</a>
-                            <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Profile</a>
-                            <a href="{% url 'account_logout' %}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Log Out</a>
-                        </div>
+                            <span class="d-none d-lg-inline text-white">{{ request.user.username }}</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{% url 'account:dashboard' %}">Dashboard</a></li>
+                            <li><a class="dropdown-item" href="#">Profile</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'account_logout' %}">Log Out</a></li>
+                        </ul>
                     </div>
                     {% else %}
-                    <a href="{% url 'account_login' %}" class="ed-nav-link hover:text-white">Log in</a>
-                    <a href="{% url 'account_signup' %}" class="ed-nav-btn bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Sign up</a>
+                    <a href="{% url 'account_login' %}" class="text-white-50 text-decoration-none">Log in</a>
+                    <a href="{% url 'account_signup' %}" class="btn btn-primary btn-sm">Sign up</a>
                     {% endif %}
                 </div>
             </div>
         </div>
-        
-        <div class="ed-nav-main bg-white border-b">
-            <div class="container mx-auto px-4 py-4 flex items-center justify-between">
-                <a href="{% url 'course:index' %}" class="ed-logo flex items-center">
-                    <img src="{% static 'images/logo.svg' %}" alt="EduMaster" class="h-8">
-                    <span class="ml-2 text-xl font-bold text-gray-800">Example</span>
-                </a>
+    </nav>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'course:index' %}">
+                <img src="{% static 'images/logo.svg' %}" alt="EduMaster" height="40">
+                <span class="h4 ms-2 text-dark">EduMaster</span>
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="mainNav">
+                <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+                    <li class="nav-item mx-2">
+                        <a class="nav-link text-dark" href="{% url 'course:course_list' %}">Browse</a>
+                    </li>
+                    <li class="nav-item mx-2">
+                        <a class="nav-link text-dark" href="{% url 'student:student_home' %}">My Learning</a>
+                    </li>
+                    <li class="nav-item mx-2">
+                        <a class="nav-link text-dark" href="#">Resources</a>
+                    </li>
+                </ul>
                 
-                <div class="ed-nav-links hidden lg:flex space-x-8">
-                    <a href="{% url 'course:course_list' %}" class="ed-nav-link text-gray-600 hover:text-blue-600 font-medium">Browse</a>
-                    <a href="{% url 'student:student_home' %}" class="ed-nav-link text-gray-600 hover:text-blue-600 font-medium">My Learning</a>
-                    <a href="#" class="ed-nav-link text-gray-600 hover:text-blue-600 font-medium">Resources</a>
-                </div>
-                
-                <div class="ed-search flex-1 max-w-xl mx-8 hidden lg:block">
-                    <form class="relative">
-                        <input type="search" placeholder="Search courses, skills, instructors..." 
-                            class="w-full px-6 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
-                        <button type="submit" class="absolute right-4 top-3 text-gray-500 hover:text-blue-600">
+                <form class="d-flex w-100 me-3" role="search">
+                    <div class="input-group flex-nowrap">
+                        <input type="search" class="form-control rounded-pill ps-4" 
+                               placeholder="Search courses, skills, instructors...">
+                        <button class="btn btn-link text-secondary position-absolute end-0 top-50 translate-middle-y me-3">
                             <i class="fas fa-search"></i>
                         </button>
-                    </form>
-                </div>
-                
-                <!-- Mobile Menu Button -->
-                <button class="lg:hidden text-gray-600">
-                    <i class="fas fa-bars text-xl"></i>
-                </button>
+                    </div>
+                </form>
             </div>
         </div>
     </nav>
 
-    <!-- Main Content -->
-    {% block content %}{% endblock %}
+<!-- Main Content -->
+{% block content %}{% endblock %}
 
-    <!-- Footer -->
-    <footer class="ed-footer bg-gray-800 text-white py-8 mt-16">
-        <div class="container mx-auto px-4">
-            <!-- Footer content -->
-        </div>
-    </footer>
+<script src="{% static 'assets/js/jquery.min.js' %}"></script>
+<script src="{% static 'assets/vendors/bootstrap/js/popper.min.js' %}"></script>
+<script src="{% static 'assets/vendors/bootstrap/js/bootstrap.min.js' %}"></script>
+<script src="{% static 'assets/vendors/bootstrap-select/bootstrap-select.min.js' %}"></script>
+<script src="{% static 'assets/vendors/bootstrap-touchspin/jquery.bootstrap-touchspin.js' %}"></script>
+<script src="{% static 'assets/vendors/magnific-popup/magnific-popup.js' %}"></script>
+<script src="{% static 'assets/vendors/counter/waypoints-min.js' %}"></script>
+<script src="{% static 'assets/vendors/counter/counterup.min.js' %}"></script>
+<script src="{% static 'assets/vendors/imagesloaded/imagesloaded.js' %}"></script>
+<script src="{% static 'assets/vendors/masonry/masonry.js' %}"></script>
+<script src="{% static 'assets/vendors/masonry/filter.js' %}"></script>
+<script src="{% static 'assets/vendors/owl-carousel/owl.carousel.js' %}"></script>
+<script src="{% static 'assets/js/jquery.scroller.js' %}"></script>
+<script src="{% static 'assets/js/functions.js' %}"></script>
+<script src="{% static 'assets/js/contact.js' %}"></script>
+<script src="{% static 'assets/vendors/switcher/switcher.js' %}"></script>
+<!-- Revolution Slider core JS -->
+<script src="{% static 'assets/vendors/revolution/js/jquery.themepunch.tools.min.js' %}"></script>
+<script src="{% static 'assets/vendors/revolution/js/jquery.themepunch.revolution.min.js' %}"></script>
+<script>
+	jQuery(document).ready(function() {
+		var ttrevapi;
+		var tpj =jQuery;
+		if(tpj("#rev_slider_486_1").revolution == undefined){
+			revslider_showDoubleJqueryError("#rev_slider_486_1");
+		}else{
+			ttrevapi = tpj("#rev_slider_486_1").show().revolution({
+				sliderType:"standard",
+				jsFileLocation:"assets/vendors/revolution/js/",
+				sliderLayout:"fullwidth",
+				dottedOverlay:"none",
+				delay:9000,
+				navigation: {
+					keyboardNavigation:"on",
+					keyboard_direction: "horizontal",
+					mouseScrollNavigation:"off",
+					mouseScrollReverse:"default",
+					onHoverStop:"on",
+					touch:{
+						touchenabled:"on",
+						swipe_threshold: 75,
+						swipe_min_touches: 1,
+						swipe_direction: "horizontal",
+						drag_block_vertical: false
+					}
+					,
+					arrows: {
+						style: "uranus",
+						enable: true,
+						hide_onmobile: false,
+						hide_onleave: false,
+						tmp: '',
+						left: {
+							h_align: "left",
+							v_align: "center",
+							h_offset: 10,
+							v_offset: 0
+						},
+						right: {
+							h_align: "right",
+							v_align: "center",
+							h_offset: 10,
+							v_offset: 0
+						}
+					},
+					
+				},
+				viewPort: {
+					enable:true,
+					outof:"pause",
+					visible_area:"80%",
+					presize:false
+				},
+				responsiveLevels:[1240,1024,778,480],
+				visibilityLevels:[1240,1024,778,480],
+				gridwidth:[1240,1024,778,480],
+				gridheight:[768,600,600,600],
+				lazyType:"none",
+				parallax: {
+					type:"scroll",
+					origo:"enterpoint",
+					speed:400,
+					levels:[5,10,15,20,25,30,35,40,45,50,46,47,48,49,50,55],
+					type:"scroll",
+				},
+				shadow:0,
+				spinner:"off",
+				stopLoop:"off",
+				stopAfterLoops:-1,
+				stopAtSlide:-1,
+				shuffle:"off",
+				autoHeight:"off",
+				hideThumbsOnMobile:"off",
+				hideSliderAtLimit:0,
+				hideCaptionAtLimit:0,
+				hideAllCaptionAtLilmit:0,
+				debugMode:false,
+				fallbacks: {
+					simplifyAll:"off",
+					nextSlideOnWindowFocus:"off",
+					disableFocusListener:false,
+				}
+			});
+		}
+	});	
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const logoutModal = document.getElementById("logoutModal");
+        const logoutBtn = document.getElementById("logoutBtn");
+        const cancelLogoutBtn = document.getElementById("cancelLogout");
 
-    <!-- Scripts -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="{% static 'js/main.js' %}"></script>
+        if (logoutBtn) {
+            // Show modal
+            logoutBtn.addEventListener("click", () => {
+                logoutModal.style.display = "block";
+            });
+        }
+
+        if (cancelLogoutBtn) {
+            // Close modal with "Cancel" button
+            cancelLogoutBtn.addEventListener("click", () => {
+                logoutModal.style.display = "none";
+            });
+        }
+
+        // Optional: click outside modal to close
+        window.addEventListener("click", (e) => {
+            if (e.target === logoutModal) {
+                logoutModal.style.display = "none";
+            }
+        });
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const toggle = document.getElementById('notificationToggle');
+        const dropdown = document.getElementById('notificationDropdown');
+
+        toggle.addEventListener('click', function (e) {
+            e.preventDefault();
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        });
+
+        // Hide on click outside
+        document.addEventListener('click', function (e) {
+            if (!toggle.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+    });
+</script>
+
 </body>
+
 </html>

@@ -1,55 +1,135 @@
-.ttr-divider {
-    height: 1px;
+/* divider.css */
+/* Modern Divider System */
+.divider {
+    --divider-color: #e5e7eb;
+    --divider-height: 1px;
+    --divider-spacing: 2rem;
+    --icon-size: 2.5rem;
+    --icon-bg: #fff;
+    --icon-color: #4b5563;
+    
     position: relative;
-    margin: 30px 0;
+    display: flex;
+    align-items: center;
+    margin: var(--divider-spacing) 0;
+    transition: all 0.3s ease;
 }
-.ttr-divider.tb20{
-	margin:20px 0;
+
+.divider::before {
+    content: '';
+    flex: 1;
+    height: var(--divider-height);
+    background: var(--divider-color);
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        var(--divider-color) 50%, 
+        transparent 100%);
 }
-.ttr-divider.tb15{
-	margin:15px 0;
+
+/* Icon Modifier */
+.divider--icon {
+    --divider-spacing: 3rem;
+    gap: 1.5rem;
 }
-.ttr-divider.tb10{
-	margin:10px 0;
+
+.divider--icon::after {
+    content: '';
+    flex: 1;
+    height: var(--divider-height);
+    background: var(--divider-color);
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        var(--divider-color) 50%, 
+        transparent 100%);
 }
-.ttr-divider.tb0{
-	margin:0;
+
+.divider__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--icon-size);
+    height: var(--icon-size);
+    background: var(--icon-bg);
+    color: var(--icon-color);
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
 }
-.ttr-divider.divider-2px {
-    height: 2px;
+
+/* Vertical Divider */
+.divider-vertical {
+    width: var(--divider-height);
+    min-height: 100px;
+    margin: 0 var(--divider-spacing);
+    flex-direction: column;
 }
-.ttr-divider.divider-3px {
-    height: 3px;
+
+.divider-vertical::before {
+    width: var(--divider-height);
+    height: 100%;
+    background: linear-gradient(0deg, 
+        transparent 0%, 
+        var(--divider-color) 50%, 
+        transparent 100%);
 }
-.ttr-divider.divider-4px {
-    height: 4px;
+
+/* Sizes */
+.divider--sm {
+    --divider-height: 1px;
+    --divider-spacing: 1rem;
 }
-.ttr-divider i {
-    position: absolute;
-    width: 30px;
-    height: 30px;
-    text-align: center;
-    line-height: 30px;
-    display: block;
-    border-radius: 100%;
-    -webkit-transform: translateY(-50%);
-    -ms-transform: translateY(-50%);
-    transform: translateY(-50%);
+
+.divider--md {
+    --divider-height: 2px;
+    --divider-spacing: 2rem;
 }
-.ttr-divider.icon-left {
-    margin-left: 40px;
+
+.divider--lg {
+    --divider-height: 3px;
+    --divider-spacing: 3rem;
 }
-.ttr-divider.icon-left i {
-    left: -40px;
+
+/* Color Variants */
+.divider--primary {
+    --divider-color: #2563eb;
+    --icon-color: #2563eb;
 }
-.ttr-divider.icon-right {
-    margin-right: 40px;
+
+.divider--success {
+    --divider-color: #16a34a;
+    --icon-color: #16a34a;
 }
-.ttr-divider.icon-right i {
-    left: auto;
-    right: -40px;
+
+.divider--warning {
+    --divider-color: #f59e0b;
+    --icon-color: #f59e0b;
 }
-.ttr-divider.icon-center i {
-    left: 50%;
-    margin-left: -5px;
+
+.divider--danger {
+    --divider-color: #dc2626;
+    --icon-color: #dc2626;
+}
+
+/* Animated Divider */
+.divider--animated::before {
+    animation: dividerFlow 3s ease-in-out infinite;
+}
+
+@keyframes dividerFlow {
+    0% { opacity: 0.5; background-size: 200% 100%; }
+    50% { opacity: 1; background-size: 100% 100%; }
+    100% { opacity: 0.5; background-size: 200% 100%; }
+}
+
+/* Hover Effects */
+.divider--hover:hover .divider__icon {
+    transform: translateY(-2px) scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Dark Theme */
+.dark .divider {
+    --divider-color: #374151;
+    --icon-bg: #1f2937;
+    --icon-color: #9ca3af;
 }

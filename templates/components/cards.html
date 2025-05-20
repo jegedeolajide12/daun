@@ -1,0 +1,22 @@
+<div class="edu-card {% if hover_effect %}hover:edu-card-hover{% endif %}">
+  {% if image_url %}
+  <div class="edu-card-image-container">
+    <img src="{{ image_url }}" alt="{{ title }}" class="edu-card-image">
+    {% if badge_text %}
+    <span class="edu-card-badge">{{ badge_text }}</span>
+    {% endif %}
+  </div>
+  {% endif %}
+  
+  <div class="edu-card-content">
+    <h3 class="edu-card-title">{{ title }}</h3>
+    {% if subtitle %}<p class="edu-card-subtitle">{{ subtitle }}</p>{% endif %}
+    {% if description %}<p class="edu-card-description">{{ description }}</p>{% endif %}
+    
+    {% if footer_content %}
+    <div class="edu-card-footer">
+      {{ footer_content }}
+    </div>
+    {% endif %}
+  </div>
+</div>
