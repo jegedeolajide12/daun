@@ -1,0 +1,119 @@
+/* owl.css */
+/* Modern Owl Carousel Styles */
+:root {
+    --nav-btn-size: 3rem;
+    --nav-btn-bg: rgba(255, 255, 255, 0.9);
+    --nav-btn-color: #1a202c;
+    --nav-btn-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --dot-size: 0.75rem;
+    --dot-spacing: 0.5rem;
+    --dot-active-scale: 1.4;
+    --transition-speed: 0.3s;
+}
+
+/* Navigation Arrows */
+.owl-prev,
+.owl-next {
+    width: var(--nav-btn-size);
+    height: var(--nav-btn-size);
+    background: var(--nav-btn-bg) !important;
+    color: var(--nav-btn-color) !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--nav-btn-shadow);
+    transition: all var(--transition-speed) ease !important;
+    transform: translateY(-50%);
+    opacity: 0.9;
+}
+
+.owl-prev:hover,
+.owl-next:hover {
+    opacity: 1;
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.owl-prev::before,
+.owl-next::before {
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    font-size: 1.25rem;
+}
+
+.owl-prev::before { content: "\f104"; }
+.owl-next::before { content: "\f105"; }
+
+/* Dots Navigation */
+.owl-theme .owl-dots {
+    margin-top: 2rem;
+}
+
+.owl-theme .owl-dots .owl-dot span {
+    width: var(--dot-size);
+    height: var(--dot-size);
+    margin: 0 var(--dot-spacing);
+    background: #cbd5e0;
+    transition: all var(--transition-speed) ease;
+}
+
+.owl-theme .owl-dots .owl-dot.active span,
+.owl-theme .owl-dots .owl-dot:hover span {
+    background: #2563eb;
+    transform: scale(var(--dot-active-scale));
+}
+
+/* Modern Variants */
+/* Outline Buttons */
+.owl-nav-outline .owl-prev,
+.owl-nav-outline .owl-next {
+    background: transparent !important;
+    border: 2px solid currentColor !important;
+    color: var(--nav-btn-color) !important;
+}
+
+/* Large Navigation */
+.owl-nav-lg {
+    --nav-btn-size: 4rem;
+    --dot-size: 1rem;
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+    .owl-prev,
+    .owl-next {
+        --nav-btn-bg: rgba(0, 0, 0, 0.7);
+        --nav-btn-color: #fff;
+    }
+    
+    .owl-theme .owl-dots .owl-dot span {
+        background: #4a5568;
+    }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    :root {
+        --nav-btn-size: 2.5rem;
+        --dot-size: 0.5rem;
+    }
+    
+    .owl-prev,
+    .owl-next {
+        opacity: 1 !important;
+    }
+}
+
+/* Smooth Transitions */
+.owl-carousel .owl-item img {
+    transition: transform 0.4s ease;
+}
+
+.owl-carousel .owl-item:hover img {
+    transform: scale(1.02);
+}
+
+/* Centered Navigation */
+.owl-btn-center-lr .owl-prev { left: 2rem !important; }
+.owl-btn-center-lr .owl-next { right: 2rem !important; }

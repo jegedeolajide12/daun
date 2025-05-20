@@ -1,0 +1,54 @@
+{% load static %}
+<div class="event-card">
+    <div class="event-card__header">
+        <img src="{% static "asset/images/courses/pic2.jpg" %}" alt="Tech Conference 2024" class="event-card__image">
+        <span class="event-card__status">Upcoming</span>
+        <button class="event-card__save" aria-label="Save event">
+            <i class="far fa-bookmark"></i>
+        </button>
+    </div>
+    
+    <div class="event-card__body">
+        <div class="event-card__host">
+            <img src="host-avatar.jpg" alt="Tech Events Inc" class="event-card__host-avatar">
+            <span class="event-card__host-name">Tech Events Inc</span>
+        </div>
+        
+        <h3 class="event-card__title">Future Tech Summit 2024</h3>
+        
+        <div class="event-card__details">
+            <div class="event-card__detail">
+                <i class="fas fa-calendar-alt"></i>
+                <div>
+                    <span class="event-card__date">Fri, Oct 18, 2024</span>
+                    <span class="event-card__time">10:00 AM - 6:00 PM CEST</span>
+                </div>
+            </div>
+            
+            <div class="event-card__detail">
+                <i class="fas fa-map-marker-alt"></i>
+                <div>
+                    <span class="event-card__location-type">Virtual Event</span>
+                    <span class="event-card__location">Online</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="event-card__pricing">
+            <span class="event-card__price">From $99</span>
+            <span class="event-card__price-type">Early Bird</span>
+        </div>
+    </div>
+    
+    <div class="event-card__footer">
+        <button class="event-card__cta">Register Now</button>
+        <div class="event-card__attendees">
+            <div class="event-card__avatars">
+                <img src="user1.jpg" alt="Attendee">
+                <img src="user2.jpg" alt="Attendee">
+                <img src="user3.jpg" alt="Attendee">
+            </div>
+            <span class="event-card__attendee-count">500+ attending</span>
+        </div>
+    </div>
+</div>

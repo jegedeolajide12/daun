@@ -1,0 +1,47 @@
+<div class="course-card">
+    <div class="course-card__header">
+        <img src="{{ course.cover_image.url }}" alt="{{ course.name }}" class="course-card__image">
+        <span class="course-card__badge">Bestseller</span>
+        <button class="course-card__wishlist" aria-label="Add to wishlist">
+            <i class="fas fa-heart"></i>
+        </button>
+    </div>
+    
+    <div class="course-card__body">
+        <h3 class="course-card__title">{{ course.name.title }}</h3>
+        <p class="course-card__instructor">{{ course.owner.full_name }}</p>
+        
+        <div class="course-card__meta">
+            <div class="course-card__rating">
+                <span class="course-card__stars">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star-half-alt"></i>
+                </span>
+                <span class="course-card__rating-count">(189,240)</span>
+            </div>
+            
+            <div class="course-card__pricing">
+                <span class="course-card__price">$94.99</span>
+                <span class="course-card__original-price">$199.99</span>
+            </div>
+        </div>
+        
+        <div class="course-card__details">
+            <div class="course-card__detail-item">
+                <i class="fas fa-clock"></i>
+                <span>52 hours</span>
+            </div>
+            <div class="course-card__detail-item">
+                <i class="fas fa-file-alt"></i>
+                <span>{{ course.course_topics.count }} topics</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="course-card__footer">
+        <button class="course-card__cta">Add to Cart</button>
+    </div>
+</div>

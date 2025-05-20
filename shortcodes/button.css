@@ -1,0 +1,232 @@
+/* buttons.css */
+/* Modern Button System */
+.btn {
+    --btn-color: #fff;
+    --btn-bg: #2563eb;
+    --btn-border: #2563eb;
+    --btn-hover-bg: #1d4ed8;
+    --btn-hover-border: #1d4ed8;
+    --btn-padding-x: 1.25rem;
+    --btn-padding-y: 0.75rem;
+    --btn-radius: 8px;
+    --btn-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: var(--btn-padding-y) var(--btn-padding-x);
+    font-family: 'Montserrat', system-ui, sans-serif;
+    font-weight: 600;
+    line-height: 1.5;
+    color: var(--btn-color);
+    background: var(--btn-bg);
+    border: 2px solid var(--btn-border);
+    border-radius: var(--btn-radius);
+    box-shadow: var(--btn-shadow);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform, box-shadow;
+}
+
+/* Solid Color Variants */
+.btn-primary {
+    --btn-bg: #2563eb;
+    --btn-border: #2563eb;
+    --btn-hover-bg: #1d4ed8;
+    --btn-hover-border: #1d4ed8;
+}
+
+.btn-secondary {
+    --btn-bg: #4b5563;
+    --btn-border: #4b5563;
+    --btn-hover-bg: #374151;
+    --btn-hover-border: #374151;
+}
+
+.btn-success {
+    --btn-bg: #16a34a;
+    --btn-border: #16a34a;
+    --btn-hover-bg: #15803d;
+    --btn-hover-border: #15803d;
+}
+
+.btn-danger {
+    --btn-bg: #dc2626;
+    --btn-border: #dc2626;
+    --btn-hover-bg: #b91c1c;
+    --btn-hover-border: #b91c1c;
+}
+
+.btn-warning {
+    --btn-bg: #f59e0b;
+    --btn-border: #f59e0b;
+    --btn-hover-bg: #d97706;
+    --btn-hover-border: #d97706;
+}
+
+.btn-info {
+    --btn-bg: #0284c7;
+    --btn-border: #0284c7;
+    --btn-hover-bg: #0369a1;
+    --btn-hover-border: #0369a1;
+}
+
+/* Outline Variants */
+.btn-outline {
+    background: transparent;
+    color: var(--btn-bg);
+    border-color: currentColor;
+}
+
+.btn-outline:hover {
+    background: var(--btn-bg);
+    color: var(--btn-color);
+}
+
+/* Gradient Variants */
+.btn-gradient {
+    background-image: linear-gradient(
+        135deg,
+        var(--btn-bg) 0%,
+        var(--btn-hover-bg) 100%
+    );
+    border: none;
+}
+
+/* Sizes */
+.btn-sm {
+    --btn-padding-x: 1rem;
+    --btn-padding-y: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.btn-lg {
+    --btn-padding-x: 2rem;
+    --btn-padding-y: 1rem;
+    font-size: 1.125rem;
+}
+
+.btn-xl {
+    --btn-padding-x: 2.5rem;
+    --btn-padding-y: 1.25rem;
+    font-size: 1.25rem;
+}
+
+/* Shapes */
+.btn-pill {
+    --btn-radius: 50px;
+}
+
+.btn-square {
+    --btn-radius: 4px;
+}
+
+/* Hover Effects */
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    background: var(--btn-hover-bg);
+    border-color: var(--btn-hover-border);
+}
+
+.btn:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Social Buttons */
+.btn-social {
+    --btn-color: #fff;
+    gap: 0.5rem;
+}
+
+.btn-facebook {
+    --btn-bg: #1877f2;
+    --btn-hover-bg: #166fe5;
+}
+
+.btn-twitter {
+    --btn-bg: #1da1f2;
+    --btn-hover-bg: #1991db;
+}
+
+.btn-google {
+    --btn-bg: #ea4335;
+    --btn-hover-bg: #d33828;
+}
+
+.btn-linkedin {
+    --btn-bg: #0a66c2;
+    --btn-hover-bg: #0959aa;
+}
+
+/* Icon Buttons */
+.btn-icon {
+    padding: 0;
+    width: 2.5rem;
+    height: 2.5rem;
+}
+
+.btn-icon.btn-sm {
+    width: 2rem;
+    height: 2rem;
+}
+
+.btn-icon.btn-lg {
+    width: 3rem;
+    height: 3rem;
+}
+
+/* Loading State */
+.btn-loading {
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+.btn-loading::after {
+    content: "";
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    border: 2px solid currentColor;
+    border-radius: 50%;
+    border-right-color: transparent;
+    animation: spin 0.75s linear infinite;
+    margin-left: 0.5em;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Special Effects */
+.btn-3d {
+    border-bottom-width: 4px;
+    border-bottom-color: color-mix(in srgb, var(--btn-bg) 80%, black);
+}
+
+.btn-neon {
+    box-shadow: 0 0 8px color-mix(in srgb, var(--btn-bg) 30%, transparent);
+}
+
+.btn-neon:hover {
+    box-shadow: 0 0 12px color-mix(in srgb, var(--btn-bg) 40%, transparent);
+}
+
+/* Dark Theme */
+.dark .btn {
+    --btn-color: #f3f4f6;
+    box-shadow: 0 1px 2px rgba(255, 255, 255, 0.05);
+}
+
+.dark .btn-outline {
+    background: transparent;
+    color: var(--btn-bg);
+    border-color: color-mix(in srgb, var(--btn-bg) 50%, transparent);
+}
+
+.dark .btn-outline:hover {
+    background: var(--btn-bg);
+    color: var(--btn-color);
+}

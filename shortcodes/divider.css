@@ -1,0 +1,135 @@
+/* divider.css */
+/* Modern Divider System */
+.divider {
+    --divider-color: #e5e7eb;
+    --divider-height: 1px;
+    --divider-spacing: 2rem;
+    --icon-size: 2.5rem;
+    --icon-bg: #fff;
+    --icon-color: #4b5563;
+    
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin: var(--divider-spacing) 0;
+    transition: all 0.3s ease;
+}
+
+.divider::before {
+    content: '';
+    flex: 1;
+    height: var(--divider-height);
+    background: var(--divider-color);
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        var(--divider-color) 50%, 
+        transparent 100%);
+}
+
+/* Icon Modifier */
+.divider--icon {
+    --divider-spacing: 3rem;
+    gap: 1.5rem;
+}
+
+.divider--icon::after {
+    content: '';
+    flex: 1;
+    height: var(--divider-height);
+    background: var(--divider-color);
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        var(--divider-color) 50%, 
+        transparent 100%);
+}
+
+.divider__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--icon-size);
+    height: var(--icon-size);
+    background: var(--icon-bg);
+    color: var(--icon-color);
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+/* Vertical Divider */
+.divider-vertical {
+    width: var(--divider-height);
+    min-height: 100px;
+    margin: 0 var(--divider-spacing);
+    flex-direction: column;
+}
+
+.divider-vertical::before {
+    width: var(--divider-height);
+    height: 100%;
+    background: linear-gradient(0deg, 
+        transparent 0%, 
+        var(--divider-color) 50%, 
+        transparent 100%);
+}
+
+/* Sizes */
+.divider--sm {
+    --divider-height: 1px;
+    --divider-spacing: 1rem;
+}
+
+.divider--md {
+    --divider-height: 2px;
+    --divider-spacing: 2rem;
+}
+
+.divider--lg {
+    --divider-height: 3px;
+    --divider-spacing: 3rem;
+}
+
+/* Color Variants */
+.divider--primary {
+    --divider-color: #2563eb;
+    --icon-color: #2563eb;
+}
+
+.divider--success {
+    --divider-color: #16a34a;
+    --icon-color: #16a34a;
+}
+
+.divider--warning {
+    --divider-color: #f59e0b;
+    --icon-color: #f59e0b;
+}
+
+.divider--danger {
+    --divider-color: #dc2626;
+    --icon-color: #dc2626;
+}
+
+/* Animated Divider */
+.divider--animated::before {
+    animation: dividerFlow 3s ease-in-out infinite;
+}
+
+@keyframes dividerFlow {
+    0% { opacity: 0.5; background-size: 200% 100%; }
+    50% { opacity: 1; background-size: 100% 100%; }
+    100% { opacity: 0.5; background-size: 200% 100%; }
+}
+
+/* Hover Effects */
+.divider--hover:hover .divider__icon {
+    transform: translateY(-2px) scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Dark Theme */
+.dark .divider {
+    --divider-color: #374151;
+    --icon-bg: #1f2937;
+    --icon-color: #9ca3af;
+}

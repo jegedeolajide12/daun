@@ -1,51 +1,258 @@
-.ed-nav {
-    position: relative;
-    z-index: 50;
-}
-
-.ed-course-card {
-    transition: transform 0.2s ease;
-}
-
-.ed-course-card:hover {
-    transform: translateY(-4px);
-}
-
-.ed-badge {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    background: #ef4444;
+/* Hero Section */
+.hero-section {
+    background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), 
+                url('hero-bg.jpg') center/cover;
     color: white;
-    width: 20px;
-    height: 20px;
+    padding: 8rem 0 6rem;
+}
+
+.hero-title {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    line-height: 1.2;
+    max-width: 800px;
+    margin: 0 auto 1.5rem;
+}
+
+.hero-subtitle {
+    font-size: 1.25rem;
+    margin-bottom: 3rem;
+    opacity: 0.9;
+}
+
+.search-container {
+    max-width: 700px;
+    margin: 0 auto;
+    position: relative;
+}
+
+.search-input {
+    width: 100%;
+    padding: 1.25rem 2rem;
+    border-radius: 50px;
+    border: none;
+    font-size: 1.1rem;
+}
+
+.search-btn {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 0.75rem 2rem;
+    border-radius: 50px;
+    background: #2563eb;
+    color: white;
+    border: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+/* Carousel Styles */
+.swiper {
+    padding: 2rem 0;
+}
+
+.swiper-button-next,
+.swiper-button-prev {
+    color: #2563eb !important;
+    background: rgba(255,255,255,0.9);
+    padding: 1rem;
     border-radius: 50%;
-    font-size: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+/* Accordion Styles */
+.accordion-button {
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding: 1.25rem;
+}
+
+.accordion-body {
+    padding: 1.5rem 1.25rem;
+}
+
+.category-card {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    border-radius: 8px;
+    background: #f8fafc;
+    transition: transform 0.3s ease;
+}
+
+.category-card:hover {
+    transform: translateY(-3px);
+    background: white;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Value Propositions */
+.value-grid {
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+.value-card {
+    text-align: center;
+    padding: 2rem;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.value-icon {
+    font-size: 2rem;
+    color: #2563eb;
+    margin-bottom: 1rem;
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 4rem 0 3rem;
+    }
+    
+    .search-container {
+        padding: 0 1rem;
+    }
+    
+    .search-btn {
+        position: static;
+        width: 100%;
+        margin-top: 1rem;
+        transform: none;
+    }
+    
+    .swiper-button-next,
+    .swiper-button-prev {
+        display: none;
+    }
+}
+/* Swiper Carousel Styles */
+.courses-carousel {
+    padding: 2rem 1rem 4rem;
+    overflow: hidden;
+}
+
+.swiper-slide {
+    width: 300px;
+    height: auto;
+    transition: transform 0.3s ease;
+}
+
+.swiper-button-next,
+.swiper-button-prev {
+    width: 40px;
+    height: 40px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    top: 45%;
+}
+
+.swiper-button-next::after,
+.swiper-button-prev::after {
+    font-size: 1.2rem;
+    color: #2563eb;
+}
+
+/* Accordion Styles */
+.accordion-button {
+    background: #f8fafc;
+    font-weight: 600;
+    color: #1e293b;
+    padding: 1.5rem;
+    border-radius: 8px !important;
+    margin-bottom: 0.5rem;
+}
+
+.accordion-button:not(.collapsed) {
+    background: #2563eb;
+    color: white;
+}
+
+.accordion-body {
+    padding: 1.5rem;
+    background: white;
+    border-radius: 0 0 8px 8px;
+}
+
+.category-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 8px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+.category-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    border-color: #2563eb;
+}
+
+.category-card i {
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
+    background: #f1f5f9;
+    border-radius: 6px;
+    color: #2563eb;
 }
 
-.ed-user-menu:hover .ed-user-dropdown {
-    display: block;
+/* Section Headers */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
 }
-/* HERO RESPONSIVE SECTION */
-@media (max-width: 640px) {
-    .ed-search-form {
-        width: 100%;
-        max-width: 100%;
-        padding: 0 8px;
-    }
-    
-    .ed-hero input {
-        border-radius: 28px 28px 0 0 !important;
-    }
-    
-    .ed-hero button {
-        border-radius: 0 0 28px 28px !important;
-    }
-    
-    .ed-stats div[class*="col-span-1"] {
-        padding: 0 4px;
-    }
+
+.section-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.see-all {
+    color: #2563eb;
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Testimonials Carousel */
+.testimonials-carousel {
+    padding: 2rem 0 4rem;
+}
+
+.testimonial-card {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    margin: 1rem;
+}
+
+.testimonial-author {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.testimonial-author img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
 }

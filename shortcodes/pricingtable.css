@@ -1,0 +1,168 @@
+/* pricingtable.css */
+/* Modern Pricing Table System */
+.pricing-table {
+    --pt-bg: #fff;
+    --pt-color: #1a202c;
+    --pt-accent: #2563eb;
+    --pt-radius: 1rem;
+    --pt-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    --pt-border: 1px solid #e2e8f0;
+    --pt-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    background: var(--pt-bg);
+    border-radius: var(--pt-radius);
+    transition: var(--pt-transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.pricing-table:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--pt-shadow);
+}
+
+.pricing-table__header {
+    padding: 2rem;
+    background: linear-gradient(135deg, var(--pt-accent) 0%, color-mix(in srgb, var(--pt-accent), black 15%) 100%);
+    color: white;
+    text-align: center;
+}
+
+.pricing-table__title {
+    margin: 0 0 0.5rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.pricing-table__price {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 0.25rem;
+    font-family: 'Inter', system-ui, sans-serif;
+    margin: 1rem 0;
+}
+
+.pricing-table__amount {
+    font-size: 3rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.pricing-table__period {
+    font-size: 1rem;
+    font-weight: 500;
+    opacity: 0.9;
+}
+
+.pricing-table__features {
+    padding: 1.5rem;
+    margin: 0;
+    list-style: none;
+}
+
+.pricing-table__feature {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    margin: 0.25rem 0;
+    background: rgba(241, 245, 249, 0.4);
+    border-radius: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.pricing-table__feature-icon {
+    color: var(--pt-accent);
+    font-size: 1.25rem;
+}
+
+.pricing-table__footer {
+    padding: 1.5rem;
+    text-align: center;
+}
+
+/* Highlighted Plan */
+.pricing-table--highlight {
+    border: 2px solid var(--pt-accent);
+    box-shadow: var(--pt-shadow);
+    transform: scale(1.03);
+}
+
+.pricing-table--highlight .pricing-table__header {
+    padding: 2.5rem 2rem;
+}
+
+.pricing-table--highlight::before {
+    content: "Most Popular";
+    position: absolute;
+    top: 1rem;
+    right: -2.5rem;
+    background: #f59e0b;
+    color: white;
+    padding: 0.25rem 2.5rem;
+    transform: rotate(45deg);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+}
+
+/* Color Variants */
+.pricing-table--primary {
+    --pt-accent: #2563eb;
+}
+
+.pricing-table--success {
+    --pt-accent: #16a34a;
+}
+
+.pricing-table--premium {
+    --pt-accent: #9333ea;
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+    .pricing-table {
+        --pt-bg: #1e293b;
+        --pt-color: #f8fafc;
+        --pt-border: 1px solid #2d3748;
+    }
+    
+    .pricing-table__feature {
+        background: rgba(45, 55, 72, 0.4);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .pricing-table {
+        margin-bottom: 2rem;
+    }
+    
+    .pricing-table--highlight {
+        transform: none;
+    }
+}
+
+/* Enterprise Style */
+.pricing-table--enterprise .pricing-table__header {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+}
+
+.pricing-table--enterprise .pricing-table__feature-icon {
+    color: #64748b;
+}
+
+/* Minimal Style */
+.pricing-table--minimal {
+    --pt-border: 0;
+    box-shadow: none;
+}
+
+.pricing-table--minimal .pricing-table__header {
+    background: transparent;
+    color: var(--pt-color);
+    border-bottom: var(--pt-border);
+}
