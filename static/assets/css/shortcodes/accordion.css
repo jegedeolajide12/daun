@@ -1,99 +1,65 @@
-/* accordion.css */
-/* Modern Bootstrap-based Accordion Styling */
-.accordion {
-    --accordion-color: #2d3748; /* Default text color */
-    --accordion-border-color: #e2e8f0;
-    --accordion-active-color: #2563eb; /* Blue for active states */
-    --accordion-bg-hover: #f8fafc;
-    --accordion-radius: 8px;
-    gap: 1rem;
-}
-
-.accordion-item {
-    background: white;
-    border: 1px solid var(--accordion-border-color);
-    border-radius: var(--accordion-radius) !important;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.accordion-item:hover {
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
-
-.accordion-button {
-    padding: 1.25rem 2rem;
-    font-weight: 600;
-    color: var(--accordion-color);
-    background-color: transparent !important;
-    transition: all 0.2s ease;
-}
-
-.accordion-button:not(.collapsed) {
-    color: var(--accordion-active-color);
+.panel {
     box-shadow: none;
-    border-bottom: 1px solid var(--accordion-border-color);
+    -webkit-box-shadow: none;
 }
-
-.accordion-button::after {
-    width: 1.25rem;
-    height: 1.25rem;
-    background-size: 1.25rem;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%232d3748'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
-    transition: transform 0.2s ease-in-out;
-}
-
-.accordion-button:not(.collapsed)::after {
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%232563eb'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
-    transform: rotate(-180deg);
-}
-
-.accordion-button:hover {
-    background-color: var(--accordion-bg-hover) !important;
-}
-
-.accordion-button:focus {
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-}
-
-.accordion-body {
-    padding: 1.5rem 2rem;
-    color: #4a5568;
-    line-height: 1.6;
-    border-top: 1px solid var(--accordion-border-color);
-}
-
-/* Compact Version */
-.accordion-compact .accordion-button {
-    padding: 1rem 1.5rem;
-}
-
-.accordion-compact .accordion-body {
-    padding: 1rem 1.5rem;
-}
-
-/* No Border Version */
-.accordion-no-border .accordion-item {
+.ttr-accordion .panel {
     border: none;
-    box-shadow: none;
+    border-radius: 0;
+    margin-bottom: -1px;
 }
-
-.accordion-no-border .accordion-button {
-    border-bottom: 1px solid var(--accordion-border-color);
+.acod-head {
+    position: relative;
 }
-
-/* Dark Theme */
-.accordion-dark {
-    --accordion-color: #e2e8f0;
-    --accordion-border-color: #2d3748;
-    --accordion-active-color: #60a5fa;
-    --accordion-bg-hover: rgba(255, 255, 255, 0.05);
+.acod-title {
+    margin-top: 0;
+    margin-bottom: 0;
 }
-
-.accordion-dark .accordion-item {
-    background: #1a202c;
-    border-color: var(--accordion-border-color);
+.acod-head .fa {
+    margin-right: 5px;
 }
-
-.accordion-dark .accordion-body {
-    color: #cbd5e0;
+.acod-head a {
+    display: block;
+    padding: 17px 40px 17px 25px;
+    border: 1px solid #dddddd;
+	border-radius: 4px;
+}
+.acod-head a,
+.acod-head a:hover,
+.acod-head a.collapsed:hover {
+    color: #EFBB20;
+}
+.acod-head a.collapsed,
+.acod-head a.collapsed:after {
+    color: #3d474a;
+}
+.acod-head a:after {
+    font-family:"themify";
+    content: "\e622";
+    float: right;
+    color: #EFBB20;
+    font-size: 16px;
+	letter-spacing: -2px;
+    position: absolute;
+    right: 20px;
+	top: 50%;
+    transform: translateY(-50%);
+    -moz-transform: translateY(-50%);
+    -webkit-transform: translateY(-50%);
+    -o-transform: translateY(-50%);
+}
+.acod-head a.collapsed:after {
+    content: "\e61a";
+	font-size:16px;
+	font-family: "themify";
+}
+.acod-body{
+    border-left: 1px solid #ebedf2;
+    border-right: 1px solid #ebedf2;
+    border-bottom: 1px solid #ebedf2;
+    border-top: 1px solid transparent;
+    margin-top: -1px;
+	border-radius: 0 0 4px 4px;
+}
+.acod-content {
+    margin: 20px;
 }
