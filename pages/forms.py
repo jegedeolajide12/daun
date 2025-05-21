@@ -51,7 +51,7 @@ class FacultyForm(forms.ModelForm):
 class AssignmentForm(forms.ModelForm):
     class Meta:
         model = Assignment
-        fields = ['title', 'description', 'course', 'topic', 'file', 'max_score']
+        fields = ['title', 'description', 'topic', 'file', 'max_score']
         widgets = {
             'title': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -63,11 +63,6 @@ class AssignmentForm(forms.ModelForm):
                 'rows': 3,
                 'placeholder': 'Enter Assignment Description',
                 'id': 'id_description',
-            }),
-            'course': forms.Select(attrs={
-                'class': 'form-control',
-                'placeholder': 'Select Course',
-                'id': 'id_course',
             }),
             'topic': forms.Select(attrs={
                 'class': 'form-control',
@@ -88,9 +83,6 @@ class AssignmentForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
         super(AssignmentForm, self).__init__(*args, **kwargs)
-
-        if user and user.is_authenticated:
-            self.fields['course'].queryset = Course.objects.filter(owner=user)
 
         if self.instance and hasattr(self.instance, 'course') and self.instance.course:
             self.fields['topic'].queryset = Topic.objects.filter(course=self.instance.course)

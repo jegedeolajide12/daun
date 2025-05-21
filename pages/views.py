@@ -387,12 +387,11 @@ def manage_courses(request):
 
 
 @login_required
-def create_assignment(request):
+def create_assignment(request, course_id):
+    course = get_object_or_404(Course, id=course_id)
     if request.method == 'POST':
         form = AssignmentForm(request.POST, request.FILES, user=request.user)
-        course_id = request.POST.get('course')
-        if course_id:
-            form.fields['topic'].queryset = Topic.objects.filter(course_id=course_id)
+        form.fields['topic'].queryset = Topic.objects.filter(course=course)
         if form.is_valid():
             assignment = form.save(commit=False)
             assignment.is_graded = False
@@ -435,6 +434,7 @@ def create_assignment(request):
             messages.error(request, "There was an error creating the assignment. Please correct the errors below.")
     else:
         form = AssignmentForm()
+        form.fields['topic'].queryset = Topic.objects.filter(course=course)
     # Get the list of courses for the dropdown
     courses = Course.objects.filter(owner=request.user)
     return render(request, 'students/manage/create_assignment.html', {'form': form, 'courses': courses})
@@ -508,17 +508,6 @@ def submit_assignment(request, course_id, topic_id, assignment_id):
     return render(request, 'students/manage/submit_asignment.html', context)
 
 
-def load_topics(request):
-    course_id = request.GET.get('course_id')
-    topics = Topic.objects.filter(course_id=course_id).order_by('order')
-    
-    # Return both id and the formatted string (including order number)
-    data = [{
-        'id': topic.id,
-        'name': str(topic)  # This uses your __str__ method
-    } for topic in topics]
-    
-    return JsonResponse(data, safe=False)
 
 
 

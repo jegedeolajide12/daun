@@ -59,29 +59,10 @@
 
                 <!-- Course and Topic - Stack on mobile, side by side on larger screens -->
                 <div class="row g-3 mb-4">
-                    <div class="col-md-6">
-                        <label for="id_course" class="form-label fw-bold">Course</label>
-                        <select id="id_course" name="course" class="form-select" required>
-                            <option value="" selected disabled>Select Course</option>
-                            {% for course in courses %}
-                                <option value="{{ course.id }}">{{ course.name }}</option>
-                            {% endfor %}
-                        </select>
-                        <div class="invalid-feedback">
-                            Please select a course.
-                        </div>
-                        {% if form.course.errors %}
-                            <div class="text-danger small mt-1">
-                                {{ form.course.errors|join:", " }}
-                            </div>
-                        {% endif %}
-                    </div>
+                    
                     <div class="col-md-6">
                         <label for="id_topic" class="form-label fw-bold">Topic</label>
-                        <select id="id_topic" name="topic" class="form-select">
-                            <option value="" selected disabled>Select Topic</option>
-                            <!-- Topics will be loaded dynamically via AJAX -->
-                        </select>
+                        {{ form.topic }}
                         {% if form.topic.errors %}
                             <div class="text-danger small mt-1">
                                 {{ form.topic.errors|join:", " }}
@@ -219,73 +200,5 @@ function addRubricItem() {
     `;
     rubricItems.insertAdjacentHTML('beforeend', html);
 }
-</script>
-
-<script>
-$(document).ready(function() {
-    console.log("Document ready - jQuery version:", $.fn.jquery);
-    
-    // Initialize selectpicker only once
-    $('#id_topic').selectpicker({
-        liveSearch: true,
-        noneSelectedText: 'Select Topic'
-    });
-    
-    // Course change handler
-    $('#id_course').change(function() {
-        const courseId = $(this).val();
-        const $topicSelect = $('#id_topic');
-        
-        console.log("Course changed, ID:", courseId);
-        
-        if (courseId) {
-            console.log("Fetching topics...");
-            
-            // Show loading state - disable through selectpicker
-            $topicSelect.selectpicker('val', '');
-            $topicSelect.selectpicker('disable');
-            $topicSelect.empty().append('<option value="">Loading topics...</option>');
-            $topicSelect.selectpicker('refresh');
-            
-            // Make AJAX request
-            $.ajax({
-                url: '{% url "course:ajax_load_topics" %}',
-                type: 'GET',
-                data: { 'course_id': courseId },
-                dataType: 'json',
-                success: function(response) {
-                    console.log("AJAX success, received:", response);
-                    
-                    $topicSelect.empty().append('<option value="" selected disabled>Select Topic</option>');
-                    
-                    if (response && response.length > 0) {
-                        response.forEach(function(topic) {
-                            $topicSelect.append(
-                                $('<option>').val(topic.id).text(topic.name)
-                            );
-                        });
-                    } else {
-                        $topicSelect.append('<option value="">No topics available</option>');
-                    }
-                    
-                    // Properly re-enable and refresh
-                    $topicSelect.selectpicker('enable');
-                    $topicSelect.selectpicker('refresh');
-                    console.log("Dropdown refreshed with new options");
-                },
-                error: function(xhr, status, error) {
-                    console.error("AJAX error:", status, error);
-                    $topicSelect.empty().append('<option value="">Error loading topics</option>');
-                    $topicSelect.selectpicker('enable');
-                    $topicSelect.selectpicker('refresh');
-                }
-            });
-        } else {
-            $topicSelect.empty().append('<option value="" selected disabled>Select Topic</option>');
-            $topicSelect.selectpicker('enable');
-            $topicSelect.selectpicker('refresh');
-        }
-    });
-});
 </script>
 {% endblock %}

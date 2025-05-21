@@ -5,7 +5,7 @@ from django.conf.urls.static import static
 from .views import (index, ManageCourseListView, CourseCreateView, CourseUpdateView, CourseDeleteView, 
                     course_detail, CourseModuleUpdateView, ContentCreateUpdateView, topic_detail, 
                     ContentDeleteView, CourseListView, course_unenroll, create_faculty, get_notifications, 
-                    mark_notification_read, mark_all_notifications_read, create_assignment, load_topics, 
+                    mark_notification_read, mark_all_notifications_read, create_assignment,
                     submit_assignment, assignment_detail, grade_assignments, get_submission_details, 
                     grade_submissions, create_assessment, manage_courses, attempt_assessment,
                     assessment_result)
@@ -37,8 +37,7 @@ urlpatterns = [
     path('notifications/<int:notification_id>/mark-read', mark_notification_read, name='mark_notification_read'),
     path('notifications/mark-all-read/', mark_all_notifications_read, name='mark_all_read'),
 
-    path('assignment/create/', create_assignment, name='create_assignment'),
-    path('ajax/load-topics/', load_topics, name='ajax_load_topics'),  # AJAX endpoint to load topics
+    path('course/<int:course_id>/assignment/create/', create_assignment, name='create_assignment'),
     path('course/<int:course_id>/topic/<int:topic_id>/assignment/<int:assignment_id>/submit', submit_assignment, name='submit_assignment'),
     path('assignment/<int:assignment_id>/topic/<int:topic_id>/course/<int:course_id>/detail', assignment_detail, name='assignment_detail'),
     path('students/assignments/grade', grade_assignments, name='grade_assignments'),
