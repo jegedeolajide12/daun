@@ -3,373 +3,192 @@
 {% load course %}
 {% load dict_extras %}
 {% block content %}
-    <!-- Content -->
-    <div class="page-content bg-white">
-        <!-- inner page banner -->
-        <div class="page-banner ovbl-dark" style="background-image:url({% static 'assets/images/banner/banner2.jpg' %});">
-            <div class="container py-5 position-relative ">
-                <div class="page-banner-entry">
-                    <h1 class="text-white">Topic Details</h1>
-				 </div>
-            </div>
+<main class="module-detail-main">
+  <!-- Hero/Banner -->
+  <section class="module-detail-hero" style="background: linear-gradient(rgba(37,99,235,0.7),rgba(0,0,0,0.7)), url('{% static "assets/images/banner/banner2.jpg" %}') center/cover; min-height: 240px;">
+    <div class="container py-4 text-white d-flex flex-column flex-md-row align-items-center justify-content-between">
+      <div class="module-detail-hero-info">
+        <h1 class="display-5 font-weight-bold mb-2">{{ module.title|default:module.name }}</h1>
+        <div class="d-flex align-items-center mb-2">
+          {% if module.owner.profile_picture %}
+            <img src="{{ module.owner.profile_picture.url }}" alt="Instructor" class="rounded-circle mr-2" width="40" height="40">
+          {% else %}
+            <img src="{% static 'asset/images/empty_profile.jpg' %}" alt="Instructor" class="rounded-circle mr-2" width="40" height="40">
+          {% endif %}
+          <div>
+            <span class="font-weight-bold">{{ module.owner.full_name|default:module.owner.username }}</span>
+            <span class="text-light small ml-2">Instructor</span>
+          </div>
         </div>
-		<!-- Breadcrumb row -->
-		<div class="breadcrumb-row">
-			<div class="container">
-				<ul class="list-inline">
-					<li><a href="#">Home</a></li>
-					<li>Topic Details</li>
-				</ul>
-			</div>
-		</div>
-        <div class="content-block">
-            <div class="section-area section-sp1">
-                <div class="container py-5">
-                    <div class="row g-4">
-                        <!-- Left part start -->
-                        <div class="col-lg-8 col-xl-8 order-lg-1 order-2">
-                            <!-- blog start -->
-                            <div class="recent-news blog-lg">
-                                <!-- Display Video or Image Content -->
-                                {% for content in contents %}
-                                    {% if content.item|model_name == 'video' and content.item.file %}
-                                        <div class="action-box blog-lg">
-                                            <video controls width="100%" class="rounded">
-                                                <source src="{{ content.item.file.url }}" type="video/mp4">
-                                                Your browser does not support the video tag.
-                                            </video>
-                                        </div>
-                                        <!-- Show Delete Button Only to the Owner -->
-                                        {% if content.item.owner == user %}
-                                            <form method="post" action="{% url 'course:content_delete' content.id %}">
-                                                {% csrf_token %}
-                                                <button type="submit" class="btn btn-danger mt-2">Delete</button>
-                                            </form>
-                                        {% endif %}
-                                    {% endif %}
-                                {% endfor %}
-                                <!-- Topic Details -->
-                                <div class="info-bx">
-                                    
-                                    <h5 class="post-title">{{ topic.name|title }}</h5>
-                                    <div class="media-post mt-3 text-start">
-                                        <ul class="list-inline mb-0">
-                                            <li class="list-inline-item"><a href="#"><i class="fa fa-calendar"></i> {{ topic.course.created|date:"M j Y" }}</a></li>
-                                            <li class="list-inline-item"><a href="#"><i class="fa fa-comments-o"></i> 10 Comment</a></li>
-                                        </ul>
-                                    </div>
-                                    <p>{{ topic.description|linebreaks }}</p>
-                                    <div class="ttr-divider bg-gray"><i class="icon-dot c-square"></i></div>
-
-                                    <!-- Content Upload Buttons -->
-                                    <div class="col-12">
-                                        <h7>CHOOSE A CONTENT TO UPLOAD</h7>
-                                    </div>
-                                    <br>
-                                    <div class="col-lg-8 col-sm-12 col-md-12">
-                                        <a href="{% url 'course:topic_content_create' topic.id 'text' %}" class="btn btn-secondary">TEXT</a>
-                                        {% if video_count < 1 %}
-                                            <a href="{% url 'course:topic_content_create' topic.id 'video' %}" class="btn btn-secondary">VIDEO</a>
-                                        {% else %}
-                                            <button class="btn btn-disabled" disabled>Video</button>
-                                        {% endif %}
-                                        <a href="{% url 'course:topic_content_create' topic.id 'image' %}" class="btn btn-secondary">IMAGES</a>
-                                        <a href="{% url 'course:topic_content_create' topic.id 'file' %}" class="btn btn-secondary">FILES</a>
-                                    </div>
-                                    <div class="ttr-divider bg-gray"><i class="icon-dot c-square"></i></div>
-
-                                    <!-- Social Sharing -->
-                                    <h6>SHARE</h6>
-                                    <ul class="list-inline contact-social-bx">
-                                        <li><a href="#" class="btn outline radius-xl"><i class="fa fa-facebook"></i></a></li>
-                                        <li><a href="#" class="btn outline radius-xl"><i class="fa fa-twitter"></i></a></li>
-                                        <li><a href="#" class="btn outline radius-xl"><i class="fa fa-linkedin"></i></a></li>
-                                        <li><a href="#" class="btn outline radius-xl"><i class="fa fa-google-plus"></i></a></li>
-                                    </ul>
-                                    <div class="ttr-divider bg-gray"><i class="icon-dot c-square"></i></div>
-                                </div>
-                            </div>
-                            <!-- New Assignments Section -->
-                            <div class="card mb-4">
-                                <div class="card-header">
-                                    <h4 class="mb-0">Topic Assignments</h4>
-                                </div>
-                                <div class="card-body">
-                                    <div class="list-group">
-                                        {% for assignment in assignments %}
-                                        <div class="list-group-item">
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <div>
-                                                    <h5 class="mb-1"><a href="{{ assignment.get_absolute_url }}">{{ assignment.title }}</a> </h5>
-                                                </div>
-                                                <span class="badge bg-{% if assignment.assignment_task.user_tasks.status == 'submitted' %}info{% elif assignment.status == 'graded' %}success{% elif assignment.status == 'overdue' %}danger{% else %}warning{% endif %}">
-                                                    {{ assignment.status_display }}
-                                                </span>
-                                            </div>
-                                            <p class="mt-2 mb-0">{{ assignment.description|truncatewords:20 }}</p>
-                                            
-                                            <!-- Submission Button (conditionally shown) -->
-                                            <div class="d-flex justify-content-between align-items-center mt-2">
-                                                
-                                                {% with user_task=assignment_user_tasks|dict_key:assignment.id %}
-                                                    {% if user_task and user_task.status != 'submitted' %}
-                                                        <a href="{% url 'course:submit_assignment' course_id=assignment.course.id topic_id=topic.id assignment_id=assignment.id %}" 
-                                                        class="btn btn-sm btn-primary">
-                                                            <i class="fa fa-paper-plane me-1"></i> Submit
-                                                        </a>
-                                                    {% elif user_task and user_task.status == 'submitted' %}
-                                                        <span class="badge bg-success">
-                                                            <i class="fa fa-check me-1"></i> Submitted
-                                                        </span>
-                                                    {% endif %}
-                                                {% endwith %}
-                                            </div>
-                                        </div>
-                                        {% empty %}
-                                        <div class="text-muted">No assignments for this topic</div>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- New Assignments Section -->
-                            <div class="card mb-4">
-                                <div class="card-header">
-                                    <h4 class="mb-0">Topic Assessments</h4>
-                                </div>
-                                <div class="card-body">
-                                    <div class="list-group">
-                                        {% for assessment in assessments %}
-                                        <div class="list-group-item">
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <div>
-                                                    <h5 class="mb-1"><a href="{{ assessment.get_absolute_url }}">Assessment {{ forloop.counter }}</a> </h5>
-                                                </div>
-                                                <span class="badge bg-{% if assessment.assessment_task.user_tasks.status == 'submitted' %}info{% elif assignment.status == 'graded' %}success{% elif assignment.status == 'overdue' %}danger{% else %}warning{% endif %}">
-                                                    {{ assessment.get_status_display }}
-                                                </span>
-                                            </div>
-                                            <p class="mt-2 mb-0">{{ assessment.description|truncatewords:20 }}</p>
-                                            
-                                            <!-- Submission Button (conditionally shown) -->
-                                            <div class="d-flex justify-content-between align-items-center mt-2">
-                                                
-                                                {% with user_task=assessment_user_tasks|dict_key:assessment.id %}
-                                                    {% if user_task and user_task.status != 'submitted' %}
-                                                        <a href="{% url "course:attempt_assessment" assessment.id %}" 
-                                                        class="btn btn-sm btn-primary">
-                                                            <i class="fa fa-paper-plane me-1"></i> Attempt
-                                                        </a>
-                                                    {% elif user_task and user_task.status == 'submitted' %}
-                                                        <span class="badge bg-success">
-                                                            <i class="fa fa-check me-1"></i> Attempted
-                                                        </span>
-                                                    {% endif %}
-                                                {% endwith %}
-                                            </div>
-                                        </div>
-                                        {% empty %}
-                                        <div class="text-muted">No assessments for this topic</div>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                            </div>
-
-
-                            <!-- Comments Section -->
-                            <div class="clear" id="comment-list">
-                                <div class="comments-area" id="comments">
-                                    <h2 class="comments-title">8 Comments</h2>
-                                    <div class="clearfix m-b20">
-                                        <!-- Comment List -->
-                                        <ol class="comment-list">
-                                            <!-- Example Comment -->
-                                            <li class="comment">
-                                                <div class="comment-body">
-                                                    <div class="comment-author vcard">
-                                                        <img class="avatar photo" src="{% static 'assets/images/testimonials/pic1.jpg' %}" alt="">
-                                                        <cite class="fn">John Doe</cite>
-                                                        <span class="says">says:</span>
-                                                    </div>
-                                                    <div class="comment-meta">
-                                                        <a href="#">December 02, 2019 at 10:45 am</a>
-                                                    </div>
-                                                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam vitae neque vitae sapien malesuada aliquet.</p>
-                                                    <div class="reply">
-                                                        <a href="#" class="comment-reply-link">Reply</a>
-                                                    </div>
-                                                </div>
-                                            </li>
-                                            <!-- Repeat for other comments -->
-                                        </ol>
-                                        <!-- Comment Form -->
-                                        <div class="comment-respond" id="respond">
-                                            <h4 class="comment-reply-title" id="reply-title">Leave a Reply</h4>
-                                            <form class="comment-form" id="commentform" method="post">
-                                                <p class="comment-form-author">
-                                                    <label for="author">Name <span class="required">*</span></label>
-                                                    <input type="text" name="Author" placeholder="Author" id="author">
-                                                </p>
-                                                <p class="comment-form-email">
-                                                    <label for="email">Email <span class="required">*</span></label>
-                                                    <input type="text" placeholder="Email" name="email" id="email">
-                                                </p>
-                                                <p class="comment-form-comment">
-                                                    <label for="comment">Comment</label>
-                                                    <textarea rows="8" name="comment" placeholder="Comment" id="comment"></textarea>
-                                                </p>
-                                                <p class="form-submit">
-                                                    <input type="submit" value="Submit Comment" class="submit" id="submit" name="submit">
-                                                </p>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Left part END -->
-                         
-
-                        <!-- Sidebar -->
-                        <div class="col-lg-4 col-xl-4 col-md-12 order-lg-2 order-1">
-                            <div class="sticky-top" style="top: 80px; z-index: 1;">
-                                <!-- Learning Materials -->
-                                <div class="card border-0 shadow-sm mb-4">
-                                    <div class="card-header bg-primary text-white">
-                                        <h5 class="mb-0">Learning Materials</h5>
-                                    </div>
-                                    <div class="card-body">
-                                    {% if contents %}
-                                        <ul class="list-group list-group-flush">
-                                            {% for content in contents %}
-                                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                <span>{{ content.item.title }}</span>
-                                                <span class="badge bg-secondary">
-                                                    {{ content.item|model_name|title }}
-                                                </span>
-                                            </li>
-                                            {% endfor %}
-                                        </ul>
-                                    {% else %}
-                                        <p class="text-muted">No learning materials available for this topic.</p>
-                                    {% endif %}
-                                    </div>
-                                </div>
-
-                                <!-- Topic Progress -->
-                                <div class="card border-0 mb-4 shadow-sm">
-                                    <div class="card-header bg-success text-white">
-                                        <h5 class="mb-0">Your Progress</h5>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="mb-3">
-                                            <div class="d-flex justify-content-between mb-1">
-                                                <span>Topic Completion</span>
-                                                <span>{{ topic_completion_percentage }}%</span>
-                                            </div>
-                                            <div class="progress" style="height: 8px;">
-                                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" 
-                                                    role="progressbar" style="width: {{ topic_completion_percentage }}%" 
-                                                    aria-valuenow="{{ topic_completion_percenage }}" aria-valuemin="0" aria-valuemax="100">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <dl class="row mb-0">
-                                            <dt class="col-6">Completed:</dt>
-                                            <dd class="col-6 text-end">{{ completed_topics_count }}/{{ total_topics }} topics</dd>
-                                            <dt class="col-6">Assignments:</dt>
-                                            <dd class="col-6 text-end">{{ total_completed_assignments }}/{{ assignments|length }} done</dd>
-                                            <dt class="col-6">Quizzes:</dt>
-                                            <dd class="col-6 text-end">{{ total_completed_assessments }}/{{ assessments|length }} done</dd>
-                                        </dl>
-                                    </div>
-                                </div>
-
-                                <!-- Upcoming Deadlines -->
-                                <div class="card border-0 mb-4 shadow-sm">
-                                    <div class="card-header bg-warning text-dark">
-                                        <h5 class="mb-0">Upcoming Deadlines</h5>
-                                    </div>
-                                    <div class="card-body">
-                                    {% if assignments %}
-                                        <ul class="list-group list-group-flush">
-                                            {% for assignment in assignments|slice:":3" %}
-                                            <li class="list-group-item">
-                                                <div class="d-flex justify-content-between">
-                                                    <span>{{ assignment.title }}</span>
-                                                    <small class="text-muted">{{ assignment.due_date|date:"M j" }}</small>
-                                                </div>
-                                            </li>
-                                            {% empty %}
-                                            <li class="list-group-item text-muted">No upcoming deadlines</li>
-                                            {% endfor %}
-                                        </ul>
-                                    {% else %}
-                                        <p class="text-muted">No upcoming deadlines</p>
-                                    {% endif %}
-                                    </div>
-                                </div>
-
-                                <!-- Instructor Info -->
-                                <div class="card-body">
-                                    <div class="d-flex align-items-start mb-4">
-                                        <!-- Image Container -->
-                                        <div class="me-3">
-                                            <img src="{% if topic.course.owner.profile_picture %}{{ topic.course.owner.profile_picture.url }}{% else %}{% static 'assets/images/empty_profile.jpg' %}{% endif %}"
-                                                class="rounded-circle border border-3 border-white shadow-sm"
-                                                style="width: 72px; height: 72px; object-fit: cover;"
-                                                alt="{{ topic.course.owner.get_full_name }} profile picture">
-                                        </div>
-                                        
-                                        <!-- Instructor Info with Badge -->
-                                        <div class="flex-grow-1 position-relative">
-                                            <div class="d-flex align-items-center">
-                                                <h5 class="mb-0 me-2">{% if topic.course.owner.full_name %}{{ topic.course.owner.full_name }}{% else %} {{ topic.course.owner.username }}{% endif %}</h5>
-                                                <!-- Verification badge now next to name -->
-                                                <div class="bg-primary rounded-circle p-1 border border-2 border-white" style="width: 20px; height: 20px;">
-                                                    <i class="fa fa-check text-white d-flex justify-content-center align-items-center" style="font-size: 0.7rem;"></i>
-                                                </div>
-                                            </div>
-                                            
-                                            <p class="text-muted small mb-2">Course Instructor</p>
-                                            
-                                            <!-- Rating (optional) -->
-                                            <div class="d-flex align-items-center mb-2">
-                                                <div class="text-warning me-2">
-                                                    <i class="fa fa-star"></i>
-                                                    <i class="fa fa-star"></i>
-                                                    <i class="fa fa-star"></i>
-                                                    <i class="fa fa-star"></i>
-                                                    <i class="fa fa-star-half-alt"></i>
-                                                </div>
-                                                <small class="text-muted">4.8 (128 reviews)</small>
-                                            </div>
-                                            
-                                            <!-- Bio -->
-                                            <p class="mb-3 text-muted">{{ topic.course.owner.bio|truncatewords:20 }}</p>
-                                            
-                                            <!-- Contact Buttons with proper spacing -->
-                                            <div class="row"> <!-- Use row for proper spacing -->
-                                                <div class="col">
-                                                    <a href="#" class="btn btn-sm btn-outline-primary rounded-pill px-3 w-100 text-center">
-                                                        <i class="fa fa-envelope me-2"></i> Message
-                                                    </a>
-                                                </div>
-                                                <div class="col">
-                                                    <a href="#" class="btn btn-sm btn-outline-secondary rounded-pill px-3 w-100 text-center">
-                                                        <i class="fa fa-user me-2"></i> Profile
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Sidebar END -->
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="d-flex align-items-center flex-wrap mb-2">
+          <span class="badge badge-success mr-2">Module</span>
+          <span class="mr-3"><i class="fas fa-book-open text-warning"></i> {{ contents|length }} Materials</span>
+          <span class="mr-3"><i class="fas fa-tasks"></i> {{ assignments|length }} Assignments</span>
+          <span><i class="fas fa-clipboard-check"></i> {{ assessments|length }} Assessments</span>
         </div>
+      </div>
     </div>
+  </section>
+
+  <!-- Main Content -->
+  <section class="container py-5">
+    <div class="row">
+      <!-- Left/Main -->
+      <div class="col-lg-8 mb-5 mb-lg-0">
+        <!-- Overview -->
+        <div class="mb-5">
+          <h3 class="font-weight-bold mb-3">Module Overview</h3>
+          <div class="text-muted" style="font-size:1.08rem;">{{ module.description|linebreaksbr }}</div>
+        </div>
+        <!-- Learning Materials -->
+        <div class="mb-5">
+          <h3 class="font-weight-bold mb-3">Learning Materials</h3>
+          {% if contents %}
+            <ul class="list-group list-group-flush">
+              {% for content in contents %}
+                <li class="list-group-item d-flex align-items-center justify-content-between">
+                  <span><i class="fas fa-file-alt text-primary mr-2"></i>{{ content.item.title }}</span>
+                  <span class="badge badge-secondary">{{ content.item.get_type_display }}</span>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <div class="text-muted">No learning materials available for this module.</div>
+          {% endif %}
+        </div>
+        <!-- Assignments -->
+        <div class="mb-5">
+          <h3 class="font-weight-bold mb-3">Assignments</h3>
+          {% if assignments %}
+            <ul class="list-group list-group-flush">
+              {% for assignment in assignments %}
+                <li class="list-group-item">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <span class="font-weight-bold">{{ assignment.title }}</span>
+                    <span class="badge badge-info">Due: {{ assignment.due_date|date:'M d, Y' }}</span>
+                  </div>
+                  <p class="mb-1 text-muted">{{ assignment.description|truncatewords:20 }}</p>
+                  <a href="{{ assignment.get_absolute_url }}" class="btn btn-sm btn-outline-primary mt-2">View Assignment</a>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <div class="text-muted">No assignments for this module.</div>
+          {% endif %}
+        </div>
+        <!-- Assessments -->
+        <div class="mb-5">
+          <h3 class="font-weight-bold mb-3">Assessments</h3>
+          {% if assessments %}
+            <ul class="list-group list-group-flush">
+              {% for assessment in assessments %}
+                <li class="list-group-item">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <span class="font-weight-bold">{{ assessment.title }}</span>
+                    <span class="badge badge-warning">{{ assessment.get_type_display }}</span>
+                  </div>
+                  <p class="mb-1 text-muted">{{ assessment.description|truncatewords:20 }}</p>
+                  <a href="{{ assessment.get_absolute_url }}" class="btn btn-sm btn-outline-primary mt-2">Take Assessment</a>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <div class="text-muted">No assessments for this module.</div>
+          {% endif %}
+        </div>
+        <!-- Comments Section -->
+        <div class="mb-5">
+          <h3 class="font-weight-bold mb-3">Discussion & Comments</h3>
+          <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+              <h5 class="mb-3">Comments</h5>
+              <ol class="list-unstyled">
+                {% for comment in comments %}
+                  <li class="media mb-4">
+                    <img src="{% static 'asset/images/empty_profile.jpg' %}" class="mr-3 rounded-circle" width="40" height="40" alt="User">
+                    <div class="media-body">
+                      <h6 class="mt-0 mb-1 font-weight-bold">{{ comment.user.get_full_name|default:comment.user.username }} <span class="text-muted small ml-2">{{ comment.created|date:'M d, Y H:i' }}</span></h6>
+                      <p class="mb-0 text-muted">{{ comment.body }}</p>
+                    </div>
+                  </li>
+                {% empty %}
+                  <li class="text-muted">No comments yet. Be the first to comment!</li>
+                {% endfor %}
+              </ol>
+              <!-- Comment Form -->
+              <form class="mt-4" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                  <label for="comment">Add a comment</label>
+                  <textarea class="form-control" id="comment" name="comment" rows="4" placeholder="Write your comment..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Sidebar -->
+      <div class="col-lg-4">
+        <div class="sticky-top" style="top: 80px; z-index: 1;">
+          <!-- Progress -->
+          <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-success text-white">
+              <h5 class="mb-0">Your Progress</h5>
+            </div>
+            <div class="card-body">
+              <div class="mb-3">
+                <div class="d-flex justify-content-between mb-1">
+                  <span>Completed</span>
+                  <span class="font-weight-bold">{{ progress.completed }}/{{ progress.total }}</span>
+                </div>
+                <div class="progress" style="height: 8px;">
+                  <div class="progress-bar bg-success" role="progressbar" style="width: {{ progress.percent }}%;" aria-valuenow="{{ progress.percent }}" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+              </div>
+              <dl class="row mb-0">
+                <dt class="col-6">Last Activity</dt>
+                <dd class="col-6 text-right">{{ progress.last_activity|date:'M d, Y' }}</dd>
+              </dl>
+            </div>
+          </div>
+          <!-- Upcoming Deadlines -->
+          <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-warning text-dark">
+              <h5 class="mb-0">Upcoming Deadlines</h5>
+            </div>
+            <div class="card-body">
+              {% if upcoming_deadlines %}
+                <ul class="list-group list-group-flush">
+                  {% for deadline in upcoming_deadlines %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                      <span>{{ deadline.title }}</span>
+                      <span class="badge badge-danger">{{ deadline.due_date|date:'M d, Y' }}</span>
+                    </li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <div class="text-muted">No upcoming deadlines.</div>
+              {% endif %}
+            </div>
+          </div>
+          <!-- Share Module -->
+          <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+              <h5 class="mb-0">Share this Module</h5>
+            </div>
+            <div class="card-body">
+              <div class="d-flex align-items-center">
+                <a href="#" class="btn btn-link text-primary p-0 mr-2"><i class="fab fa-facebook fa-lg"></i></a>
+                <a href="#" class="btn btn-link text-info p-0 mr-2"><i class="fab fa-twitter fa-lg"></i></a>
+                <a href="#" class="btn btn-link text-danger p-0"><i class="fab fa-linkedin fa-lg"></i></a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
 {% include "footer.html" %}
 {% endblock %}

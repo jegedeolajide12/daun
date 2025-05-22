@@ -9,7 +9,7 @@
     
     <div class="course-card__body">
         <h3 class="course-card__title">
-            <a href="{% url "course:course" course.id %}"> {{ course.name|title }} </a>
+            <a href="{% url "course:course" course.slug %}"> {{ course.name|title }} </a>
           <span class="course-card__desc-tooltip">{{ course.overview|default_if_none:''|striptags }}</span>
         </h3>
         <div class="course-card__hoverbox">
