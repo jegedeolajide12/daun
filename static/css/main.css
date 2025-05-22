@@ -539,3 +539,8 @@ body { margin-top: 72px !important; }
     flex-direction: column;
     justify-content: center;
 }
+
+/* Custom progress bar height for module detail sidebar */
+.module-progress-bar {
+  height: 18px;
+}
