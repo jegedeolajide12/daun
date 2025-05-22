@@ -8,7 +8,10 @@
     </div>
     
     <div class="course-card__body">
-        <h3 class="course-card__title">{{ course.name.title }}</h3>
+        <h3 class="course-card__title" title="{{ course.overview|default_if_none:''|striptags|truncatechars:200 }}">
+          {{ course.name|title }}
+          <span class="course-card__desc-tooltip">{{ course.overview|default_if_none:''|striptags }}</span>
+        </h3>
         <p class="course-card__instructor">{{ course.owner.full_name }}</p>
         
         <div class="course-card__meta">
@@ -43,5 +46,21 @@
     
     <div class="course-card__footer">
         <button class="course-card__cta">Add to Cart</button>
+    </div>
+
+    <div class="course-card__hoverbox">
+      <h4>{{ course.name|title }}</h4>
+      <div class="hoverbox-instructor">By {{ course.owner.full_name }}</div>
+      <div class="hoverbox-desc">{{ course.overview|default_if_none:''|striptags }}</div>
+      <div class="hoverbox-details">
+        <span><i class="fas fa-clock"></i> 52 hours</span>
+        <span><i class="fas fa-file-alt"></i> {{ course.course_topics.count }} topics</span>
+      </div>
+      <div class="hoverbox-meta">
+        <span class="hoverbox-rating"><i class="fas fa-star"></i> 4.7</span>
+        <span class="hoverbox-rating-count">(189,240)</span>
+        <span class="hoverbox-price">$94.99</span>
+        <span class="hoverbox-original-price">$199.99</span>
+      </div>
     </div>
 </div>

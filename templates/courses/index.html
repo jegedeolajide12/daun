@@ -1,268 +1,188 @@
-
 {% extends parent_template|default:"navbar.html" %}
 {% load static %}
 {% block content %}
-<!-- Content -->
-<div class="page-content bg-white">
-    <!-- Main Slider -->
-    <div class="section-area section-sp1 ovpr-dark bg-fix online-cours" style="background-image:url({% static 'assets/images/background/bg1.jpg' %});">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-12 text-center text-white">
-                    <h2>Your Gateway to Skills, Courses & Events</h2>
-                    <h5>Find top-tier courses, attend live events, and connect with experts</h5>
-                    <h5>All designed to elevate your skills and unlock new opportunities</h5>
-                    <form class="cours-search">
-                        <div class="input-group">
-                            <input type="text" class="form-control" placeholder="What do you want to learn today?">
-                            <div class="input-group-append">
-                                <button class="btn" type="submit">Search</button>
+<!-- Hero Section -->
+<section class="hero-section d-flex align-items-center" style="background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('{% static 'assets/images/background/bg1.jpg' %}') center/cover; min-height: 420px;">
+    <div class="container text-center text-white py-5">
+        <h1 class="hero-title mb-3">Your Gateway to Skills, Courses & Events</h1>
+        <p class="hero-subtitle mb-4">Find top-tier courses, attend live events, and connect with experts. All designed to elevate your skills and unlock new opportunities.</p>
+        <form class="search-container mb-4" method="get" action="{# search url #}">
+            <input class="search-input" type="text" name="q" placeholder="What do you want to learn today?">
+            <button class="search-btn" type="submit"><i class="fas fa-search"></i></button>
+        </form>
+        <div class="hero-stats-row">
+            <div class="text-center">
+                <h3><i class="fas fa-users mr-2"></i><span class="counter">5</span>M+</h3>
+                <span class="text-light small">Students</span>
+            </div>
+            <div class="text-center">
+                <h3><i class="fas fa-book mr-2"></i><span class="counter">30</span>K+</h3>
+                <span class="text-light small">Courses</span>
+            </div>
+            <div class="text-center">
+                <h3><i class="fas fa-list-alt mr-2"></i><span class="counter">20</span>K+</h3>
+                <span class="text-light small">Topics</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Popular Courses Section -->
+<section class="container py-5">
+    <div class="d-flex justify-content-between align-items-end mb-4 flex-wrap">
+        <div>
+            <h2 class="font-weight-bold mb-1">Popular Courses</h2>
+            <p class="text-muted mb-0">Browse our most popular courses, handpicked for you.</p>
+        </div>
+        <a href="{% url 'course:course_list' %}" class="btn btn-link text-primary">View All Courses <i class="fas fa-arrow-right"></i></a>
+    </div>
+    <div class="courses-carousel owl-carousel owl-theme">
+        {% for course in courses %}
+            <div class="item d-flex">
+                {% include 'components/course_cards.html' %}
+            </div>
+        {% empty %}
+        <div class="item col-12 text-center text-muted py-5">
+            <p>No courses available at the moment. Please check back later.</p>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Upcoming Events Section -->
+<section class="container py-5">
+    <div class="d-flex justify-content-between align-items-end mb-4 flex-wrap">
+        <div>
+            <h2 class="font-weight-bold mb-1">Upcoming Events</h2>
+            <p class="text-muted mb-0">Don't miss these exciting learning opportunities and conferences.</p>
+        </div>
+        <a href="#" class="btn btn-link text-primary">View All Events <i class="fas fa-arrow-right"></i></a>
+    </div>
+    <div class="events-carousel owl-carousel owl-theme">
+        <div class="item d-flex">
+            {% include 'components/events_card.html' %}
+        </div>
+        <div class="item d-flex">
+            {% include 'components/events_card.html' %}
+        </div>
+        <div class="item d-flex">
+            {% include 'components/events_card.html' %}
+        </div>
+        <div class="item d-flex">
+            {% include 'components/events_card.html' %}
+        </div>
+        <div class="item d-flex">
+            {% include 'components/events_card.html' %}
+        </div>
+    </div>
+</section>
+
+<!-- Value Propositions / Why Choose Us -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col text-center">
+                <h2 class="font-weight-bold">Why Learn With Daun?</h2>
+                <p class="text-muted">World-class content, expert instructors, and a vibrant community.</p>
+            </div>
+        </div>
+        <div class="value-grid">
+            <div class="value-card">
+                <div class="value-icon mb-2"><i class="fas fa-chalkboard-teacher"></i></div>
+                <h5>Expert Instructors</h5>
+                <p>Learn from industry leaders and top university professors.</p>
+            </div>
+            <div class="value-card">
+                <div class="value-icon mb-2"><i class="fas fa-certificate"></i></div>
+                <h5>Recognized Certificates</h5>
+                <p>Earn certificates to showcase your new skills and boost your career.</p>
+            </div>
+            <div class="value-card">
+                <div class="value-icon mb-2"><i class="fas fa-users"></i></div>
+                <h5>Vibrant Community</h5>
+                <p>Join a global network of learners and professionals.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col text-center">
+                <h2 class="font-weight-bold">What Our Learners Say</h2>
+                <p class="text-muted">Hear from students who have transformed their careers with Daun.</p>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-md-4 mb-4">
+                <div class="card shadow border-0">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="{% static 'assets/images/testimonials/pic1.jpg' %}" alt="" class="rounded-circle mr-3" width="56" height="56">
+                            <div>
+                                <h6 class="mb-0 font-weight-bold">Peter Packer</h6>
+                                <small class="text-muted">Art Director</small>
                             </div>
                         </div>
-                    </form>
+                        <p class="mb-0">“Daun helped me upskill and land my dream job. The courses are practical and the instructors are top-notch!”</p>
+                    </div>
                 </div>
             </div>
-            <div class="mw800 m-auto">
-                <div class="row">
-                    <div class="col-md-4 col-sm-6">
-                        <div class="cours-search-bx m-b30">
-                            <div class="icon-box">
-                                <h3><i class="ti-user"></i><span class="counter">5</span>M</h3>
+            <div class="col-md-4 mb-4">
+                <div class="card shadow border-0">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="{% static 'assets/images/testimonials/pic2.jpg' %}" alt="" class="rounded-circle mr-3" width="56" height="56">
+                            <div>
+                                <h6 class="mb-0 font-weight-bold">Anna Strong</h6>
+                                <small class="text-muted">Software Engineer</small>
                             </div>
-                            <span class="cours-search-text">Over 5 million students</span>
                         </div>
-                    </div>
-                    <div class="col-md-4 col-sm-6">
-                        <div class="cours-search-bx m-b30">
-                            <div class="icon-box">
-                                <h3><i class="ti-book"></i><span class="counter">30</span>K</h3>
-                            </div>
-                            <span class="cours-search-text">30,000 Courses</span>
-                        </div>
-                    </div>
-                    <div class="col-md-4 col-sm-12">
-                        <div class="cours-search-bx m-b30">
-                            <div class="icon-box">
-                                <h3><i class="ti-layout-list-post"></i><span class="counter">20</span>K</h3>
-                            </div>
-                            <span class="cours-search-text">Learn Anything Online</span>
-                        </div>
+                        <p class="mb-0">“The learning experience is seamless and the certificates are recognized by my employer.”</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <!-- Main Slider -->
-    <div class="content-block">
-        <!-- Popular Courses -->
-        <div class="section-area section-sp2 popular-courses-bx">
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-12 heading-bx left">
-                        <h2 class="title-head">Popular <span>Courses</span></h2>
-                        <p>It is a long established fact that a reader will be distracted by the readable content of a page</p>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="courses-carousel owl-carousel owl-btn-1 col-12 p-lr0">
-                        {% for course in courses %}
-                        <div class="item">
-                            <div class="cours-bx">
-                                <div class="action-box">
-                                    <img src="{{ course.cover_image.url }}" alt="">
-                                    <a href="#" class="btn">Read More</a>
-                                </div>
-                                <div class="info-bx text-center">
-                                    <h5><a href="#">{{ course.name|title }}</a></h5>
-                                    <span>Faculty of {{ course.faculty.name|title }}</span>
-                                </div>
-                                <div class="cours-more-info">
-                                    <div class="review">
-                                        <span>3 Review</span>
-                                        <ul class="cours-star">
-                                            <li class="active"><i class="fa fa-star"></i></li>
-                                            <li class="active"><i class="fa fa-star"></i></li>
-                                            <li class="active"><i class="fa fa-star"></i></li>
-                                            <li><i class="fa fa-star"></i></li>
-                                            <li><i class="fa fa-star"></i></li>
-                                        </ul>
-                                    </div>
-                                    <div class="price">
-                                        <del>$190</del>
-                                        <h5>$120</h5>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-						{% empty %}
-						<div class="no-courses-message text-center" style="padding: 20px; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px;">
-							<p>No courses available at the moment. Please check back later.</p>
-						</div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Popular Courses END -->
-        <div class="section-area section-sp2 bg-fix ovbl-dark join-bx text-center" style="background-image:url({% static 'assets/images/background/bg1.jpg' %});">
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="join-content-bx text-white">
-                            <h2>Learn a new skill online on <br> your time</h2>
-                            <h4><span class="counter">57,000</span> Online Courses</h4>
-                            <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.</p>
-                            <a href="#" class="btn button-md">Join Now</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Form END -->
-        <div class="section-area section-sp1">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-6 m-b30">
-                        <h2 class="title-head">Learn a new skill online<br> <span class="text-primary">on your time</span></h2>
-                        <h4><span class="counter">57,000</span> Online Courses</h4>
-                        <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
-                        <a href="#" class="btn button-md">Join Now</a>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="row">
-                            <div class="col-lg-6 col-md-6 col-sm-6 m-b30">
-                                <div class="feature-container">
-                                    <div class="feature-md text-white m-b20">
-                                        <a href="#" class="icon-cell"><img src="{% static 'assets/images/icon/icon1.png' %}" alt=""></a>
-                                    </div>
-                                    <div class="icon-content">
-                                        <h5 class="ttr-tilte">Our Philosophy</h5>
-                                        <p>Lorem ipsum dolor sit amet, consectetuer adipiscing.</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-6 col-md-6 col-sm-6 m-b30">
-                                <div class="feature-container">
-                                    <div class="feature-md text-white m-b20">
-                                        <a href="#" class="icon-cell"><img src="{% static 'assets/images/icon/icon2.png' %}" alt=""></a>
-                                    </div>
-                                    <div class="icon-content">
-                                        <h5 class="ttr-tilte">Kingster's Principle</h5>
-                                        <p>Lorem ipsum dolor sit amet, consectetuer adipiscing.</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-6 col-md-6 col-sm-6 m-b30">
-                                <div class="feature-container">
-                                    <div class="feature-md text-white m-b20">
-                                        <a href="#" class="icon-cell"><img src="{% static 'assets/images/icon/icon3.png' %}" alt=""></a>
-                                    </div>
-                                    <div class="icon-content">
-                                        <h5 class="ttr-tilte">Key Of Success</h5>
-                                        <p>Lorem ipsum dolor sit amet, consectetuer adipiscing.</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-6 col-md-6 col-sm-6 m-b30">
-                                <div class="feature-container">
-                                    <div class="feature-md text-white m-b20">
-                                        <a href="#" class="icon-cell"><img src="{% static 'assets/images/icon/icon4.png' %}" alt=""></a>
-                                    </div>
-                                    <div class="icon-content">
-                                        <h5 class="ttr-tilte">Our Philosophy</h5>
-                                        <p>Lorem ipsum dolor sit amet, consectetuer adipiscing.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Testimonials -->
-        <div class="section-area section-sp1 bg-fix ovbl-dark text-white" style="background-image:url({% static 'assets/images/background/bg1.jpg' %});">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-3 col-md-6 col-sm-6 col-6 m-b30">
-                        <div class="counter-style-1">
-                            <div class="text-white">
-                                <span class="counter">3000</span><span>+</span>
-                            </div>
-                            <span class="counter-text">Completed Projects</span>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-md-6 col-sm-6 col-6 m-b30">
-                        <div class="counter-style-1">
-                            <div class="text-white">
-                                <span class="counter">2500</span><span>+</span>
-                            </div>
-                            <span class="counter-text">Happy Clients</span>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-md-6 col-sm-6 col-6 m-b30">
-                        <div class="counter-style-1">
-                            <div class="text-white">
-                                <span class="counter">1500</span><span>+</span>
-                            </div>
-                            <span class="counter-text">Questions Answered</span>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-md-6 col-sm-6 col-6 m-b30">
-                        <div class="counter-style-1">
-                            <div class="text-white">
-                                <span class="counter">1000</span><span>+</span>
-                            </div>
-                            <span class="counter-text">Ordered Coffee's</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Testimonials END -->
-        <!-- Testimonials ==== -->
-        <div class="section-area section-sp2">
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-12 heading-bx left">
-                        <h2 class="title-head text-uppercase">what people <span>say</span></h2>
-                        <p>It is a long established fact that a reader will be distracted by the readable content of a page</p>
-                    </div>
-                </div>
-                <div class="testimonial-carousel owl-carousel owl-btn-1 col-12 p-lr0">
-                    <div class="item">
-                        <div class="testimonial-bx">
-                            <div class="testimonial-thumb">
-                                <img src="{% static 'assets/images/testimonials/pic1.jpg' %}" alt="">
-                            </div>
-                            <div class="testimonial-info">
-                                <h5 class="name">Peter Packer</h5>
-                                <p>-Art Director</p>
-                            </div>
-                            <div class="testimonial-content">
-                                <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="item">
-                        <div class="testimonial-bx">
-                            <div class="testimonial-thumb">
-                                <img src="{% static 'assets/images/testimonials/pic2.jpg' %}" alt="">
-                            </div>
-                            <div class="testimonial-info">
-                                <h5 class="name">Peter Packer</h5>
-                                <p>-Art Director</p>
-                            </div>
-                            <div class="testimonial-content">
-                                <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Testimonials END ==== -->
-    </div>
-    <!-- contact area END -->
-</div>
-<!-- Content END-->
+</section>
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
+<script>
+$(document).ready(function(){
+    $('.courses-carousel').owlCarousel({
+        loop:true,
+        margin:24,
+        nav:false, // Remove navigation arrows
+        dots:false,
+        autoplay:true, // Enable autoplay
+        autoplayTimeout:3500, // 3.5 seconds interval
+        autoplayHoverPause:true, // Pause on hover
+        responsive:{
+            0:{ items:1 },
+            576:{ items:2 },
+            992:{ items:3 },
+            1200:{ items:4 }
+        }
+    });
+    $('.events-carousel').owlCarousel({
+        loop:true,
+        margin:24,
+        nav:false, // Remove navigation arrows
+        dots:false,
+        autoplay:true, // Enable autoplay
+        autoplayTimeout:3500, // 3.5 seconds interval
+        autoplayHoverPause:true, // Pause on hover
+        responsive:{
+            0:{ items:1 },
+            576:{ items:2 },
+            992:{ items:3 },
+            1200:{ items:4 }
+        }
+    });
+});
+</script>
+{% endblock %}
 {% endblock %}
