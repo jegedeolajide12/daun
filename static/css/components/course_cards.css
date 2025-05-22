@@ -13,16 +13,21 @@
     background: #fff;
     border-radius: 8px;
     overflow: hidden;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
     position: relative;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     display: flex;
     flex-direction: column;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                z-index 0.3s linear;
+    z-index: 1;
 }
 
 .course-card:hover {
     transform: translateY(-4px);
-    box-shadow: var(--shadow);
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    z-index: 2;
 }
 
 /* Header Section */
@@ -35,6 +40,12 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+}
+
+.course-card:hover .course-card__image {
+    transform: scale(1.03);
 }
 
 .course-card__badge {
@@ -59,12 +70,17 @@
     height: 32px;
     border-radius: 50%;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease, 
+                color 0.2s ease 0.1s,
+                box-shadow 0.2s ease;
+
 }
 
 .course-card__wishlist:hover {
     background: #fff;
-    transform: scale(1.1);
+    transform: scale(1.15);
+    color: #ec5252;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 /* Body Section */
@@ -87,6 +103,29 @@
     overflow: hidden;
     position: relative;
     cursor: pointer;
+    z-index: 2;
+    background: none;
+}
+
+.course-card__title a {
+    color: #18181b;
+    text-decoration: none;
+    transition: color 0.18s;
+}
+.course-card__title a:hover,
+.course-card__title a:focus {
+    color: #235bd3;
+    text-decoration: underline;
+}
+
+@media (prefers-color-scheme: dark) {
+  .course-card__title a {
+    color: #fff;
+  }
+  .course-card__title a:hover,
+  .course-card__title a:focus {
+    color: #60a5fa;
+  }
 }
 
 .course-card__desc-tooltip {
@@ -107,13 +146,16 @@
     white-space: normal;
     pointer-events: none;
     opacity: 0;
-    transition: opacity 0.18s;
+    transform: translateX(-50%) translateY(8px);
+    transition: opacity 0.2s ease 0.1s, 
+                transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .course-card__title:hover .course-card__desc-tooltip,
 .course-card__title:focus .course-card__desc-tooltip {
     display: block;
     opacity: 1;
+    transform: translateX(-50%) translateY(0);
 }
 
 .course-card__instructor {
@@ -199,99 +241,50 @@
     background: #401b9c;
 }
 
-/* ========== Modern Udemy-style Course Hover Card ========== */
+/* ========== Modern Udemy-style Course Title Hover Card ========== */
+.course-card__title {
+    position: relative;
+    cursor: pointer;
+    z-index: 2;
+    background: none;
+}
 .course-card__hoverbox {
     display: none;
     position: absolute;
     left: 50%;
-    top: 0;
-    transform: translate(-50%, -8px);
+    top: 100%;
     min-width: 340px;
     max-width: 420px;
     background: #fff;
     color: #222;
     border-radius: 16px;
-    box-shadow: 0 8px 32px rgba(37,99,235,0.10), 0 1.5px 6px rgba(0,0,0,0.07);
     padding: 1.5rem 1.5rem 1.2rem 1.5rem;
     z-index: 100;
     white-space: normal;
     pointer-events: none;
     opacity: 0;
-    transition: opacity 0.22s cubic-bezier(.4,0,.2,1), transform 0.22s cubic-bezier(.4,0,.2,1);
     font-size: 1rem;
     font-family: inherit;
     line-height: 1.6;
+    transform: translate(-50%, 12px) scale(0.98);
+    opacity: 0;
+    transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+               transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+               visibility 0s linear 0.25s;
+    visibility: hidden;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 12px 48px rgba(37, 99, 235, 0.12),
+                0 2px 8px rgba(0, 0, 0, 0.08);
 }
-.course-card:hover .course-card__hoverbox,
-.course-card:focus-within .course-card__hoverbox {
+.course-card__title:hover + .course-card__hoverbox,
+.course-card__title:focus + .course-card__hoverbox {
     display: block;
     pointer-events: auto;
+    transform: translate(-50%, 20px) scale(1);
     opacity: 1;
-    transform: translate(-50%, 12px) scale(1.02);
+    visibility: visible;
+    transition-delay: 0.15s;
 }
-
-.course-card__hoverbox h4 {
-    font-size: 1.15rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-    color: #1c1d1f;
-}
-.course-card__hoverbox .hoverbox-instructor {
-    font-size: 0.97rem;
-    color: #6a6f73;
-    margin-bottom: 0.7rem;
-}
-.course-card__hoverbox .hoverbox-desc {
-    font-size: 1rem;
-    color: #222;
-    margin-bottom: 1rem;
-    max-height: 4.5em;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    line-clamp: 3;
-    box-orient: vertical;
-}
-.course-card__hoverbox .hoverbox-details {
-    display: flex;
-    gap: 1.5rem;
-    margin-bottom: 1rem;
-    font-size: 0.97rem;
-    color: #6a6f73;
-}
-.course-card__hoverbox .hoverbox-details i {
-    color: #235bd3;
-    margin-right: 0.4em;
-}
-.course-card__hoverbox .hoverbox-meta {
-    display: flex;
-    align-items: center;
-    gap: 1.2rem;
-    font-size: 0.97rem;
-    margin-bottom: 0.7rem;
-}
-.course-card__hoverbox .hoverbox-meta .hoverbox-rating {
-    color: #fab437;
-    font-weight: 700;
-    font-size: 1.05rem;
-}
-.course-card__hoverbox .hoverbox-meta .hoverbox-rating-count {
-    color: #6a6f73;
-    font-size: 0.97rem;
-    margin-left: 0.3em;
-}
-.course-card__hoverbox .hoverbox-meta .hoverbox-price {
-    color: #1c1d1f;
-    font-weight: 700;
-    font-size: 1.1rem;
-}
-.course-card__hoverbox .hoverbox-meta .hoverbox-original-price {
-    color: #6a6f73;
-    text-decoration: line-through;
-    font-size: 0.97rem;
-    margin-left: 0.5em;
 }
 @media (max-width: 576px) {
   .course-card__hoverbox {
@@ -313,6 +306,15 @@
     
     .course-card__title {
         color: #fff;
+    }
+    
+    .course-card__title a {
+        color: #fff;
+    }
+    
+    .course-card__title a:hover,
+    .course-card__title a:focus {
+        color: #60a5fa;
     }
     
     .course-card__price {

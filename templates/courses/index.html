@@ -151,6 +151,29 @@
 {% block extra_js %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.course-card');
+    
+    cards.forEach(card => {
+        const hoverbox = card.querySelector('.course-card__hoverbox');
+        
+        card.addEventListener('mousemove', (e) => {
+            const cardRect = card.getBoundingClientRect();
+            const viewportCenter = window.innerHeight / 2;
+            
+            // Position hoverbox based on card location
+            if (cardRect.top < viewportCenter) {
+                hoverbox.style.top = 'calc(100% + 20px)';
+                hoverbox.style.bottom = 'auto';
+            } else {
+                hoverbox.style.top = 'auto';
+                hoverbox.style.bottom = 'calc(100% + 20px)';
+            }
+        });
+    });
+});
+</script>
+<script>
 $(document).ready(function(){
     $('.courses-carousel').owlCarousel({
         loop:true,
