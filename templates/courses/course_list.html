@@ -1,111 +1,94 @@
-{% extends parent_template|default:"navbar.html" %}
+{% extends 'navbar.html' %}
 {% load static %}
 {% block content %}
-    <!-- Content -->
-    <div class="page-content bg-white">
-        <!-- inner page banner -->
-        <div class="page-banner ovbl-dark" style="background-image:url('{% static "assets/images/banner/banner3.jpg" %}');">
-            <div class="container">
-                <div class="page-banner-entry">
-                    <h1 class="text-white">Our Courses</h1>
-				 </div>
-            </div>
+<!-- Hero/Banner -->
+<section class="course-list-hero mb-5">
+  <div class="container course-list-hero-content text-center py-5">
+    <h1 class="display-4 fw-bold mb-2">Explore Courses</h1>
+    <p class="lead mb-4">Browse our top-rated courses and start learning today</p>
+    <form class="course-list-search mx-auto d-flex align-items-center" style="max-width: 480px;">
+      <input type="text" class="form-control form-control-lg rounded-pill px-4" placeholder="Search for anything...">
+      <button class="btn btn-primary btn-lg rounded-pill ms-n5 px-4" type="submit" style="margin-left:-48px;z-index:2;">
+        <i class="fas fa-search"></i>
+      </button>
+    </form>
+  </div>
+</section>
+
+<section class="container mb-5">
+  <!-- Carousel 1 -->
+  <div class="mb-5">
+    <h2 class="fw-bold mb-3">Because you searched...</h2>
+    <div class="course-carousel-wrapper">
+      <div class="row flex-nowrap overflow-auto gx-4 align-items-stretch course-carousel-row" id="carousel-search">
+        {% for course in courses %}
+        <div class="col-10 col-sm-6 col-md-4 col-lg-3">
+          {% include 'components/course_cards.html' with course=course %}
         </div>
-		<!-- Breadcrumb row -->
-		<div class="breadcrumb-row">
-			<div class="container">
-				<ul class="list-inline">
-					<li><a href="#">Home</a></li>
-					<li>Our Courses</li>
-				</ul>
-			</div>
-		</div>
-		<!-- Breadcrumb row END -->
-        <!-- inner page banner END -->
-		<div class="content-block">
-            <!-- About Us -->
-			<div class="section-area section-sp1">
-                <div class="container">
-					 <div class="row">
-						<div class="col-lg-3 col-md-4 col-sm-12 m-b30">
-							<div class="widget courses-search-bx placeani">
-								<div class="form-group">
-									<div class="input-group">
-										<label>Search Courses</label>
-										<input name="dzName" type="text" required class="form-control">
-									</div>
-								</div>
-							</div>
-							<div class="widget widget_archive">
-                                <h5 class="widget-title style-1">All Faculties</h5>
-                                <ul>
-									{% for faculty in faculties %}
-                                	    <li class="active"><a href="#">{{ faculty.name|title }}</a></li>
-                                    {% endfor %}
-                                </ul>
-                            </div>
-							<div class="widget">
-								<a href="#"><img src="{% static "assets/images/adv/adv.jpg" %}" alt=""/></a>
-							</div>
-						</div>
-						<div class="col-lg-9 col-md-8 col-sm-12">
-							<div class="row">
-                                {% for course in courses %}
-								<div class="col-md-6 col-lg-4 col-sm-6 m-b30">
-									<div class="cours-bx">
-										<div class="action-box">
-											<img src="{{ course.cover_image.url }}" alt="">
-											<a href="#" class="btn">Read More</a>
-										</div>
-										<div class="info-bx text-center">
-											<h5><a href="{% url "course:course" course.slug %}">{{ course.name|upper }}</a></h5>
-											<span>Faculty of {{ course.faculty|title }}</span>
-										</div>
-										<div class="cours-more-info">
-											<div class="review">
-												<span>3 Review</span>
-												<ul class="cours-star">
-													<li class="active"><i class="fa fa-star"></i></li>
-													<li class="active"><i class="fa fa-star"></i></li>
-													<li class="active"><i class="fa fa-star"></i></li>
-													<li><i class="fa fa-star"></i></li>
-													<li><i class="fa fa-star"></i></li>
-												</ul>
-											</div>
-											<div class="price">
-												<del>$190</del>
-												<h5>$120</h5>
-											</div>
-										</div>
-									</div>
-								</div>
-								{% empty %}
-								<div class="col-md-12 col-lg-12 col-sm-12 m-b30">
-									<div class="alert alert-warning">
-										Sorry but we don't have any courses yet.
-										<a href="{% url 'course:course_list' %}" class="btn btn-primary">Explore Courses Now</a>
-									</div>
-								</div>
-								{% endfor %}
-								<div class="col-lg-12 m-b20">
-									<div class="pagination-bx rounded-sm gray clearfix">
-										<ul class="pagination">
-											<li class="previous"><a href="#"><i class="ti-arrow-left"></i> Prev</a></li>
-											<li class="active"><a href="#">1</a></li>
-											<li><a href="#">2</a></li>
-											<li><a href="#">3</a></li>
-											<li class="next"><a href="#">Next <i class="ti-arrow-right"></i></a></li>
-										</ul>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-            </div>
-        </div>
-		<!-- contact area END -->
-		
+        {% empty %}
+        <div class="col-12 text-muted">No courses found for your search.</div>
+        {% endfor %}
+      </div>
     </div>
-    <!-- Content END-->
+  </div>
+  <!-- Carousel 2 -->
+  <div class="mb-5">
+    <h2 class="fw-bold mb-3">Top Picks For You</h2>
+    <div class="course-carousel-wrapper">
+      <div class="row flex-nowrap overflow-auto gx-4 align-items-stretch course-carousel-row" id="carousel-top-picks">
+        {% for course in courses %}
+        <div class="col-10 col-sm-6 col-md-4 col-lg-3">
+          {% include 'components/course_cards.html' with course=course %}
+        </div>
+        {% empty %}
+        <div class="col-12 text-muted">No top picks available.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  <!-- Carousel 3 -->
+  <div class="mb-5">
+    <h2 class="fw-bold mb-3">Trending Now</h2>
+    <div class="course-carousel-wrapper">
+      <div class="row flex-nowrap overflow-auto gx-4 align-items-stretch course-carousel-row" id="carousel-trending">
+        {% for course in courses %}
+        <div class="col-10 col-sm-6 col-md-4 col-lg-3">
+          {% include 'components/course_cards.html' with course=course %}
+        </div>
+        {% empty %}
+        <div class="col-12 text-muted">No trending courses at the moment.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+<script>
+// Auto-slide carousels horizontally at intervals
+function autoSlideCarousel(carouselId, interval = 3500, initialDelay = 0) {
+  const carousel = document.getElementById(carouselId);
+  if (!carousel) return;
+  const cards = carousel.querySelectorAll('.col-10');
+  if (!cards.length) return;
+  let current = 0;
+  setTimeout(() => {
+    setInterval(() => {
+      current = (current + 1) % cards.length;
+      // Scroll only the carousel horizontally, not the whole page
+      const card = cards[current];
+      // Robustly center the card in the carousel
+      const cardRect = card.getBoundingClientRect();
+      const carouselRect = carousel.getBoundingClientRect();
+      const cardCenter = cardRect.left + (cardRect.width / 2);
+      const carouselCenter = carouselRect.left + (carouselRect.width / 2);
+      const scrollOffset = cardCenter - carouselCenter;
+      carousel.scrollBy({ left: scrollOffset, behavior: 'smooth' });
+    }, interval);
+  }, initialDelay);
+}
+document.addEventListener('DOMContentLoaded', function() {
+  autoSlideCarousel('carousel-search', 3500, 0); // no delay
+  autoSlideCarousel('carousel-top-picks', 3500, 1200); // 1.2s delay
+  autoSlideCarousel('carousel-trending', 3500, 2400); // 2.4s delay
+});
+</script>
 {% endblock %}

@@ -1,107 +1,68 @@
-{% extends parent_template|default:"navbar.html" %}
+{% extends 'navbar.html' %}
 {% load static %}
 {% block content %}
-    <!-- Content -->
-    <div class="page-content bg-white">
-        <!-- inner page banner -->
-        <div class="page-banner ovbl-dark" style="background-image:url('{% static "assets/images/banner/banner3.jpg" %}');">
-            <div class="container">
-                <div class="page-banner-entry">
-                    <h1 class="text-white">Your Courses</h1>
-                </div>
-            </div>
-        </div>
-        <!-- Breadcrumb row -->
-        <div class="breadcrumb-row">
-            <div class="container">
-                <ul class="list-inline">
-                    <li><a href="#">Home</a></li>
-                    <li>Your Courses</li>
-                </ul>
-            </div>
-        </div>
-        <!-- Breadcrumb row END -->
-        <!-- inner page banner END -->
-        <div class="content-block">
-            <!-- About Us -->
-            <div class="section-area section-sp1">
-                <div class="container">
-                    <div class="row">
-                    	<div class="col-lg-3 col-md-4 col-sm-12 m-b30">
-							<div class="widget courses-search-bx placeani">
-								<div class="form-group">
-									<div class="input-group">
-										<label>Search Courses</label>
-										<input name="dzName" type="text" required class="form-control">
-									</div>
-								</div>
-							</div>
-                            <div class="widget widget_archive">
-                                <h5 class="widget-title style-1">All Faculties</h5>
-                                <ul>
-                                    <!-- "All" option -->
-                                    <li class="{% if not faculty %}active{% endif %}">
-                                        <a href="{% url 'student:student_home' %}">All</a>
-                                    </li>
-                                    <!-- Faculties -->
-                                    {% for faculty in faculties %}
-                                        <li class="{% if faculty == faculty %}active{% endif %}">
-                                            <a href="{% url 'student:student_courses_by_faculty' faculty.slug %}">{{ faculty.name|title }}</a>
-                                        </li>
-                                    {% endfor %}
-                                </ul>
-                            </div>
-                        </div>
-                        <!-- Main Content -->
-                        <div class="col-lg-9 col-md-8 col-sm-12">
-                            <div class="row">
-                                <!-- Courses -->
-                                {% for course in courses %}
-                                    <div class="col-md-6 col-lg-4 col-sm-6 m-b30">
-                                        <div class="cours-bx">
-                                            <div class="action-box">
-                                                <img src="{{ course.cover_image.url }}" alt="">
-                                                <a href="{% url 'course:course' course.slug %}" class="btn">Read More</a>
-                                            </div>
-                                            <div class="info-bx text-center">
-                                                <h5><a href="{% url 'course:course' course.slug %}">{{ course.name|upper }}</a></h5>
-                                                <span>Faculty of {{ course.faculty.name|title }}</span>
-                                            </div>
-                                            <div class="cours-more-info">
-                                                <div class="review">
-                                                    <span>3 Review</span>
-                                                    <ul class="cours-star">
-                                                        <li class="active"><i class="fa fa-star"></i></li>
-                                                        <li class="active"><i class="fa fa-star"></i></li>
-                                                        <li class="active"><i class="fa fa-star"></i></li>
-                                                        <li><i class="fa fa-star"></i></li>
-                                                        <li><i class="fa fa-star"></i></li>
-                                                    </ul>
-                                                </div>
-                                                <div class="price">
-                                                    <del>$190</del>
-                                                    <h5>$120</h5>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                {% empty %}
-                                    <div class="col-md-12 col-lg-12 col-sm-12 m-b30">
-                                        <div class="alert alert-warning">
-                                            You are not enrolled in any course yet.
-                                            <div class="text-end mt-3">
-                                                <a href="{% url 'course:course_list' %}" class="btn btn-primary">Explore Courses Now</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- contact area END -->
+<section class="container py-4">
+  <div class="mb-4">
+    <h1 class="fw-bold display-5 mb-1">My Learning</h1>
+    <p class="lead text-muted">Continue where you left off, track your progress, and access all your enrolled courses.</p>
+  </div>
+  <div class="row mb-4 align-items-center">
+    <div class="col-md-6 mb-2 mb-md-0">
+      <form class="d-flex" role="search">
+        <input class="form-control form-control-lg rounded-pill px-4 me-2" type="search" placeholder="Search your courses..." aria-label="Search">
+        <button class="btn btn-primary rounded-pill px-4" type="submit"><i class="fas fa-search"></i></button>
+      </form>
     </div>
-    <!-- Content END-->
+    <div class="col-md-6 text-md-end my-learning-filters">
+      <select class="form-select d-inline-block w-auto me-2">
+        <option selected>All Statuses</option>
+        <option>In Progress</option>
+        <option>Completed</option>
+        <option>Wishlist</option>
+      </select>
+      <select class="form-select d-inline-block w-auto">
+        <option selected>Sort by</option>
+        <option>Recently Accessed</option>
+        <option>Recently Enrolled</option>
+        <option>Title A-Z</option>
+      </select>
+    </div>
+  </div>
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+    {% comment %} Example: Replace with your user's enrolled courses {% endcomment %}
+    {% for course in courses %}
+    <div class="col">
+      <div class="udemy-course-card h-100 d-flex flex-column">
+        <div class="udemy-course-image-wrap">
+          <img src="{{ course.cover_image.url|default:'/static/asset/placeholder.jpg' }}" class="udemy-course-image" alt="{{ course.title }}">
+          {% if course.is_new %}<span class="udemy-course-badge">New</span>{% endif %}
+        </div>
+        <div class="udemy-course-body flex-grow-1 d-flex flex-column">
+          <a href="{% url 'course:course' course.slug %}" class="udemy-course-title mb-1">{{ course.name }}</a>
+          <div class="udemy-course-instructor mb-1">{{ course.owner.full_name }}</div>
+          <div class="udemy-course-meta d-flex align-items-center mb-2">
+            <span class="udemy-course-rating me-1">{{ course.avg_rating|default:'4.5' }}</span>
+            <span class="udemy-course-rating-count">({{ course.num_ratings|default:'1,234' }})</span>
+          </div>
+          <div class="progress my-2" style="height: 8px;">
+            <div class="progress-bar bg-primary" role="progressbar" style="width: {{ course.progress|default:'0' }}%;" aria-valuenow="{{ course.progress|default:'0' }}" aria-valuemin="0" aria-valuemax="100"></div>
+          </div>
+          <div class="text-muted small mb-2">Progress: {{ course.progress|default:'0' }}%</div>
+        </div>
+        <div class="udemy-course-footer d-flex justify-content-between align-items-center px-3 pb-3 mt-auto">
+          <a href="{% url 'course:course' course.slug %}" class="btn btn-primary btn-sm rounded-pill px-3">Resume</a>
+          <span class="text-muted small">{{ course.last_accessed|date:'M d, Y' }}</span>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center text-muted py-5">
+      <i class="fas fa-graduation-cap fa-3x mb-3"></i>
+      <h4 class="fw-bold">No courses yet</h4>
+      <p>Browse our catalog and start learning something new today!</p>
+      <a href="{% url 'course:course_list' %}" class="btn btn-primary rounded-pill px-4">Browse Courses</a>
+    </div>
+    {% endfor %}
+  </div>
+</section>
 {% endblock %}
