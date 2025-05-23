@@ -33,8 +33,29 @@ class Faculty(models.Model):
     def __str__(self):
         return self.name
 
+
+class CourseManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(published=True)
+
     
 class Course(models.Model):
+    class AudienceType(models.TextChoices):
+        BEGINNER = 'beginner', _('Beginner')
+        INTERMEDIATE = 'intermediate', _('Intermediate')
+        ADVANCED = 'advanced', _('Advanced')
+        ALL = 'all', _('All Levels')
+    
+    class PriceTier(models.TextChoices):
+        FREE = 'free', _('Free')
+        TIER_1000 = '1000', _('1,000')
+        TIER_3000 = '3000', _('3,000')
+        TIER_5000 = '5000', _('5,000')
+        TIER_10000 = '10000', _('10,000')
+        TIER_30000 = '30000', _('30,000')
+        TIER_50000 = '50000', _('50,000')
+
+
     students = models.ManyToManyField(settings.AUTH_USER_MODEL, through='Enrollment', related_name='courses_joined', blank=True)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='courses_created', on_delete=models.CASCADE)
     faculty = models.ForeignKey(Faculty, related_name='faculty_courses', on_delete=models.CASCADE, null=True, blank=True)
@@ -43,8 +64,17 @@ class Course(models.Model):
     code = models.CharField(max_length=6, null=True, blank=True)
     cover_image = models.ImageField(null=True, upload_to='courses/cover_images')
     overview = models.TextField()
+    price_tier = models.CharField(max_length=20, choices=PriceTier.choices, default=PriceTier.FREE)
+    discount_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     created = models.DateTimeField(auto_now_add=True)
     is_completed = models.BooleanField(default=False)
+    published = models.BooleanField(default=False)
+    updated = models.DateTimeField(auto_now=True)
+    audience = models.CharField(max_length=20, choices=AudienceType.choices, default=AudienceType.ALL)
+    objects = CourseManager()
+    all_objects = models.Manager()
+    is_active = models.BooleanField(default=True)
+    is_featured = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['-created']
@@ -60,6 +90,19 @@ class Course(models.Model):
 
     def __str__(self):
         return self.name
+
+
+
+class CourseObjectives(models.Model):
+    course = models.ForeignKey(Course, related_name='objectives', on_delete=models.CASCADE)
+    objective = models.TextField()
+
+    class Meta:
+        verbose_name_plural = 'Course Objectives'
+        ordering = ['course']
+
+    def __str__(self):
+        return f'Objectives for {self.course.name}'
 
 class Topic(models.Model):
     course = models.ForeignKey(Course, related_name='course_topics', on_delete=models.CASCADE)

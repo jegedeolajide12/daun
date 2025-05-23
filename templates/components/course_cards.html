@@ -23,8 +23,8 @@
           <div class="hoverbox-meta">
             <span class="hoverbox-rating"><i class="fas fa-star"></i> 4.7</span>
             <span class="hoverbox-rating-count">(189,240)</span>
-            <span class="hoverbox-price">$94.99</span>
-            <span class="hoverbox-original-price">$199.99</span>
+            <span class="hoverbox-price">${{ course.discount_price }}</span>
+            <span class="hoverbox-original-price">${{ course.price_tier }}</span>
           </div>
         </div>
         <p class="course-card__instructor">{{ course.owner.full_name }}</p>
@@ -42,8 +42,8 @@
             </div>
             
             <div class="course-card__pricing">
-                <span class="course-card__price">$94.99</span>
-                <span class="course-card__original-price">$199.99</span>
+                <span class="course-card__price">₦{{ course.discount_price }}</span>
+                <span class="course-card__original-price">₦{{ course.get_price_tier_display }}</span>
             </div>
         </div>
         

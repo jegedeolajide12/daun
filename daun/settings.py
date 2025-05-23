@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "debug_toolbar",
     "widget_tweaks",
     "actstream",
+    "formtools",
     # Local
     "accounts",
     "pages",

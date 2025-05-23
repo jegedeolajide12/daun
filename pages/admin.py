@@ -25,6 +25,9 @@ class CourseAdmin(admin.ModelAdmin):
     search_fields = ['name', 'overview']
     inlines = [TopicInline]
 
+    def get_queryset(self, request):
+        return self.model.all_objects.get_queryset()
+
 @admin.register(Enrollment)
 class EnrollmentAdmin(admin.ModelAdmin):
     list_display = ['student', 'course', 'is_active']
