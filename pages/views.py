@@ -37,7 +37,7 @@ from .models import (
                 Faculty, Notification, Enrollment, Assignment,
                 Submission, UserTask, Grade, RubricScore, Rubric,
                 MCQOption, Assessment, SubmissionFile, AssessmentQuestion,
-                AssessmentAttempt, MCQResponse
+                AssessmentAttempt, MCQResponse, CourseObjectives, CourseRequirements
                 )
 from .forms import (FacultyForm, CourseTopicAssignmentsForm, SubmissionForm, 
                     CourseTopicAssessmentsForm, MCQOptionForm, CourseBasicsForm, CourseTopicsForm,
