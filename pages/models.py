@@ -36,7 +36,7 @@ class Faculty(models.Model):
 
 class CourseManager(models.Manager):
     def get_queryset(self):
-        return super().get_queryset().filter(published=True)
+        return super().get_queryset().filter(published=True, is_active=True)
 
     
 class Course(models.Model):
@@ -91,6 +91,30 @@ class Course(models.Model):
     def __str__(self):
         return self.name
 
+
+class CourseTrailer(models.Model):
+    course = models.OneToOneField(Course, related_name='trailer', on_delete=models.CASCADE)
+    video_url = models.URLField(null=True, blank=True)
+    file = models.FileField(upload_to='course_trailers', null=True, blank=True)
+
+    class Meta:
+        verbose_name_plural = 'Course Trailers'
+        ordering = ['course']
+
+    def __str__(self):
+        return f'Trailer for {self.course.name}'
+
+
+class CourseRequirements(models.Model):
+    course = models.ForeignKey(Course, related_name='requirements', on_delete=models.CASCADE)
+    requirement = models.TextField()
+
+    class Meta:
+        verbose_name_plural = 'Course Requirements'
+        ordering = ['course']
+
+    def __str__(self):
+        return f'Requirements for {self.course.name}'
 
 
 class CourseObjectives(models.Model):

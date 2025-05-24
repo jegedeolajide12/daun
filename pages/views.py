@@ -1,4 +1,10 @@
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect
+from django.db import transaction
+from django.shortcuts import render
+from encodings.punycode import T
+from multiprocessing import process
+from os import name
+from django import template
 from django.utils.timezone import now
 from django.urls import reverse 
 from django.views.generic.list import ListView
@@ -21,7 +27,10 @@ from django.http import JsonResponse
 from django.core.paginator import Paginator
 
 from actstream import action
+from requests import options
+from daun.settings import TEMPLATES
 from students.forms import CourseEnrollForm
+from formtools.wizard.views import SessionWizardView
 
 from .models import (
                 Course, Content, Topic, Video, 
@@ -30,9 +39,10 @@ from .models import (
                 MCQOption, Assessment, SubmissionFile, AssessmentQuestion,
                 AssessmentAttempt, MCQResponse
                 )
-from .forms import (CourseForm, ModuleFormSet, FacultyForm, 
-                    AssignmentForm, SubmissionForm, AssessmentForm, 
-                    MCQOptionForm, AssessmentQuestionForm)
+from .forms import (FacultyForm, CourseTopicAssignmentsForm, SubmissionForm, 
+                    CourseTopicAssessmentsForm, MCQOptionForm, CourseBasicsForm, CourseTopicsForm,
+                    CourseTopicContentsForm, AssessmentQuestionForm, CourseTrailerForm, CourseRequirementsForm, 
+                    CourseMarketingForm, CourseObjectivesForm, CourseForm)
 
 def create_faculty(request):
     if request.method == "POST":
@@ -136,6 +146,299 @@ class OwnerEditMixin:
     def form_valid(self, form):
         form.instance.owner = self.request.user
         return super().form_valid(form)
+
+
+FORMS = [
+    ('basics', CourseBasicsForm),
+    ('topics', CourseTopicsForm),
+    ('contents', CourseTopicContentsForm),
+    ('assignments', CourseTopicAssignmentsForm),
+    ('assessments', CourseTopicAssessmentsForm),
+    ('marketing', CourseMarketingForm)
+]
+
+TEMPLATES = {
+    'basics': 'courses/manage/course/course_basics.html',
+    'topics': 'courses/manage/course/course_topics.html',
+    'contents': 'courses/manage/course/course_contents.html',
+    'assignments': 'courses/manage/course/course_assignments.html',
+    'assessments': 'courses/manage/course/course_assessments.html',
+    'marketing': 'courses/manage/course/course_marketing.html',
+}
+            
+class CourseCreateWizard(SessionWizardView):
+    template_name = 'courses/manage/course/course_create_wizard.html'
+    form_list = FORMS
+    file_storage = None
+
+    def get_template_names(self):
+        step = self.steps.current
+        return [TEMPLATES[step]]
+
+    def process_step(self, form):
+        step = self.steps.current
+        course_id = self.storage.extra_data.get('course_id')
+        course = Course.objects.get(id=course_id) if course_id else None
+
+        if step == 'basics':
+            data = form.cleaned_data
+            form.instance.owner = self.request.user
+            course = Course.objects.create(
+                owner=self.request.user,
+                name=data.get('name'),
+                slug=slugify(data.get('name')),
+                overview=data.get('overview'),
+                faculty=data.get('faculty'),
+                cover_image=data.get('cover_image'),
+                code=data.get('code'),
+                audience=data.get('audience'),
+                published=False,
+            )
+            self.storage.extra_data['course_id'] = course.id
+
+        elif step == 'topics':
+            # Parse all topics from POST data
+            data = self.request.POST
+            topics = []
+            i = 0
+            while True:
+                name = data.get(f'name_{i}')
+                description = data.get(f'description_{i}')
+                if not name:
+                    break
+                topics.append({'name': name, 'description': description})
+                i += 1
+            if course:
+                for idx, topic in enumerate(topics):
+                    Topic.objects.create(
+                        course=course,
+                        name=topic['name'],
+                        description=topic['description'],
+                        order=idx+1
+                    )
+
+        elif step == 'contents':
+            # Support multiple contents if needed
+            data = self.request.POST
+            files = self.request.FILES
+            i = 0
+            has_any = False
+            while True:
+                topic_id = data.get(f'topic_{i}')
+                content_type_id = data.get(f'content_type_{i}')
+                order = data.get(f'order_{i}')
+                if not topic_id or not content_type_id:
+                    break
+                # Build a form for each content
+                content_form_data = {
+                    'topic': topic_id,
+                    'content_type': content_type_id,
+                    'order': order,
+                    'text_content': data.get(f'text_content_{i}'),
+                    'file_content': files.get(f'file_content_{i}'),
+                    'image_content': files.get(f'image_content_{i}'),
+                    'video_file': files.get(f'video_file_{i}'),
+                    'video_url': data.get(f'video_url_{i}'),
+                }
+                form = CourseTopicContentsForm(content_form_data, files)
+                if form.is_valid():
+                    form.save(owner=self.request.user)
+                has_any = True
+                i += 1
+            # fallback for single content
+            if not has_any and 'topic' in data:
+                form = CourseTopicContentsForm(data, files)
+                if form.is_valid():
+                    form.save(owner=self.request.user)
+
+        elif step == 'assignments':
+            data = self.request.POST
+            files = self.request.FILES
+            form.fields['topic'].queryset = Topic.objects.filter(course=course)
+            i = 0
+            has_any = False
+            while True:
+                title = data.get(f'title_{i}')
+                description = data.get(f'description_{i}')
+                topic_id = data.get(f'topic_{i}')
+                file = files.get(f'file_{i}')
+                if not title:
+                    break
+                assignment = Assignment.objects.create(
+                    title=title,
+                    description=description,
+                    topic_id=topic_id,
+                    course=course,
+                    file=file if file else None
+                )
+                # Handle rubric criteria for this assignment
+                rubric_criteria = data.getlist(f'rubric_criteria_{i}[]')
+                rubric_description = data.getlist(f'rubric_descriptions_{i}[]')
+                rubric_max_scores = data.getlist(f'rubric_max_scores_{i}[]')
+                for crit, desc, max_score in zip(rubric_criteria, rubric_description, rubric_max_scores):
+                    Rubric.objects.create(
+                        assignment=assignment,
+                        criteria=crit,
+                        description=desc,
+                        max_score=max_score
+                    )
+                has_any = True
+                i += 1
+            # fallback for single assignment (non-indexed)
+            if not has_any and 'title' in data:
+                assignment = form.save(commit=False)
+                assignment.course = course
+                assignment.save()
+                rubric_criteria = data.getlist('rubric_criteria[]')
+                rubric_description = data.getlist('rubric_descriptions[]')
+                rubric_max_scores = data.getlist('rubric_max_scores[]')
+                for crit, desc, max_score in zip(rubric_criteria, rubric_description, rubric_max_scores):
+                    Rubric.objects.create(
+                        assignment=assignment,
+                        criteria=crit,
+                        description=desc,
+                        max_score=max_score
+                    )
+
+
+
+        elif step == 'assessments':
+
+            data = self.request.POST
+            files = self.request.FILES
+            form.fields['topic'].queryset = Topic.objects.filter(course=course)
+            options_valid = True
+            questions_data = []
+
+            # Parse questions and options
+            for key in data:
+                if key.startswith('questions[') and key.endswith('][text]'):
+                    q_index = key.split('[')[1].split(']')[0]
+                    question_text = data.get(f'questions[{q_index}][text]')
+                    explanation = data.get(f'questions[{q_index}][explanation]')
+
+                    options = []
+                    option_index = 1
+                    while True:
+                        opt_text = data.get(f'questions[{q_index}][options][{option_index}][text]')
+                        if not opt_text:
+                            break
+                        is_correct = data.get(f'questions[{q_index}][options][{option_index}][is_correct]')
+                        options.append({
+                            'text': opt_text,
+                            'is_correct': is_correct == 'true' or is_correct == 'on',
+                            'order': option_index
+                        })
+                        option_index += 1
+                    questions_data.append({
+                        'text': question_text,
+                        'explanation': explanation,
+                        'options': options
+                    })
+
+            # Validation
+            for q in questions_data:
+                if len(q['options']) < 2:
+                    options_valid = False
+                    messages.error(self.request, "Please provide at least two options for each question.")
+                if not any(opt['is_correct'] for opt in q['options']):
+                    options_valid = False
+                    messages.error(self.request, "Please select at least one correct option for each question.")
+
+            # Deduplication
+            unique_questions = []
+            seen_questions = set()
+            for q in questions_data:
+                q_text = (q['text'] or '').strip().lower()
+                if q_text and q_text not in seen_questions:
+                    # Deduplicate options for this question by option_text
+                    unique_options = []
+                    seen_options = set()
+                    for opt in q['options']:
+                        opt_text = (opt['text'] or '').strip().lower()
+                        if opt_text and opt_text not in seen_options:
+                            unique_options.append(opt)
+                            seen_options.add(opt_text)
+                    q['options'] = unique_options
+                    unique_questions.append(q)
+                    seen_questions.add(q_text)
+            questions_data = unique_questions
+
+            # If validation fails, return early (do not save)
+            if not options_valid or not questions_data:
+                return  # The wizard will re-render the form and show messages
+
+            # Save to DB atomically
+            try:
+                with transaction.atomic():
+                    assessment = form.save(commit=False)
+                    assessment.course = course
+                    assessment.created_by = self.request.user
+                    assessment.save()
+
+                    for q in questions_data:
+                        question = AssessmentQuestion.objects.create(
+                            assessment=assessment,
+                            text=q['text'],
+                            explanation=q['explanation']
+                        )
+                        for opt in q['options']:
+                            MCQOption.objects.create(
+                                question=question,
+                                option_text=opt['text'],
+                                is_correct=opt['is_correct'],
+                                order=opt['order']
+                            )
+            except Exception as e:
+                messages.error(self.request, f"An error occurred while saving the assessment: {e}")
+                return  # The wizard will re-render the form and show messages
+
+
+
+
+        elif step == 'marketing':
+            data = form.cleaned_data
+            other_data = self.request.POST
+            files = self.request.FILES
+
+            trailer_form = CourseTrailerForm(other_data, files=files)
+            form.save()
+
+            # Accept multiple objectives and requirements
+            objectives = other_data.getlist('objectives[]') or [
+                v for k, v in other_data.items() if k.startswith('objective_')
+            ]
+            requirements = other_data.getlist('requirements[]') or [
+                v for k, v in other_data.items() if k.startswith('requirement_')
+            ]
+
+            if trailer_form.is_valid() and form.is_valid():
+                with transaction.atomic():
+                    # Save trailer
+                    trailer = trailer_form.save(commit=False)
+                    trailer.course = course
+                    trailer.save()
+
+                    # Save multiple requirements
+                    for req in requirements:
+                        req = req.strip()
+                        if req:
+                            CourseRequirements.objects.create(course=course, requirement=req)
+
+                    # Save multiple objectives
+                    for obj in objectives:
+                        obj = obj.strip()
+                        if obj:
+                            CourseObjectives.objects.create(course=course, objective=obj)
+
+
+    def done(self, form_list, **kwargs):
+        course_id = self.storage.extra_data.get('course_id')
+        course = Course.objects.get(id=course_id)
+        messages.success(self.request, "Course created successfully!")
+        return redirect('course:course', course_slug=course.slug)
+    
+
 
 
 class OwnerCourseMixin(OwnerMixin, LoginRequiredMixin, PermissionRequiredMixin):
@@ -654,7 +957,7 @@ def grade_submissions(request, submission_id):
                 submission=submission,
                 defaults={'score': score}
             )
-
+    
         # Update feedback, etc.
         submission.submission_grade.feedback = feedback
         submission.submission_grade.score = grade
@@ -679,7 +982,8 @@ def grade_submissions(request, submission_id):
             related_course=submission.assignment.course,
             is_read=False
         )
-
+    
+    
         return JsonResponse({
             'success': True,
             'status_display': 'Graded',
