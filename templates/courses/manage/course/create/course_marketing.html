@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<main class="ttr-wrapper">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card shadow-lg">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="card-title mb-0">Create New Course</h3>
+                        <p class="mb-0">Step 6 - Marketing & Setup</p>
+                    </div>
+
+                    <div class="card-body">
+                        <form method="post" enctype="multipart/form-data" novalidate>
+                            {% csrf_token %}
+                            
+                            <!-- Trailer Section -->
+                            <div class="mb-5 border-bottom pb-4">
+                                <h5 class="mb-4">Course Trailer</h5>
+                                <div class="row g-3">
+                                    <div class="col-md-12">
+                                        <label class="form-label fw-bold">Trailer Video</label>
+                                        <input type="file" name="video_file" class="form-control">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Learning Objectives -->
+                            <div class="mb-5 border-bottom pb-4">
+                                <h5 class="mb-4">Learning Objectives</h5>
+                                <div id="objectives-container">
+                                    <div class="objective mb-3">
+                                        <div class="input-group">
+                                            <input type="text" name="objectives[]" 
+                                                class="form-control" 
+                                                placeholder="What will students learn?">
+                                            <button type="button" 
+                                                    class="btn btn-danger remove-objective">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="button" id="add-objective" 
+                                        class="btn btn-outline-primary mt-2">
+                                    <i class="bi bi-plus-circle me-2"></i>Add Objective
+                                </button>
+                            </div>
+
+                            <!-- Requirements -->
+                            <div class="mb-5 border-bottom pb-4">
+                                <h5 class="mb-4">Course Requirements</h5>
+                                <div id="requirements-container">
+                                    <div class="requirement mb-3">
+                                        <div class="input-group">
+                                            <input type="text" name="requirements[]" 
+                                                class="form-control" 
+                                                placeholder="What do students need to know?">
+                                            <button type="button" 
+                                                    class="btn btn-danger remove-requirement">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="button" id="add-requirement" 
+                                        class="btn btn-outline-primary mt-2">
+                                    <i class="bi bi-plus-circle me-2"></i>Add Requirement
+                                </button>
+                            </div>
+
+                            <!-- Form Navigation -->
+                            <div class="d-flex justify-content-between mt-5">
+                                <a href="{% url 'previous_step_url' %}" class="btn btn-outline-primary">
+                                    <i class="bi bi-chevron-left me-2"></i>Previous
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    Complete Setup<i class="bi bi-check-circle ms-2"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add Objectives
+    document.getElementById('add-objective').addEventListener('click', function() {
+        const container = document.getElementById('objectives-container');
+        const newObj = document.createElement('div');
+        newObj.className = 'objective mb-3';
+        newObj.innerHTML = `
+            <div class="input-group">
+                <input type="text" name="objectives[]" 
+                       class="form-control" 
+                       placeholder="What will students learn?">
+                <button type="button" 
+                        class="btn btn-danger remove-objective">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+        `;
+        container.appendChild(newObj);
+    });
+
+    // Remove Objectives
+    document.addEventListener('click', function(e) {
+        if(e.target.closest('.remove-objective')) {
+            e.target.closest('.objective').remove();
+        }
+    });
+
+    // Add Requirements
+    document.getElementById('add-requirement').addEventListener('click', function() {
+        const container = document.getElementById('requirements-container');
+        const newReq = document.createElement('div');
+        newReq.className = 'requirement mb-3';
+        newReq.innerHTML = `
+            <div class="input-group">
+                <input type="text" name="requirements[]" 
+                       class="form-control" 
+                       placeholder="What do students need to know?">
+                <button type="button" 
+                        class="btn btn-danger remove-requirement">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+        `;
+        container.appendChild(newReq);
+    });
+
+    // Remove Requirements
+    document.addEventListener('click', function(e) {
+        if(e.target.closest('.remove-requirement')) {
+            e.target.closest('.requirement').remove();
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,265 @@
+{% extends 'user_navbar.html' %}
+
+{% block content %}
+<main class="ttr-wrapper">
+    <div class="card-header bg-primary text-white">
+        <h3 class="card-title mb-0">Create New Course</h3>
+        <p class="mb-0">Step 4 - Assignments</p>
+    </div>
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card shadow-lg">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="card-title mb-0">Create New Course</h3>
+                        <p class="mb-0">Step 4 - Assignments</p>
+                    </div>
+
+                    <div class="card-body">
+                        <form method="post" enctype="multipart/form-data" novalidate>
+                            {% csrf_token %}
+                            
+                            <div id="assignments-container">
+                                <!-- Initial Assignment -->
+                                <div class="assignment-section mb-5 border-bottom pb-4">
+                                    <div class="row g-3">
+                                        <div class="col-12">
+                                            <h5 class="mb-3">Assignment #1</h5>
+                                        </div>
+                                        
+                                        <!-- Assignment Fields -->
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Title</label>
+                                            <input type="text" name="title_0" class="form-control" required>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Topic</label>
+                                            <select name="topic_0" class="form-control">
+                                                {% for topic in topics %}
+                                                <option value="{{ topic.id }}">{{ topic.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="col-12">
+                                            <label class="form-label fw-bold">Description</label>
+                                            <textarea name="description_0" class="form-control" rows="3"></textarea>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">File Upload</label>
+                                            <input type="file" name="file_0" class="form-control">
+                                        </div>
+
+                                        <!-- Rubric Section -->
+                                        <div class="col-12 mt-4">
+                                            <h6 class="mb-3">Rubric Criteria</h6>
+                                            <div class="rubric-container" data-assignment-index="0">
+                                                <!-- Rubric Criteria 1 -->
+                                                <div class="rubric-criteria mb-3">
+                                                    <div class="row g-2">
+                                                        <div class="col-md-4">
+                                                            <input type="text" 
+                                                                name="rubric_criteria_0[]"
+                                                                class="form-control"
+                                                                placeholder="Criteria">
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <input type="text" 
+                                                                name="rubric_descriptions_0[]"
+                                                                class="form-control"
+                                                                placeholder="Description">
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <input type="number" 
+                                                                name="rubric_max_scores_0[]"
+                                                                class="form-control"
+                                                                placeholder="Max Score"
+                                                                min="0">
+                                                        </div>
+                                                        <div class="col-md-1">
+                                                            <button type="button" 
+                                                                    class="btn btn-danger btn-sm remove-rubric">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <button type="button" 
+                                                    class="btn btn-outline-secondary btn-sm add-rubric">
+                                                <i class="bi bi-plus"></i> Add Criteria
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Add Assignment button -->
+                            <div class="mb-4">
+                                <button type="button" id="add-assignment" class="btn btn-outline-primary">
+                                    <i class="bi bi-plus-circle me-2"></i>Add Another Assignment
+                                </button>
+                            </div>
+
+                            <!-- Form Navigation -->
+                            <div class="d-flex justify-content-between mt-5">
+                                <a href="{% url 'previous_step_url' %}" class="btn btn-outline-primary">
+                                    <i class="bi bi-chevron-left me-2"></i>Previous
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    Next Step<i class="bi bi-chevron-right ms-2"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let assignmentIndex = 1;
+    const assignmentsContainer = document.getElementById('assignments-container');
+
+    // Add new assignment
+    document.getElementById('add-assignment').addEventListener('click', function() {
+        const newAssignment = document.createElement('div');
+        newAssignment.className = 'assignment-section mb-5 border-bottom pb-4';
+        newAssignment.innerHTML = `
+            <div class="row g-3">
+                <div class="col-12 d-flex justify-content-between align-items-center">
+                    <h5>Assignment #${assignmentIndex + 1}</h5>
+                    <button type="button" class="btn btn-danger btn-sm remove-assignment">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+                
+                <div class="col-md-6">
+                    <input type="text" name="title_${assignmentIndex}" class="form-control" required>
+                </div>
+                
+                <div class="col-md-6">
+                    <select name="topic_${assignmentIndex}" class="form-control">
+                        {% for topic in topics %}
+                        <option value="{{ topic.id }}">{{ topic.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="col-12">
+                    <textarea name="description_${assignmentIndex}" class="form-control" rows="3"></textarea>
+                </div>
+                
+                <div class="col-md-6">
+                    <input type="file" name="file_${assignmentIndex}" class="form-control">
+                </div>
+
+                <div class="col-12 mt-4">
+                    <h6 class="mb-3">Rubric Criteria</h6>
+                    <div class="rubric-container" data-assignment-index="${assignmentIndex}">
+                        <div class="rubric-criteria mb-3">
+                            <div class="row g-2">
+                                <div class="col-md-4">
+                                    <input type="text" 
+                                           name="rubric_criteria_${assignmentIndex}[]"
+                                           class="form-control"
+                                           placeholder="Criteria">
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="text" 
+                                           name="rubric_descriptions_${assignmentIndex}[]"
+                                           class="form-control"
+                                           placeholder="Description">
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="number" 
+                                           name="rubric_max_scores_${assignmentIndex}[]"
+                                           class="form-control"
+                                           placeholder="Max Score"
+                                           min="0">
+                                </div>
+                                <div class="col-md-1">
+                                    <button type="button" 
+                                            class="btn btn-danger btn-sm remove-rubric">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" 
+                            class="btn btn-outline-secondary btn-sm add-rubric">
+                        <i class="bi bi-plus"></i> Add Criteria
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        assignmentsContainer.appendChild(newAssignment);
+        assignmentIndex++;
+    });
+
+    // Remove assignment
+    assignmentsContainer.addEventListener('click', function(e) {
+        if(e.target.closest('.remove-assignment')) {
+            e.target.closest('.assignment-section').remove();
+        }
+    });
+
+    // Add rubric criteria
+    document.addEventListener('click', function(e) {
+        if(e.target.closest('.add-rubric')) {
+            const rubricContainer = e.target.closest('.rubric-container');
+            const assignmentIndex = rubricContainer.dataset.assignmentIndex;
+            
+            const newCriteria = document.createElement('div');
+            newCriteria.className = 'rubric-criteria mb-3';
+            newCriteria.innerHTML = `
+                <div class="row g-2">
+                    <div class="col-md-4">
+                        <input type="text" 
+                               name="rubric_criteria_${assignmentIndex}[]"
+                               class="form-control"
+                               placeholder="Criteria">
+                    </div>
+                    <div class="col-md-4">
+                        <input type="text" 
+                               name="rubric_descriptions_${assignmentIndex}[]"
+                               class="form-control"
+                               placeholder="Description">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="number" 
+                               name="rubric_max_scores_${assignmentIndex}[]"
+                               class="form-control"
+                               placeholder="Max Score"
+                               min="0">
+                    </div>
+                    <div class="col-md-1">
+                        <button type="button" 
+                                class="btn btn-danger btn-sm remove-rubric">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            rubricContainer.appendChild(newCriteria);
+        }
+    });
+
+    // Remove rubric criteria
+    document.addEventListener('click', function(e) {
+        if(e.target.closest('.remove-rubric')) {
+            e.target.closest('.rubric-criteria').remove();
+        }
+    });
+});
+</script>
+{% endblock %}

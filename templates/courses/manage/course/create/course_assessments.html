@@ -1,0 +1,244 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<main class="ttr-wrapper">"
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card shadow-lg">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="card-title mb-0">Create New Course</h3>
+                        <p class="mb-0">Step 5 - Assessments</p>
+                    </div>
+
+                    <div class="card-body">
+                        <form method="post" novalidate>
+                            {% csrf_token %}
+                            
+                            <div id="questions-container">
+                                <!-- Initial Question -->
+                                <div class="question-section mb-4 border-bottom pb-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h5>Question #1</h5>
+                                        <button type="button" class="btn btn-danger btn-sm remove-question">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Question Text</label>
+                                        <input type="text" name="questions[0][text]" 
+                                            class="form-control" required>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Explanation</label>
+                                        <textarea name="questions[0][explanation]" 
+                                                class="form-control" rows="2"></textarea>
+                                    </div>
+                                    
+                                    <div class="options-container mb-3">
+                                        <label class="form-label fw-bold">Options</label>
+                                        <div class="option mb-2">
+                                            <div class="row g-2 align-items-center">
+                                                <div class="col-md-6">
+                                                    <input type="text" 
+                                                        name="questions[0][options][1][text]"
+                                                        class="form-control" 
+                                                        placeholder="Option text" required>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-check">
+                                                        <input type="checkbox" 
+                                                            name="questions[0][options][1][is_correct]"
+                                                            class="form-check-input" 
+                                                            value="true"
+                                                            id="q0-opt1-correct">
+                                                        <label class="form-check-label" for="q0-opt1-correct">
+                                                            Correct Answer
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <button type="button" 
+                                                            class="btn btn-danger btn-sm remove-option">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <button type="button" class="btn btn-outline-primary btn-sm add-option">
+                                        <i class="bi bi-plus"></i> Add Option
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Add Question button -->
+                            <div class="mb-4">
+                                <button type="button" id="add-question" class="btn btn-outline-primary">
+                                    <i class="bi bi-plus-circle me-2"></i>Add Another Question
+                                </button>
+                            </div>
+
+                            <!-- Form Navigation -->
+                            <div class="d-flex justify-content-between mt-5">
+                                <a href="{% url 'previous_step_url' %}" class="btn btn-outline-primary">
+                                    <i class="bi bi-chevron-left me-2"></i>Previous
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    Next Step<i class="bi bi-chevron-right ms-2"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let qIndex = document.querySelectorAll('.question-section').length;
+    const questionsContainer = document.getElementById('questions-container');
+
+    // Add new question
+    document.getElementById('add-question').addEventListener('click', function() {
+        const newQuestion = document.createElement('div');
+        newQuestion.className = 'question-section mb-4 border-bottom pb-4';
+        newQuestion.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5>Question #${qIndex + 1}</h5>
+                <button type="button" class="btn btn-danger btn-sm remove-question">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-bold">Question Text</label>
+                <input type="text" name="questions[${qIndex}][text]" 
+                       class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-bold">Explanation</label>
+                <textarea name="questions[${qIndex}][explanation]" 
+                          class="form-control" rows="2"></textarea>
+            </div>
+            <div class="options-container mb-3">
+                <label class="form-label fw-bold">Options</label>
+                <div class="option mb-2">
+                    <div class="row g-2 align-items-center">
+                        <div class="col-md-6">
+                            <input type="text" 
+                                   name="questions[${qIndex}][options][1][text]"
+                                   class="form-control" 
+                                   placeholder="Option text" required>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                <input type="checkbox" 
+                                       name="questions[${qIndex}][options][1][is_correct]"
+                                       class="form-check-input" 
+                                       value="true"
+                                       id="q${qIndex}-opt1-correct">
+                                <label class="form-check-label" for="q${qIndex}-opt1-correct">
+                                    Correct Answer
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" 
+                                    class="btn btn-danger btn-sm remove-option">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="btn btn-outline-primary btn-sm add-option">
+                <i class="bi bi-plus"></i> Add Option
+            </button>
+        `;
+
+        questionsContainer.appendChild(newQuestion);
+        qIndex++;
+    });
+
+    // Remove question
+    questionsContainer.addEventListener('click', function(e) {
+        if(e.target.closest('.remove-question')) {
+            e.target.closest('.question-section').remove();
+        }
+    });
+
+    // Add option
+    document.addEventListener('click', function(e) {
+        if(e.target.closest('.add-option')) {
+            const questionSection = e.target.closest('.question-section');
+            const optionsContainer = questionSection.querySelector('.options-container');
+            const qIndex = Array.from(questionsContainer.children)
+                               .indexOf(questionSection);
+            const optionCount = optionsContainer.querySelectorAll('.option').length + 1;
+
+            const newOption = document.createElement('div');
+            newOption.className = 'option mb-2';
+            newOption.innerHTML = `
+                <div class="row g-2 align-items-center">
+                    <div class="col-md-6">
+                        <input type="text" 
+                               name="questions[${qIndex}][options][${optionCount}][text]"
+                               class="form-control" 
+                               placeholder="Option text" required>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-check">
+                            <input type="checkbox" 
+                                   name="questions[${qIndex}][options][${optionCount}][is_correct]"
+                                   class="form-check-input" 
+                                   value="true"
+                                   id="q${qIndex}-opt${optionCount}-correct">
+                            <label class="form-check-label" for="q${qIndex}-opt${optionCount}-correct">
+                                Correct Answer
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" 
+                                class="btn btn-danger btn-sm remove-option">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            optionsContainer.appendChild(newOption);
+        }
+    });
+
+    // Remove option and reindex
+    document.addEventListener('click', function(e) {
+        if(e.target.closest('.remove-option')) {
+            const option = e.target.closest('.option');
+            const optionsContainer = option.closest('.options-container');
+            option.remove();
+
+            // Reindex remaining options
+            optionsContainer.querySelectorAll('.option').forEach((opt, index) => {
+                const oIndex = index + 1;
+                opt.querySelectorAll('input').forEach(input => {
+                    input.name = input.name.replace(/\[options\]\[\d+\]/g, `[options][${oIndex}]`);
+                });
+                // Update checkbox IDs
+                const checkbox = opt.querySelector('.form-check-input');
+                const label = opt.querySelector('.form-check-label');
+                const newId = `q${qIndex}-opt${oIndex}-correct`;
+                checkbox.id = newId;
+                label.htmlFor = newId;
+            });
+        }
+    });
+});
+</script>
+{% endblock %}

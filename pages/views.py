@@ -182,21 +182,15 @@ class CourseCreateWizard(SessionWizardView):
 
         if step == 'basics':
             data = form.cleaned_data
-            form.instance.owner = self.request.user
-            try:
-                course = Course.objects.create(
-                    owner=self.request.user,
-                    name=data.get('name'),
-                    slug=slugify(data.get('name')),
-                    overview=data.get('overview'),
-                    faculty=data.get('faculty'),
-                    cover_image=data.get('cover_image'),
-                    code=data.get('code'),
-                    audience=data.get('audience'),
-                    published=False,
-                )
+            files = self.request.FILES
+            form.fields['faculty'].queryset = Faculty.objects.all()
+            if data and files:
+                course = form.save(commit=False)
+                course.owner = self.request.user
+                course.slug = slugify(data['name'])
+                course.save()
                 self.storage.extra_data['course_id'] = course.id
-            except Exception as e:
+            else:
                 messages.error(self.request, f"Error creating course: {e}")
                 return  # The wizard will re-render the form and show the error
 

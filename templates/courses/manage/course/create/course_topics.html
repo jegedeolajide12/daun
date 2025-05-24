@@ -1,0 +1,111 @@
+{% extends 'user_navbar.html' %}
+
+{% block content %}
+<main class="ttr-wrapper">
+    <div class="ttr-page-titlebar">
+        <div class="container">
+            <h1 class="ttr-page-title">Create New Course</h1>
+            <p class="ttr-page-subtitle">Step 2 - Course Topics</p>
+        </div>
+    </div>
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow-lg">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="card-title mb-0">Create New Course</h3>
+                        <p class="mb-0">Step 2 - Course Topics</p>
+                    </div>
+
+                    <div class="card-body">
+                        <form method="post" novalidate>
+                            {% csrf_token %}
+                            
+                            <div id="topics-container">
+                                <!-- Initial topic form -->
+                                <div class="topic-form mb-4 border-bottom pb-4">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Topic Name</label>
+                                        <input type="text" name="name_0" class="form-control" 
+                                            placeholder="Enter Topic Name" required>
+                                        <div class="text-danger small mt-1"></div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Description (optional)</label>
+                                        <textarea name="description_0" class="form-control" 
+                                                rows="3" placeholder="Enter Topic Description"></textarea>
+                                        <div class="text-danger small mt-1"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Add Topic button -->
+                            <div class="mb-4">
+                                <button type="button" id="add-topic" class="btn btn-outline-primary">
+                                    <i class="bi bi-plus-circle me-2"></i>Add Another Topic
+                                </button>
+                            </div>
+
+                            <!-- Form Navigation -->
+                            <div class="d-flex justify-content-between mt-5">
+                                <a href="{% url 'your_previous_step_url' %}" class="btn btn-outline-primary">
+                                    <i class="bi bi-chevron-left me-2"></i>Previous
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    Next Step<i class="bi bi-chevron-right ms-2"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let topicIndex = 1;
+    const container = document.getElementById('topics-container');
+    
+    document.getElementById('add-topic').addEventListener('click', function() {
+        const newTopic = document.createElement('div');
+        newTopic.className = 'topic-form mb-4 border-bottom pb-4';
+        newTopic.innerHTML = `
+            <div class="d-flex justify-content-end">
+                <button type="button" class="btn btn-sm btn-danger remove-topic mb-2">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-bold">Topic Name</label>
+                <input type="text" name="name_${topicIndex}" class="form-control" 
+                       placeholder="Enter Topic Name" required>
+                <div class="text-danger small mt-1"></div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-bold">Description (optional)</label>
+                <textarea name="description_${topicIndex}" class="form-control" 
+                          rows="3" placeholder="Enter Topic Description"></textarea>
+                <div class="text-danger small mt-1"></div>
+            </div>
+        `;
+        
+        container.appendChild(newTopic);
+        topicIndex++;
+    });
+
+    container.addEventListener('click', function(e) {
+        if(e.target.classList.contains('remove-topic')) {
+            e.target.closest('.topic-form').remove();
+            // Update indices after removal if needed
+        }
+    });
+});
+</script>
+{% endblock %}
