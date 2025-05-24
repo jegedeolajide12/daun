@@ -4,13 +4,29 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.contrib.contenttypes.models import ContentType
 from pkg_resources import require
+from django.forms import modelformset_factory
 
 from .models import (Course, Topic, Faculty, Assignment, 
                      Submission, Assessment, MCQOption, AssessmentQuestion, 
                      Content, Text, File, Image, Video,
                      CourseTrailer, CourseRequirements, CourseObjectives)
 
-
+ModuleFormSet = modelformset_factory(
+    model=Topic,
+    fields=['name', 'description'],
+    extra=1,
+    widgets={
+        'name': forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter Module Name',
+        }),
+        'description': forms.Textarea(attrs={
+            'class': 'form-control',
+            'rows': 3,
+            'placeholder': 'Enter Module Description',
+        }),
+    }
+)
 
 
 class CourseForm(forms.ModelForm):

@@ -1,0 +1,106 @@
+{% extends 'user_navbar.html' %}
+
+{% block content %}
+<main class="ttr-wrapper">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow-lg">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="card-title mb-0">Create New Course</h3>
+                        <p class="mb-0">Step 1 - Basic Information</p>
+                    </div>
+                    
+                    <div class="card-body">
+                        <form method="post" enctype="multipart/form-data" novalidate>
+                            {% csrf_token %}
+                            
+                            <!-- Faculty Selection -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">{{ form.faculty.label }}</label>
+                                {{ form.faculty }}
+                                {% for error in form.faculty.errors %}
+                                    <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <!-- Course Name -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">{{ form.name.label }}</label>
+                                {{ form.name }}
+                                {% for error in form.name.errors %}
+                                    <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <!-- Course Code -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">{{ form.code.label }}</label>
+                                {{ form.code }}
+                                {% for error in form.code.errors %}
+                                    <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <!-- Course Overview -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">{{ form.overview.label }}</label>
+                                {{ form.overview }}
+                                <small class="form-text text-muted">A brief description of your course (200-300 characters)</small>
+                                {% for error in form.overview.errors %}
+                                    <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <!-- Target Audience -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">{{ form.audience.label }}</label>
+                                {{ form.audience }}
+                                {% for error in form.audience.errors %}
+                                    <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <!-- Cover Image Upload -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">{{ form.cover_image.label }}</label>
+                                <div class="file-upload-wrapper">
+                                    {{ form.cover_image }}
+                                </div>
+                                <small class="form-text text-muted">Recommended size: 1200x600 pixels (JPEG or PNG)</small>
+                                {% for error in form.cover_image.errors %}
+                                    <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <!-- Form Navigation -->
+                            <div class="d-flex justify-content-between mt-5">
+                                <button type="button" class="btn btn-outline-secondary" disabled>
+                                    <i class="bi bi-chevron-left me-2"></i>Save as Draft
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    Continue<i class="bi bi-chevron-right ms-2"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .file-upload-wrapper input[type="file"] {
+        opacity: 1;
+        position: static;
+        height: auto;
+        padding: 0.375rem 0.75rem;
+    }
+    textarea {
+        resize: none;
+    }
+</style>
+{% endblock %}

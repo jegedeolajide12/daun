@@ -42,7 +42,7 @@ from .models import (
 from .forms import (FacultyForm, CourseTopicAssignmentsForm, SubmissionForm, 
                     CourseTopicAssessmentsForm, MCQOptionForm, CourseBasicsForm, CourseTopicsForm,
                     CourseTopicContentsForm, AssessmentQuestionForm, CourseTrailerForm, CourseRequirementsForm, 
-                    CourseMarketingForm, CourseObjectivesForm, CourseForm)
+                    CourseMarketingForm, CourseObjectivesForm, CourseForm, ModuleFormSet)
 
 def create_faculty(request):
     if request.method == "POST":
@@ -158,16 +158,16 @@ FORMS = [
 ]
 
 TEMPLATES = {
-    'basics': 'courses/manage/course/course_basics.html',
-    'topics': 'courses/manage/course/course_topics.html',
-    'contents': 'courses/manage/course/course_contents.html',
-    'assignments': 'courses/manage/course/course_assignments.html',
-    'assessments': 'courses/manage/course/course_assessments.html',
-    'marketing': 'courses/manage/course/course_marketing.html',
+    'basics': 'courses/manage/course/create/course_basics.html',
+    'topics': 'courses/manage/course/create/course_topics.html',
+    'contents': 'courses/manage/course/create/course_contents.html',
+    'assignments': 'courses/manage/course/create/course_assignments.html',
+    'assessments': 'courses/manage/course/create/course_assessments.html',
+    'marketing': 'courses/manage/course/create/course_marketing.html',
 }
             
 class CourseCreateWizard(SessionWizardView):
-    template_name = 'courses/manage/course/course_create_wizard.html'
+    template_name = 'courses/manage/course/create/course_basics.html'
     form_list = FORMS
     file_storage = None
 
@@ -183,18 +183,22 @@ class CourseCreateWizard(SessionWizardView):
         if step == 'basics':
             data = form.cleaned_data
             form.instance.owner = self.request.user
-            course = Course.objects.create(
-                owner=self.request.user,
-                name=data.get('name'),
-                slug=slugify(data.get('name')),
-                overview=data.get('overview'),
-                faculty=data.get('faculty'),
-                cover_image=data.get('cover_image'),
-                code=data.get('code'),
-                audience=data.get('audience'),
-                published=False,
-            )
-            self.storage.extra_data['course_id'] = course.id
+            try:
+                course = Course.objects.create(
+                    owner=self.request.user,
+                    name=data.get('name'),
+                    slug=slugify(data.get('name')),
+                    overview=data.get('overview'),
+                    faculty=data.get('faculty'),
+                    cover_image=data.get('cover_image'),
+                    code=data.get('code'),
+                    audience=data.get('audience'),
+                    published=False,
+                )
+                self.storage.extra_data['course_id'] = course.id
+            except Exception as e:
+                messages.error(self.request, f"Error creating course: {e}")
+                return  # The wizard will re-render the form and show the error
 
         elif step == 'topics':
             # Parse all topics from POST data
