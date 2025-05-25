@@ -60,7 +60,7 @@ class Course(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='courses_created', on_delete=models.CASCADE)
     faculty = models.ForeignKey(Faculty, related_name='faculty_courses', on_delete=models.CASCADE, null=True, blank=True)
     name = models.CharField(max_length=200)
-    slug = models.SlugField(max_length=200, unique=True)
+    slug = models.SlugField(max_length=200)
     code = models.CharField(max_length=6, null=True, blank=True)
     cover_image = models.ImageField(null=True, upload_to='courses/cover_images')
     overview = models.TextField()

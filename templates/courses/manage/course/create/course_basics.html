@@ -14,7 +14,7 @@
                     <div class="card-body">
                         <form method="post" enctype="multipart/form-data" novalidate>
                             {% csrf_token %}
-                            
+                            {{ wizard.management_form }}
                             <!-- Faculty Selection -->
                             <div class="mb-4">
                                 <label class="form-label fw-bold">{{ form.faculty.label }}</label>

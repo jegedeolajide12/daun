@@ -20,6 +20,7 @@
                     <div class="card-body">
                         <form method="post" novalidate>
                             {% csrf_token %}
+                            {{ wizard.management_form }}
                             
                             <div id="topics-container">
                                 <!-- Initial topic form -->
@@ -49,7 +50,7 @@
 
                             <!-- Form Navigation -->
                             <div class="d-flex justify-content-between mt-5">
-                                <a href="{% url 'your_previous_step_url' %}" class="btn btn-outline-primary">
+                                <a href="#" class="btn btn-outline-primary">
                                     <i class="bi bi-chevron-left me-2"></i>Previous
                                 </a>
                                 <button type="submit" class="btn btn-primary">
@@ -63,11 +64,7 @@
         </div>
     </div>
 </main>
-{% endblock %}
 
-{% endblock %}
-
-{% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     let topicIndex = 1;

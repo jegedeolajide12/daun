@@ -11,23 +11,6 @@ from .models import (Course, Topic, Faculty, Assignment,
                      Content, Text, File, Image, Video,
                      CourseTrailer, CourseRequirements, CourseObjectives)
 
-ModuleFormSet = modelformset_factory(
-    model=Topic,
-    fields=['name', 'description'],
-    extra=1,
-    widgets={
-        'name': forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Enter Module Name',
-        }),
-        'description': forms.Textarea(attrs={
-            'class': 'form-control',
-            'rows': 3,
-            'placeholder': 'Enter Module Description',
-        }),
-    }
-)
-
 
 class CourseForm(forms.ModelForm):
     class Meta:
@@ -131,6 +114,8 @@ class CourseTopicsForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['name'].required = True
         self.fields['description'].required = False
+
+ModuleFormSet = modelformset_factory(Topic, form=CourseTopicsForm, extra=1)
 
 CONTENT_MODELS = {
     'text': Text,

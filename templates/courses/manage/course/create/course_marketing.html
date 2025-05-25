@@ -14,6 +14,7 @@
                     <div class="card-body">
                         <form method="post" enctype="multipart/form-data" novalidate>
                             {% csrf_token %}
+                            {{ wizard.management_form }}
                             
                             <!-- Trailer Section -->
                             <div class="mb-5 border-bottom pb-4">

@@ -25,6 +25,9 @@ from django.apps import apps
 from django.contrib.auth.models import Group
 from django.http import JsonResponse
 from django.core.paginator import Paginator
+from django.forms import modelformset_factory
+
+from django.core.files.storage import FileSystemStorage
 
 from actstream import action
 from requests import options
@@ -147,7 +150,12 @@ class OwnerEditMixin:
         form.instance.owner = self.request.user
         return super().form_valid(form)
 
-
+ModuleFormSet = modelformset_factory(
+    Topic,
+    form=CourseTopicsForm,
+    extra=1,
+    can_delete=True
+)
 FORMS = [
     ('basics', CourseBasicsForm),
     ('topics', CourseTopicsForm),
@@ -169,7 +177,7 @@ TEMPLATES = {
 class CourseCreateWizard(SessionWizardView):
     template_name = 'courses/manage/course/create/course_basics.html'
     form_list = FORMS
-    file_storage = None
+    file_storage = FileSystemStorage(location='media/course_files')
 
     def get_template_names(self):
         step = self.steps.current
@@ -188,7 +196,7 @@ class CourseCreateWizard(SessionWizardView):
                 course = form.save(commit=False)
                 course.owner = self.request.user
                 course.slug = slugify(data['name'])
-                course.save()
+                
                 self.storage.extra_data['course_id'] = course.id
             else:
                 messages.error(self.request, f"Error creating course: {e}")
@@ -207,13 +215,20 @@ class CourseCreateWizard(SessionWizardView):
                 topics.append({'name': name, 'description': description})
                 i += 1
             if course:
-                for idx, topic in enumerate(topics):
-                    Topic.objects.create(
-                        course=course,
-                        name=topic['name'],
-                        description=topic['description'],
-                        order=idx+1
-                    )
+                try:
+                    for idx, topic in enumerate(topics):
+                        Topic.objects.create(
+                            course=course,
+                            name=topic['name'],
+                            description=topic['description'],
+                            order=idx+1
+                        )
+                except Exception as e:
+                    messages.error(self.request, f"Error creating topics: {e}")
+                    return  # The wizard will re-render the form and show the error
+            else:
+                messages.error(self.request, "Course not found. Cannot create topics.")
+                return  # The wizard will re-render the form and show the error
 
         elif step == 'contents':
             # Support multiple contents if needed
