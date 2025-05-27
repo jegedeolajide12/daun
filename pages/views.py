@@ -158,7 +158,7 @@ ModuleFormSet = modelformset_factory(
 )
 FORMS = [
     ('basics', CourseBasicsForm),
-    ('topics', CourseTopicsForm),
+    ('topics', ModuleFormSet),
     ('contents', CourseTopicContentsForm),
     ('assignments', CourseTopicAssignmentsForm),
     ('assessments', CourseTopicAssessmentsForm),
@@ -182,6 +182,18 @@ class CourseCreateWizard(SessionWizardView):
     def get_template_names(self):
         step = self.steps.current
         return [TEMPLATES[step]]
+    
+    def get_form(self, step=None, data=None, files=None):
+        step = step or self.steps.current
+        if step == 'topics':
+            return ModuleFormSet(queryset=Topic.objects.none(), data=data)
+        return super().get_form(step, data, files)
+
+    def get_context_data(self, form, **kwargs):
+        context = super().get_context_data(form=form, **kwargs)
+        if self.steps.current == 'topics':
+            context['formset'] = form
+        return context
 
     def process_step(self, form):
         step = self.steps.current
@@ -190,45 +202,48 @@ class CourseCreateWizard(SessionWizardView):
 
         if step == 'basics':
             data = form.cleaned_data
-            files = self.request.FILES
             form.fields['faculty'].queryset = Faculty.objects.all()
-            if data and files:
+            if data:
                 course = form.save(commit=False)
                 course.owner = self.request.user
                 course.slug = slugify(data['name'])
-                
+                course.save()
                 self.storage.extra_data['course_id'] = course.id
+                self.storage.save()
             else:
-                messages.error(self.request, f"Error creating course: {e}")
-                return  # The wizard will re-render the form and show the error
+                messages.error(self.request, "Error creating course.")
+                return
 
         elif step == 'topics':
-            # Parse all topics from POST data
-            data = self.request.POST
-            topics = []
-            i = 0
-            while True:
-                name = data.get(f'name_{i}')
-                description = data.get(f'description_{i}')
-                if not name:
-                    break
-                topics.append({'name': name, 'description': description})
-                i += 1
-            if course:
-                try:
-                    for idx, topic in enumerate(topics):
-                        Topic.objects.create(
-                            course=course,
-                            name=topic['name'],
-                            description=topic['description'],
-                            order=idx+1
-                        )
-                except Exception as e:
-                    messages.error(self.request, f"Error creating topics: {e}")
-                    return  # The wizard will re-render the form and show the error
+            try:
+                course_id = self.storage.extra_data.get('course_id')
+                course = Course.objects.get(id=course_id)
+            except Course.DoesNotExist:
+                messages.error(self.request, "Course not found. Please create a course first.")
+                return
+            formset = self.get_form(data=self.request.POST)
+            if formset.is_valid():
+                
+                # Process formset
+                instances = formset.save(commit=False)
+                
+                # Delete marked topics
+                for obj in formset.deleted_objects:
+                    obj.delete()
+                    
+                # Save new topics with course relation
+                for instance in instances:
+                    if not instance.pk:  # New instance
+                        instance.course = course
+                        instance.save()
+                
+                # Save many-to-many data if any
+                formset.save_m2m()
+                
             else:
-                messages.error(self.request, "Course not found. Cannot create topics.")
-                return  # The wizard will re-render the form and show the error
+                messages.error(self.request, "Invalid topic data: " + str(formset.errors))
+                return
+            
 
         elif step == 'contents':
             # Support multiple contents if needed

@@ -23,23 +23,50 @@
                             {{ wizard.management_form }}
                             
                             <div id="topics-container">
-                                <!-- Initial topic form -->
+                                {{ formset.management_form }}
+                                {% for form in formset %}
                                 <div class="topic-form mb-4 border-bottom pb-4">
+                                    {{ form.id }}
+                                    <div class="d-flex justify-content-end">
+                                        {{ form.DELETE }}
+                                        <button type="button" class="btn btn-sm btn-danger remove-topic ms-2">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
                                     <div class="mb-3">
                                         <label class="form-label fw-bold">Topic Name</label>
-                                        <input type="text" name="name_0" class="form-control" 
-                                            placeholder="Enter Topic Name" required>
-                                        <div class="text-danger small mt-1"></div>
+                                        {{ form.name }}
+                                        {{ form.name.errors }}
                                     </div>
-
                                     <div class="mb-3">
-                                        <label class="form-label fw-bold">Description (optional)</label>
-                                        <textarea name="description_0" class="form-control" 
-                                                rows="3" placeholder="Enter Topic Description"></textarea>
-                                        <div class="text-danger small mt-1"></div>
+                                        <label class="form-label fw-bold">Description</label>
+                                        {{ form.description }}
+                                        {{ form.description.errors }}
                                     </div>
                                 </div>
+                                {% endfor %}
                             </div>
+
+                            <!-- Add hidden empty form template with correct markup -->
+                            <template id="topic-form-template">
+                                <div class="topic-form mb-4 border-bottom pb-4">
+                                    {{ formset.empty_form.id }}
+                                    <div class="d-flex justify-content-end">
+                                        {{ formset.empty_form.DELETE }}
+                                        <button type="button" class="btn btn-sm btn-danger remove-topic ms-2">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Topic Name</label>
+                                        {{ formset.empty_form.name }}
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Description</label>
+                                        {{ formset.empty_form.description }}
+                                    </div>
+                                </div>
+                            </template>
 
                             <!-- Add Topic button -->
                             <div class="mb-4">
@@ -65,42 +92,38 @@
     </div>
 </main>
 
+<!-- Add this at bottom of template -->
+<div id="empty-form" style="display:none">
+    {{ formset.empty_form }}
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    let topicIndex = 1;
     const container = document.getElementById('topics-container');
-    
-    document.getElementById('add-topic').addEventListener('click', function() {
-        const newTopic = document.createElement('div');
-        newTopic.className = 'topic-form mb-4 border-bottom pb-4';
-        newTopic.innerHTML = `
-            <div class="d-flex justify-content-end">
-                <button type="button" class="btn btn-sm btn-danger remove-topic mb-2">
-                    <i class="bi bi-trash"></i>
-                </button>
-            </div>
-            <div class="mb-3">
-                <label class="form-label fw-bold">Topic Name</label>
-                <input type="text" name="name_${topicIndex}" class="form-control" 
-                       placeholder="Enter Topic Name" required>
-                <div class="text-danger small mt-1"></div>
-            </div>
-            <div class="mb-3">
-                <label class="form-label fw-bold">Description (optional)</label>
-                <textarea name="description_${topicIndex}" class="form-control" 
-                          rows="3" placeholder="Enter Topic Description"></textarea>
-                <div class="text-danger small mt-1"></div>
-            </div>
-        `;
-        
-        container.appendChild(newTopic);
-        topicIndex++;
+    const addButton = document.getElementById('add-topic');
+    const totalForms = document.getElementById('id_form-TOTAL_FORMS');
+    let formCount = parseInt(totalForms.value);
+
+    // Add new form
+    addButton.addEventListener('click', () => {
+        const template = document.getElementById('topic-form-template');
+        let html = template.innerHTML.replace(/__prefix__/g, formCount);
+        // Create a wrapper div to parse the HTML string
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = html;
+        // Insert the new form before the Add button
+        container.insertBefore(wrapper.firstElementChild, addButton.parentElement);
+        formCount++;
+        totalForms.value = formCount;
     });
 
-    container.addEventListener('click', function(e) {
-        if(e.target.classList.contains('remove-topic')) {
-            e.target.closest('.topic-form').remove();
-            // Update indices after removal if needed
+    // Handle delete
+    container.addEventListener('click', (e) => {
+        if(e.target.closest('.remove-topic')) {
+            const formWrapper = e.target.closest('.topic-form');
+            const deleteCheckbox = formWrapper.querySelector('[name$="-DELETE"]');
+            if(deleteCheckbox) deleteCheckbox.checked = true;  // Mark for deletion
+            formWrapper.style.display = 'none';  // Hide instead of remove
         }
     });
 });
