@@ -30,7 +30,7 @@
                                     <div class="d-flex justify-content-end">
                                         {{ form.DELETE }}
                                         <button type="button" class="btn btn-sm btn-danger remove-topic ms-2">
-                                            <i class="bi bi-trash"></i>
+                                            <i class="fa fa-trash"></i>
                                         </button>
                                     </div>
                                     <div class="mb-3">
@@ -54,7 +54,7 @@
                                     <div class="d-flex justify-content-end">
                                         {{ formset.empty_form.DELETE }}
                                         <button type="button" class="btn btn-sm btn-danger remove-topic ms-2">
-                                            <i class="bi bi-trash"></i>
+                                            <i class="fa fa-trash"></i>
                                         </button>
                                     </div>
                                     <div class="mb-3">
@@ -102,18 +102,16 @@
 document.addEventListener('DOMContentLoaded', function() {
     const container = document.getElementById('topics-container');
     const addButton = document.getElementById('add-topic');
-    const totalForms = document.getElementById('id_form-TOTAL_FORMS');
-    let formCount = parseInt(totalForms.value);
+    const totalForms = container.querySelector('[name="form-TOTAL_FORMS"]');
+    let formCount = parseInt(totalForms.value, 10);
 
     // Add new form
     addButton.addEventListener('click', () => {
         const template = document.getElementById('topic-form-template');
         let html = template.innerHTML.replace(/__prefix__/g, formCount);
-        // Create a wrapper div to parse the HTML string
         const wrapper = document.createElement('div');
         wrapper.innerHTML = html;
-        // Insert the new form before the Add button
-        container.insertBefore(wrapper.firstElementChild, addButton.parentElement);
+        container.appendChild(wrapper.firstElementChild);
         formCount++;
         totalForms.value = formCount;
     });
@@ -123,8 +121,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if(e.target.closest('.remove-topic')) {
             const formWrapper = e.target.closest('.topic-form');
             const deleteCheckbox = formWrapper.querySelector('[name$="-DELETE"]');
-            if(deleteCheckbox) deleteCheckbox.checked = true;  // Mark for deletion
-            formWrapper.style.display = 'none';  // Hide instead of remove
+            if(deleteCheckbox) deleteCheckbox.checked = true;
+            formWrapper.style.display = 'none';
         }
     });
 });

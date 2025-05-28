@@ -28,6 +28,14 @@ class CourseAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         return self.model.all_objects.get_queryset()
 
+
+@admin.register(Topic)
+class TopicAdmin(admin.ModelAdmin):
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "course":
+            kwargs["queryset"] = Course.all_objects.all()
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
 @admin.register(Enrollment)
 class EnrollmentAdmin(admin.ModelAdmin):
     list_display = ['student', 'course', 'is_active']
@@ -87,7 +95,6 @@ admin.site.register(Video)
 admin.site.register(Image)
 admin.site.register(File)
 admin.site.register(Text)
-admin.site.register(Topic)
 admin.site.register(Submission)
 admin.site.register(SubmissionFile)
 admin.site.register(Grade)

@@ -280,7 +280,7 @@ class CourseCreateWizard(SessionWizardView):
                 for obj in formset.deleted_objects:
                     obj.delete()
                 for instance in instances:
-                    instance.course_id = course_id  # Always set!
+                    instance.course = course  # Always set!
                     instance.save()
                 formset.save_m2m()
             else:
