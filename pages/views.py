@@ -190,8 +190,13 @@ class CourseCreateWizard(SessionWizardView):
             course_id = self.storage.extra_data.get('course_id')
             if not course_id:
                 # If no course ID, create a new course instance
-                messages.error(self.request, "Course not found, Please complete the basics step first.")
-                self.render_goto_step('basics')
+                course_id = self.request.session.get('wizard_course_id')
+                if course_id:
+                    self.storage.extra_data['course_id'] = course_id
+                else:
+
+                    messages.error(self.request, "Course not found, Please complete the basics step first.")
+                    self.render_goto_step('basics')
             return ModuleFormSet(queryset=Topic.objects.none(), data=data)
         return super().get_form(step, data, files)
 
@@ -247,6 +252,9 @@ class CourseCreateWizard(SessionWizardView):
                 course.slug = slugify(data['name'])
                 course.save()
                 self.storage.extra_data['course_id'] = course.id
+                self.request.session['course_id'] = course.id  # Store course ID in session
+                self.request.session['wizard_course_id'] = course.id  # Store in session for later use
+                self.request.session.modified = True
                 print("DEBUG: course_id in storage:", self.storage.extra_data.get('course_id'))
                                 
                 logger = logging.getLogger(__name__)
