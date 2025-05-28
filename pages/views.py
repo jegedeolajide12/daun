@@ -1,3 +1,4 @@
+import logging
 from django.shortcuts import get_object_or_404, redirect
 from django.db import transaction
 from django.shortcuts import render
@@ -186,6 +187,11 @@ class CourseCreateWizard(SessionWizardView):
     def get_form(self, step=None, data=None, files=None):
         step = step or self.steps.current
         if step == 'topics':
+            course_id = self.storage.extra_data.get('course_id')
+            if not course_id:
+                # If no course ID, create a new course instance
+                messages.error(self.request, "Course not found, Please complete the basics step first.")
+                self.render_goto_step('basics')
             return ModuleFormSet(queryset=Topic.objects.none(), data=data)
         return super().get_form(step, data, files)
 
@@ -195,10 +201,42 @@ class CourseCreateWizard(SessionWizardView):
             context['formset'] = form
         return context
 
+    def get_form_initial(self, step):
+        """Persist course ID between steps"""
+        initial = super().get_form_initial(step)
+        if step == 'topics':
+            # Ensure course ID is set in initial data for topics step
+            course_id = self.storage.extra_data.get('course_id')
+            if not course_id:
+                # If no course ID, create a new course instance
+                messages.error(self.request, "Course not found, Please complete the basics step first.")
+                self.render_goto_step('basics')
+            else:
+                initial['course_id'] = course_id
+        return initial
+    
+    def render(self, form=None, **kwargs):
+        response = super().render(form, **kwargs)
+        self.request.session.modified = True  # Force session save
+        return response
+
     def process_step(self, form):
         step = self.steps.current
         course_id = self.storage.extra_data.get('course_id')
         course = Course.objects.get(id=course_id) if course_id else None
+
+        if step != 'basics':
+            course_id = self.storage.extra_data.get('course_id')
+            if not course_id:
+                messages.error(self.request, "Course not found. Please complete the previous step first.")
+                return self.render_goto_step('basics')
+            try:
+                course = Course.objects.get(id=course_id)
+            except Course.DoesNotExist:
+                messages.error(self.request, "Course not found. Please create a course first.")
+                return self.render_goto_step('basics')
+        else:
+            course = None
 
         if step == 'basics':
             data = form.cleaned_data
@@ -209,7 +247,11 @@ class CourseCreateWizard(SessionWizardView):
                 course.slug = slugify(data['name'])
                 course.save()
                 self.storage.extra_data['course_id'] = course.id
-                self.storage.save()
+                print("DEBUG: course_id in storage:", self.storage.extra_data.get('course_id'))
+                                
+                logger = logging.getLogger(__name__)
+                logger.debug("course_id in storage: %s", self.storage.extra_data.get('course_id'))
+                self.request.session.modified = True
             else:
                 messages.error(self.request, "Error creating course.")
                 return
@@ -217,6 +259,7 @@ class CourseCreateWizard(SessionWizardView):
         elif step == 'topics':
             try:
                 course_id = self.storage.extra_data.get('course_id')
+                print("DEBUG: course_id retrieved in topics step:", course_id)
                 course = Course.objects.get(id=course_id)
             except Course.DoesNotExist:
                 messages.error(self.request, "Course not found. Please create a course first.")
