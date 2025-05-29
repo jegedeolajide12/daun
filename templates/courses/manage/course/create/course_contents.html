@@ -108,16 +108,16 @@ document.addEventListener('DOMContentLoaded', function() {
     // Update topic dropdowns to exclude already selected topics
     function updateTopicDropdowns() {
         const selectedTopics = getSelectedTopics();
-        
         document.querySelectorAll('.topic-select').forEach(select => {
+            if (!select.options) return; // Fix: skip if not a select element
             const currentValue = select.value;
             const options = Array.from(select.options);
-            
+
             // Enable all options first
             options.forEach(option => {
                 option.disabled = false;
             });
-            
+
             // Disable already selected topics in other dropdowns
             options.forEach(option => {
                 if (option.value && option.value !== currentValue && selectedTopics.has(option.value)) {
