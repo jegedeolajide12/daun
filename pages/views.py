@@ -295,52 +295,54 @@ class CourseCreateWizard(SessionWizardView):
                 return
 
         elif step == 'contents':
+            # Delete any existing video contents for these topics
+            course_id = self.storage.extra_data.get('course_id')
+            if course_id:
+                video_content_type = ContentType.objects.get(model='video')
+                Content.objects.filter(topic__course_id=course_id, content_type=video_content_type).delete()
+
+            # Process video contents
             data = self.request.POST
             files = self.request.FILES
             i = 0
-            has_any = False
+            processed_topics = set()
+            
             while True:
                 topic_id = data.get(f'topic_{i}')
-                content_type_id = data.get(f'content_type_{i}')
-                order = data.get(f'order_{i}')
-                if not topic_id or not content_type_id:
+                if not topic_id:
                     break
-
-                # Check if a video already exists for this topic
-                topic = Topic.objects.get(id=topic_id)
-                video_content_type = ContentType.objects.get(model='video')
-                if Content.objects.filter(topic=topic, content_type=video_content_type).exists():
-                    messages.error(self.request, f"Only one video is allowed per topic: {topic.name}")
-                    return  # Stop processing and show error
-
-                # Build a form for each content
+                    
+                # Check for duplicate topics
+                if topic_id in processed_topics:
+                    messages.error(self.request, f"Each topic can only have one video. Topic {topic_id} was specified multiple times.")
+                    return self.render_revalidation_failure('contents', CourseTopicContentsForm(), "Duplicate topic")
+                    
+                processed_topics.add(topic_id)
+                
+                # Build form data for video content
                 content_form_data = {
                     'topic': topic_id,
-                    'content_type': content_type_id,
-                    'order': order,
-                    'text_content': data.get(f'text_content_{i}'),
-                    'file_content': files.get(f'file_content_{i}'),
-                    'image_content': files.get(f'image_content_{i}'),
                     'video_file': files.get(f'video_file_{i}'),
                     'video_url': data.get(f'video_url_{i}'),
                 }
+                
                 form = CourseTopicContentsForm(content_form_data, files)
                 if form.is_valid():
                     form.save(owner=self.request.user)
-                has_any = True
+                else:
+                    # Handle form errors
+                    error_msg = f"Error in video for topic {topic_id}: "
+                    for field, errors in form.errors.items():
+                        error_msg += f"{field}: {', '.join(errors)} "
+                    messages.error(self.request, error_msg)
+                    return self.render_revalidation_failure('contents', form, "Invalid content")
+                    
                 i += 1
-            # fallback for single content
-            if not has_any and 'topic' in data:
-                topic_id = data.get('topic')
-                topic = Topic.objects.get(id=topic_id)
-                video_content_type = ContentType.objects.get(model='video')
-                if Content.objects.filter(topic=topic, content_type=video_content_type).exists():
-                    messages.error(self.request, f"Only one video is allowed per topic: {topic.name}")
-                    return
-                form = CourseTopicContentsForm(data, files)
-                if form.is_valid():
-                    form.save(owner=self.request.user)
-
+                
+            # Check if any topics were missed
+            if i == 0:
+                messages.error(self.request, "At least one video content is required")
+                return self.render_revalidation_failure('contents', CourseTopicContentsForm(), "No content provided")
                     
         elif step == 'assignments':
             data = self.request.POST

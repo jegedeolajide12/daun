@@ -121,7 +121,7 @@ ModuleFormSet = modelformset_factory(Topic, form=CourseTopicsForm, extra=1)
 class CourseTopicContentsForm(forms.ModelForm):
     class Meta:
         model = Content
-        fields = ['topic', 'order']
+        fields = ['topic']
         
     video_file = forms.FileField(
         widget=forms.ClearableFileInput(attrs={
@@ -168,6 +168,7 @@ class CourseTopicContentsForm(forms.ModelForm):
 
         # Save the Content instance
         content = super().save(commit=False)
+        content.order = 1
         content.content_type = ContentType.objects.get(model='video')
         content.object_id = item.id
         if commit:

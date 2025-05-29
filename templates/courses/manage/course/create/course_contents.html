@@ -31,9 +31,9 @@
                                         <input type="hidden" name="content_type_0" value="video">
                                         
                                         <!-- Topic Selection -->
-                                        <div class="col-md-6">
+                                        <div class="col-md-12">
                                             <label class="form-label fw-bold">Topic</label>
-                                            <select name="topic_0" class="form-control">
+                                            <select name="topic_0" class="form-control topic-select">
                                                 {% for topic in topics %}
                                                 <option value="{{ topic.id }}">{{ topic.name }}</option>
                                                 {% endfor %}
@@ -58,7 +58,7 @@
                             <!-- Add Video Content button -->
                             <div class="mb-4">
                                 <button type="button" id="add-content" class="btn btn-outline-primary">
-                                    <i class="bi bi-plus-circle me-2"></i>Add A Video to another Topic
+                                    <i class="bi bi-plus-circle me-2"></i>Add Video to Another Topic
                                 </button>
                             </div>
 
@@ -87,8 +87,56 @@ document.addEventListener('DOMContentLoaded', function() {
     let contentIndex = document.querySelectorAll('.content-section').length;
     let sectionCount = contentIndex;
 
+    // Store all available topics
+    const allTopics = [
+        {% for topic in topics %}
+        {id: "{{ topic.id }}", name: "{{ topic.name|escapejs }}"},
+        {% endfor %}
+    ];
+
+    // Get currently selected topics
+    function getSelectedTopics() {
+        const selectedTopics = new Set();
+        document.querySelectorAll('.topic-select').forEach(select => {
+            if (select.value) {
+                selectedTopics.add(select.value);
+            }
+        });
+        return selectedTopics;
+    }
+
+    // Update topic dropdowns to exclude already selected topics
+    function updateTopicDropdowns() {
+        const selectedTopics = getSelectedTopics();
+        
+        document.querySelectorAll('.topic-select').forEach(select => {
+            const currentValue = select.value;
+            const options = Array.from(select.options);
+            
+            // Enable all options first
+            options.forEach(option => {
+                option.disabled = false;
+            });
+            
+            // Disable already selected topics in other dropdowns
+            options.forEach(option => {
+                if (option.value && option.value !== currentValue && selectedTopics.has(option.value)) {
+                    option.disabled = true;
+                }
+            });
+        });
+    }
+
     // Add new video content section
     document.getElementById('add-content').addEventListener('click', function() {
+        const selectedTopics = getSelectedTopics();
+        const availableTopics = allTopics.filter(topic => !selectedTopics.has(topic.id));
+        
+        if (availableTopics.length === 0) {
+            alert("All topics already have videos assigned");
+            return;
+        }
+
         const newContent = document.createElement('div');
         newContent.className = 'content-section mb-4 border-bottom pb-4';
         newContent.innerHTML = `
@@ -100,17 +148,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
                 <!-- Content Type as hidden field with video value -->
                 <input type="hidden" name="content_type_${contentIndex}" value="video">
-                <div class="col-md-6">
+                <div class="col-md-12">
                     <label class="form-label fw-bold">Topic</label>
-                    <select name="topic_${contentIndex}" class="form-control">
-                        {% for topic in topics %}
-                        <option value="{{ topic.id }}">{{ topic.name }}</option>
-                        {% endfor %}
+                    <select name="topic_${contentIndex}" class="form-control topic-select">
+                        ${availableTopics.map(topic => 
+                            `<option value="${topic.id}">${topic.name}</option>`
+                        ).join('')}
                     </select>
-                </div>
-                <div class="col-12">
-                    <label class="form-label fw-bold">Order</label>
-                    <input type="number" name="order_${contentIndex}" class="form-control" min="1" value="${sectionCount + 1}">
                 </div>
                 <div class="col-12">
                     <div class="mb-3">
@@ -128,6 +172,13 @@ document.addEventListener('DOMContentLoaded', function() {
         container.appendChild(newContent);
         sectionCount++;
         contentIndex++;
+        
+        // Add event listener to the new topic select
+        const newSelect = newContent.querySelector('.topic-select');
+        newSelect.addEventListener('change', updateTopicDropdowns);
+        
+        // Update all dropdowns
+        updateTopicDropdowns();
     });
 
     // Handle remove button clicks
@@ -141,22 +192,18 @@ document.addEventListener('DOMContentLoaded', function() {
             if (document.querySelectorAll('.content-section').length > 1) {
                 section.remove();
                 sectionCount--;
-                renumberSections();
+                updateTopicDropdowns();
             } else {
                 alert("At least one video content is required");
             }
         }
     });
 
-    // Renumber sections after deletion
-    function renumberSections() {
-        document.querySelectorAll('.content-section').forEach((section, index) => {
-            const orderInput = section.querySelector('input[type="number"]');
-            if (orderInput) {
-                orderInput.value = index + 1;
-            }
-        });
-    }
+    // Initialize topic dropdowns on page load
+    document.querySelectorAll('.topic-select').forEach(select => {
+        select.addEventListener('change', updateTopicDropdowns);
+    });
+    updateTopicDropdowns();
 });
 </script>
 {% endblock %}
