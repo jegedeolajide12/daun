@@ -117,50 +117,12 @@ class CourseTopicsForm(forms.ModelForm):
 
 ModuleFormSet = modelformset_factory(Topic, form=CourseTopicsForm, extra=1)
 
-CONTENT_MODELS = {
-    'text': Text,
-    'file': File,
-    'image': Image,
-    'video': Video,
-}
+
 class CourseTopicContentsForm(forms.ModelForm):
     class Meta:
         model = Content
-        fields = ['topic', 'content_type', 'order']
+        fields = ['topic', 'order']
         
-    content_type = forms.ModelChoiceField(
-        queryset=ContentType.objects.filter(model__in=CONTENT_MODELS.keys()),
-        widget=forms.Select(attrs={
-            'class': 'form-control',
-            'placeholder': 'Select Content Type',
-        }),
-        label='Content Type',
-    ),
-    text_content = forms.CharField(
-        widget=forms.Textarea(attrs={
-            'class': 'form-control',
-            'rows': 3,
-            'placeholder': 'Enter Text Content',
-        }),
-        label='Text Content',
-        required=False,
-    ),
-    file_content = forms.FileField(
-        widget=forms.ClearableFileInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Upload File Content',
-        }),
-        label='File Content',
-        required=False,
-    ),
-    image_content = forms.FileField(
-        widget=forms.ClearableFileInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Upload Image Content',
-        }),
-        label='Image Content',
-        required=False,
-    ),
     video_file = forms.FileField(
         widget=forms.ClearableFileInput(attrs={
             'class': 'form-control',
@@ -169,6 +131,15 @@ class CourseTopicContentsForm(forms.ModelForm):
         label='Video File',
         required=False,
     )
+    video_url = forms.URLField(
+        widget=forms.URLInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'https://example.com/video.mp4',
+        }),
+        label='Video URL',
+        required=False,
+    )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['topic'].queryset = Topic.objects.all()
@@ -176,65 +147,28 @@ class CourseTopicContentsForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        ctype = cleaned_data.get('content_type')
-        if not ctype:
-            raise forms.ValidationError("Please select a content type.")
-
-        model = ctype.model
-        # Validate and create the related item
-        if model == 'text':
-            content = cleaned_data.get('text_content')
-            if not content:
-                self.add_error('text_content', "Text content is required.")
-        elif model == 'file':
-            file = cleaned_data.get('file_content')
-            if not file:
-                self.add_error('file_content', "File is required.")
-        elif model == 'image':
-            image = cleaned_data.get('image_content')
-            if not image:
-                self.add_error('image_content', "Image is required.")
-        elif model == 'video':
-            file = cleaned_data.get('video_file')
-            if not file:
-                self.add_error('video_file', "Provide a video URL or upload a file.")
+        # Video is the only allowed content type
+        cleaned_data['content_type'] = ContentType.objects.get(model='video')
+        
+        # Validate that either file or URL is provided
+        file = cleaned_data.get('video_file')
+        url = cleaned_data.get('video_url')
+        if not file and not url:
+            raise forms.ValidationError("Either video file or video URL is required.")
         return cleaned_data
 
     def save(self, commit=True, owner=None):
-        # Create the related item instance
-        ctype = self.cleaned_data['content_type']
-        model = ctype.model
-        item = None
-
-        if model == 'text':
-            item = Text.objects.create(
-                owner=owner,
-                title="Text Content",
-                content=self.cleaned_data['text_content']
-            )
-        elif model == 'file':
-            item = File.objects.create(
-                owner=owner,
-                title="File Content",
-                file=self.cleaned_data['file_content']
-            )
-        elif model == 'image':
-            item = Image.objects.create(
-                owner=owner,
-                title="Image Content",
-                file=self.cleaned_data['image_content']
-            )
-        elif model == 'video':
-            item = Video.objects.create(
-                owner=owner,
-                title="Video Content",
-                url=self.cleaned_data['video_url'],
-                file=self.cleaned_data['video_file']
-            )
+        # Create the video item
+        item = Video.objects.create(
+            owner=owner,
+            title="Video Content",
+            url=self.cleaned_data.get('video_url'),
+            file=self.cleaned_data.get('video_file')
+        )
 
         # Save the Content instance
         content = super().save(commit=False)
-        content.content_type = ctype
+        content.content_type = ContentType.objects.get(model='video')
         content.object_id = item.id
         if commit:
             content.save()

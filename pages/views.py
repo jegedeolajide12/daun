@@ -207,6 +207,13 @@ class CourseCreateWizard(SessionWizardView):
         if self.steps.current == 'topics':
             context['formset'] = form
             context['course_id'] = self.storage.extra_data.get('course_id') or self.request.session.get('wizard_course_id')
+        elif self.steps.current == 'contents':
+            context['content_types'] = ContentType.objects.filter(
+                model__in=['text', 'video', 'image', 'file']
+            )
+            context['topics'] = Topic.objects.filter(
+                course_id=self.storage.extra_data.get('course_id') or self.request.session.get('wizard_course_id')
+            )
         return context
 
     def get_form_initial(self, step):
@@ -288,7 +295,6 @@ class CourseCreateWizard(SessionWizardView):
                 return
 
         elif step == 'contents':
-            # Support multiple contents if needed
             data = self.request.POST
             files = self.request.FILES
             i = 0
@@ -299,6 +305,14 @@ class CourseCreateWizard(SessionWizardView):
                 order = data.get(f'order_{i}')
                 if not topic_id or not content_type_id:
                     break
+
+                # Check if a video already exists for this topic
+                topic = Topic.objects.get(id=topic_id)
+                video_content_type = ContentType.objects.get(model='video')
+                if Content.objects.filter(topic=topic, content_type=video_content_type).exists():
+                    messages.error(self.request, f"Only one video is allowed per topic: {topic.name}")
+                    return  # Stop processing and show error
+
                 # Build a form for each content
                 content_form_data = {
                     'topic': topic_id,
@@ -317,10 +331,17 @@ class CourseCreateWizard(SessionWizardView):
                 i += 1
             # fallback for single content
             if not has_any and 'topic' in data:
+                topic_id = data.get('topic')
+                topic = Topic.objects.get(id=topic_id)
+                video_content_type = ContentType.objects.get(model='video')
+                if Content.objects.filter(topic=topic, content_type=video_content_type).exists():
+                    messages.error(self.request, f"Only one video is allowed per topic: {topic.name}")
+                    return
                 form = CourseTopicContentsForm(data, files)
                 if form.is_valid():
                     form.save(owner=self.request.user)
 
+                    
         elif step == 'assignments':
             data = self.request.POST
             files = self.request.FILES
