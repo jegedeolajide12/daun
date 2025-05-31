@@ -142,41 +142,26 @@ class Topic(models.Model):
         return f'{self.order}. {self.name}'
 
 
-class Content(models.Model):
-    topic = models.ForeignKey(Topic, related_name='contents', on_delete=models.CASCADE)
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, limit_choices_to={'model__in':('text','image','video','file')})
-    object_id = models.PositiveIntegerField()
-    item = GenericForeignKey('content_type', 'object_id')
-    order = OrderField(blank=True, for_fields=['topic'])
 
-    class Meta:
-        ordering = ['order']
-
-
-class ItemBase(models.Model):
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='%(class)s_related', on_delete=models.CASCADE)
-    title = models.CharField(max_length=250)
+class TopicVideo(models.Model):
+    topic = models.ForeignKey(Topic, on_delete=models.CASCADE, related_name='videos')
+    title = models.CharField(max_length=200)
+    url = models.URLField(null=True, blank=True)
+    file = models.FileField(upload_to='videos', null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
     class Meta:
-        abstract = True
-    
+        ordering = ['created']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['topic'],
+                name='unique_video_per_topic'
+            )
+        ]
+
     def __str__(self):
-        return self.title
-
-class Text(ItemBase):
-    content = models.TextField()
-
-class File(ItemBase):
-    file = models.FileField(upload_to='files')
-
-class Image(ItemBase):
-    file = models.FileField(upload_to='images')
-
-class Video(ItemBase):
-    url = models.URLField(null=True, blank=True)
-    file = models.FileField(upload_to='videos', null=True, blank=True)
+        return f'Video for {self.topic.name} - {self.title or "No Title"}'
 
     def has_video(self):
         return bool(self.file or self.url)

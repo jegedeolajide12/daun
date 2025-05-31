@@ -1,6 +1,5 @@
 from django.contrib import admin
-from .models import (Faculty, Course, Topic, Video, 
-                     Image, Text, File, Task, 
+from .models import (Faculty, Course, Topic, TopicVideo, Task, 
                      UserTask, Enrollment, Notification, 
                      Assignment, Submission, SubmissionFile, Grade, 
                      Rubric, Assessment, MCQOption, AssessmentQuestion,
@@ -91,10 +90,7 @@ class UserTaskAdmin(admin.ModelAdmin):
     list_editable = ['is_completed']
     search_fields = ['user__username', 'task__title']
 
-admin.site.register(Video)
-admin.site.register(Image)
-admin.site.register(File)
-admin.site.register(Text)
+admin.site.register(TopicVideo)
 admin.site.register(Submission)
 admin.site.register(SubmissionFile)
 admin.site.register(Grade)

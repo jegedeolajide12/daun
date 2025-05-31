@@ -37,7 +37,7 @@ from students.forms import CourseEnrollForm
 from formtools.wizard.views import SessionWizardView
 
 from .models import (
-                Course, Content, Topic, Video, 
+                Course, Topic, TopicVideo, 
                 Faculty, Notification, Enrollment, Assignment,
                 Submission, UserTask, Grade, RubricScore, Rubric,
                 MCQOption, Assessment, SubmissionFile, AssessmentQuestion,
@@ -233,6 +233,7 @@ class CourseCreateWizard(SessionWizardView):
     def render(self, form=None, **kwargs):
         response = super().render(form, **kwargs)
         self.request.session.modified = True  # Force session save
+        self.request.session.save()
         return response
 
     def process_step(self, form):
@@ -294,27 +295,34 @@ class CourseCreateWizard(SessionWizardView):
                 messages.error(self.request, "Invalid topic data: " + str(formset.errors))
                 return
 
+        # views.py
         elif step == 'contents':
-            # Delete any existing video contents for these topics
+            print("DEBUG: Entered contents step")
             course_id = self.storage.extra_data.get('course_id')
-            if course_id:
-                video_content_type = ContentType.objects.get(model='video')
-                Content.objects.filter(topic__course_id=course_id, content_type=video_content_type).delete()
-
+            if not course_id:
+                messages.error(self.request, "Course not found. Please complete the previous steps first.")
+                return self.render_goto_step('basics')
+            
+            # Get or create video content type
+            video_content_type, _ = ContentType.objects.get_or_create(model='video')
+            
             # Process video contents
             data = self.request.POST
             files = self.request.FILES
             i = 0
             processed_topics = set()
+            has_valid_content = False
             
             while True:
                 topic_id = data.get(f'topic_{i}')
+                print(f"DEBUG: topic_{i} = {topic_id}")
+                
                 if not topic_id:
                     break
                     
                 # Check for duplicate topics
                 if topic_id in processed_topics:
-                    messages.error(self.request, f"Each topic can only have one video. Topic {topic_id} was specified multiple times.")
+                    messages.error(self.request, f"Each topic can only have one video. Topic was specified multiple times.")
                     return self.render_revalidation_failure('contents', CourseTopicContentsForm(), "Duplicate topic")
                     
                 processed_topics.add(topic_id)
@@ -326,11 +334,22 @@ class CourseCreateWizard(SessionWizardView):
                     'video_url': data.get(f'video_url_{i}'),
                 }
                 
+                print(f"DEBUG: Processing topic {topic_id}")
                 form = CourseTopicContentsForm(content_form_data, files)
+                
                 if form.is_valid():
-                    form.save(owner=self.request.user)
+                    try:
+                        print("DEBUG: Form is valid, saving...")
+                        # Save with owner
+                        form.save(owner=self.request.user)
+                        print("DEBUG: Saved content for topic", topic_id)
+                        has_valid_content = True
+                    except Exception as e:
+                        print("DEBUG: Exception during save:", e)
+                        messages.error(self.request, f"Error saving video: {str(e)}")
+                        return self.render_revalidation_failure('contents', form, "Save error")
                 else:
-                    # Handle form errors
+                    print("DEBUG: Form errors:", form.errors)
                     error_msg = f"Error in video for topic {topic_id}: "
                     for field, errors in form.errors.items():
                         error_msg += f"{field}: {', '.join(errors)} "
@@ -338,12 +357,17 @@ class CourseCreateWizard(SessionWizardView):
                     return self.render_revalidation_failure('contents', form, "Invalid content")
                     
                 i += 1
-                
-            # Check if any topics were missed
-            if i == 0:
-                messages.error(self.request, "At least one video content is required")
-                return self.render_revalidation_failure('contents', CourseTopicContentsForm(), "No content provided")
-                    
+            
+            print("DEBUG: Finished processing contents step")    
+            # Check if any valid content was processed
+            if not has_valid_content:
+                print("DEBUG: No valid content submitted")
+                messages.error(self.request, "At least one valid video content is required")
+                return self.render_revalidation_failure('contents', CourseTopicContentsForm(), "No valid content")
+            
+            # If we reached here, everything is successful
+            return None
+         
         elif step == 'assignments':
             data = self.request.POST
             files = self.request.FILES

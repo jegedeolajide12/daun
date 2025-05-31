@@ -7,8 +7,7 @@ from pkg_resources import require
 from django.forms import modelformset_factory
 
 from .models import (Course, Topic, Faculty, Assignment, 
-                     Submission, Assessment, MCQOption, AssessmentQuestion, 
-                     Content, Text, File, Image, Video,
+                     Submission, Assessment, MCQOption, AssessmentQuestion, TopicVideo,
                      CourseTrailer, CourseRequirements, CourseObjectives)
 
 
@@ -120,7 +119,7 @@ ModuleFormSet = modelformset_factory(Topic, form=CourseTopicsForm, extra=1)
 
 class CourseTopicContentsForm(forms.ModelForm):
     class Meta:
-        model = Content
+        model = TopicVideo
         fields = ['topic']
         
     video_file = forms.FileField(
@@ -147,8 +146,6 @@ class CourseTopicContentsForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        # Video is the only allowed content type
-        cleaned_data['content_type'] = ContentType.objects.get(model='video')
         
         # Validate that either file or URL is provided
         file = cleaned_data.get('video_file')
@@ -166,13 +163,14 @@ class CourseTopicContentsForm(forms.ModelForm):
             file=self.cleaned_data.get('video_file')
         )
 
-        # Save the Content instance
-        content = super().save(commit=False)
-        content.order = 1
-        content.content_type = ContentType.objects.get(model='video')
-        content.object_id = item.id
-        if commit:
-            content.save()
+        # Now create the Content instance
+        content = Content.objects.create(
+            topic=self.cleaned_data['topic'],
+            content_type=ContentType.objects.get(model='video'),
+            object_id=item.id,
+            order=1  # Default order since only one video per topic
+        )
+        
         return content
 
 class CourseTopicAssignmentsForm(forms.ModelForm):
