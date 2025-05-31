@@ -161,7 +161,7 @@ ModuleFormSet = modelformset_factory(
 FORMS = [
     ('basics', CourseBasicsForm),
     ('topics', ModuleFormSet),
-    ('contents', CourseTopicContentForm),
+    ('contents', ContentFormSet),
     ('assignments', CourseTopicAssignmentsForm),
     ('assessments', CourseTopicAssessmentsForm),
     ('marketing', CourseMarketingForm)
@@ -210,19 +210,31 @@ class CourseCreateWizard(SessionWizardView):
             context['course_id'] = self.storage.extra_data.get('course_id') or self.request.session.get('wizard_course_id')
         elif self.steps.current == 'contents':
                 # Add debug information
-            print("DEBUG: get_context_data for contents step")
-            print(f"Session course_id: {self.request.session.get('course_id')}")
-            print(f"Storage course_id: {self.storage.extra_data.get('course_id')}")
-            print(f"Topics: {Topic.objects.filter(course_id=self.storage.extra_data.get('course_id')).count()} topics found")
+            course_id = self.storage.extra_data.get('course_id') or self.request.session.get('wizard_course_id')
+            if not course_id:
+                messages.error(self.request, "Course not found. Please complete the previous steps first.")
+                return self.render_goto_step('basics')
+            
+            # Initialize formset properly
+            if self.request.method == 'POST':
+                formset = ContentFormSet(
+                    self.request.POST,
+                    self.request.FILES,
+                    form_kwargs={'owner': self.request.user}
+                )
+            else:
+                formset = ContentFormSet(form_kwargs={'owner': self.request.user})
+            
+            context['formset'] = formset
             context['content_types'] = ContentType.objects.filter(
                 model__in=['text', 'video', 'image', 'file']
             )
-            context['topics'] = Topic.objects.filter(
-                course_id=self.storage.extra_data.get('course_id') or self.request.session.get('wizard_course_id')
-            )
+            context['topics'] = Topic.objects.filter(course_id=course_id)
+        
+        return context
+
         
     
-        return context
 
     def get_form_initial(self, step):
         """Persist course ID between steps"""
@@ -307,6 +319,7 @@ class CourseCreateWizard(SessionWizardView):
 
         # views.py
 
+        # Update process_step for contents
         elif step == 'contents':
             print("DEBUG: Entered contents step")
             course_id = self.storage.extra_data.get('course_id')
@@ -314,17 +327,14 @@ class CourseCreateWizard(SessionWizardView):
                 messages.error(self.request, "Course not found. Please complete the previous steps first.")
                 return self.render_goto_step('basics')
             
-            # Create formset instance
-            formset = ContentFormSet(
-                self.request.POST,
-                self.request.FILES,
-                form_kwargs={'owner': self.request.user}  # Pass user to forms
-            )
+            # Get the formset from context data
+            formset = self.get_context_data(form=None)['formset']
+            has_valid_content = False
             
             if formset.is_valid():
                 print("DEBUG: Formset is valid")
                 for form in formset:
-                    if form.has_changed():  # Only save changed forms
+                    if form.has_changed() and form.is_valid():  # Double-check form validity
                         try:
                             form.save()
                             print(f"DEBUG: Saved content: {form.cleaned_data}")
@@ -332,6 +342,7 @@ class CourseCreateWizard(SessionWizardView):
                         except Exception as e:
                             print(f"DEBUG: Save error: {str(e)}")
                             messages.error(self.request, f"Error saving content: {str(e)}")
+                            return self.render_revalidation_failure('contents', formset)
                 
                 if not has_valid_content:
                     messages.error(self.request, "At least one valid content item is required")

@@ -182,8 +182,8 @@ class CourseTopicContentForm(forms.ModelForm):
     )
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
         self.owner = kwargs.pop('owner', None)
+        super().__init__(*args, **kwargs)
         self.fields['topic'].queryset = Topic.objects.all()
         self.fields['topic'].widget.attrs.update({'class': 'form-control'})
         self.fields['order'].widget.attrs.update({'class': 'form-control', 'min': '1'})
