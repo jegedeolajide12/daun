@@ -37,7 +37,7 @@ from students.forms import CourseEnrollForm
 from formtools.wizard.views import SessionWizardView
 
 from .models import (
-                Course, Topic, TopicVideo, 
+                Course, Content, Topic, Video, 
                 Faculty, Notification, Enrollment, Assignment,
                 Submission, UserTask, Grade, RubricScore, Rubric,
                 MCQOption, Assessment, SubmissionFile, AssessmentQuestion,
@@ -366,7 +366,7 @@ class CourseCreateWizard(SessionWizardView):
                 return self.render_revalidation_failure('contents', CourseTopicContentsForm(), "No valid content")
             
             # If we reached here, everything is successful
-            return None
+            return None 
          
         elif step == 'assignments':
             data = self.request.POST

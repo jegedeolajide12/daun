@@ -7,7 +7,8 @@ from pkg_resources import require
 from django.forms import modelformset_factory
 
 from .models import (Course, Topic, Faculty, Assignment, 
-                     Submission, Assessment, MCQOption, AssessmentQuestion, TopicVideo,
+                     Submission, Assessment, MCQOption, AssessmentQuestion, 
+                     Content, Text, File, Image, Video,
                      CourseTrailer, CourseRequirements, CourseObjectives)
 
 
@@ -119,7 +120,7 @@ ModuleFormSet = modelformset_factory(Topic, form=CourseTopicsForm, extra=1)
 
 class CourseTopicContentsForm(forms.ModelForm):
     class Meta:
-        model = TopicVideo
+        model = Content
         fields = ['topic']
         
     video_file = forms.FileField(
