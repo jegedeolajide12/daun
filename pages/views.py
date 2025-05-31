@@ -45,8 +45,9 @@ from .models import (
                 )
 from .forms import (FacultyForm, CourseTopicAssignmentsForm, SubmissionForm, 
                     CourseTopicAssessmentsForm, MCQOptionForm, CourseBasicsForm, CourseTopicsForm,
-                    CourseTopicContentsForm, AssessmentQuestionForm, CourseTrailerForm, CourseRequirementsForm, 
-                    CourseMarketingForm, CourseObjectivesForm, CourseForm, ModuleFormSet)
+                    CourseTopicContentForm, AssessmentQuestionForm, CourseTrailerForm, CourseRequirementsForm, 
+                    CourseMarketingForm, CourseObjectivesForm, CourseForm, ModuleFormSet, CourseTopicContentForm, 
+                    ContentFormSet )
 
 def create_faculty(request):
     if request.method == "POST":
@@ -160,7 +161,7 @@ ModuleFormSet = modelformset_factory(
 FORMS = [
     ('basics', CourseBasicsForm),
     ('topics', ModuleFormSet),
-    ('contents', CourseTopicContentsForm),
+    ('contents', CourseTopicContentForm),
     ('assignments', CourseTopicAssignmentsForm),
     ('assessments', CourseTopicAssessmentsForm),
     ('marketing', CourseMarketingForm)
@@ -208,12 +209,19 @@ class CourseCreateWizard(SessionWizardView):
             context['formset'] = form
             context['course_id'] = self.storage.extra_data.get('course_id') or self.request.session.get('wizard_course_id')
         elif self.steps.current == 'contents':
+                # Add debug information
+            print("DEBUG: get_context_data for contents step")
+            print(f"Session course_id: {self.request.session.get('course_id')}")
+            print(f"Storage course_id: {self.storage.extra_data.get('course_id')}")
+            print(f"Topics: {Topic.objects.filter(course_id=self.storage.extra_data.get('course_id')).count()} topics found")
             context['content_types'] = ContentType.objects.filter(
                 model__in=['text', 'video', 'image', 'file']
             )
             context['topics'] = Topic.objects.filter(
                 course_id=self.storage.extra_data.get('course_id') or self.request.session.get('wizard_course_id')
             )
+        
+    
         return context
 
     def get_form_initial(self, step):
@@ -262,6 +270,7 @@ class CourseCreateWizard(SessionWizardView):
                 course.owner = self.request.user
                 course.slug = slugify(data['name'])
                 course.save()
+                messages.success(self.request, "You have successfully created the basic part of the course")
                 self.storage.extra_data['course_id'] = course.id
                 self.request.session['course_id'] = course.id  # Store course ID in session
                 self.request.session['wizard_course_id'] = course.id  # Store in session for later use
@@ -291,11 +300,13 @@ class CourseCreateWizard(SessionWizardView):
                     instance.course = course  # Always set!
                     instance.save()
                 formset.save_m2m()
+                messages.success(self.request, "You have successfully created the Topics for the course")
             else:
                 messages.error(self.request, "Invalid topic data: " + str(formset.errors))
                 return
 
         # views.py
+
         elif step == 'contents':
             print("DEBUG: Entered contents step")
             course_id = self.storage.extra_data.get('course_id')
@@ -303,70 +314,35 @@ class CourseCreateWizard(SessionWizardView):
                 messages.error(self.request, "Course not found. Please complete the previous steps first.")
                 return self.render_goto_step('basics')
             
-            # Get or create video content type
-            video_content_type, _ = ContentType.objects.get_or_create(model='video')
+            # Create formset instance
+            formset = ContentFormSet(
+                self.request.POST,
+                self.request.FILES,
+                form_kwargs={'owner': self.request.user}  # Pass user to forms
+            )
             
-            # Process video contents
-            data = self.request.POST
-            files = self.request.FILES
-            i = 0
-            processed_topics = set()
-            has_valid_content = False
-            
-            while True:
-                topic_id = data.get(f'topic_{i}')
-                print(f"DEBUG: topic_{i} = {topic_id}")
+            if formset.is_valid():
+                print("DEBUG: Formset is valid")
+                for form in formset:
+                    if form.has_changed():  # Only save changed forms
+                        try:
+                            form.save()
+                            print(f"DEBUG: Saved content: {form.cleaned_data}")
+                            has_valid_content = True
+                        except Exception as e:
+                            print(f"DEBUG: Save error: {str(e)}")
+                            messages.error(self.request, f"Error saving content: {str(e)}")
                 
-                if not topic_id:
-                    break
-                    
-                # Check for duplicate topics
-                if topic_id in processed_topics:
-                    messages.error(self.request, f"Each topic can only have one video. Topic was specified multiple times.")
-                    return self.render_revalidation_failure('contents', CourseTopicContentsForm(), "Duplicate topic")
-                    
-                processed_topics.add(topic_id)
+                if not has_valid_content:
+                    messages.error(self.request, "At least one valid content item is required")
+                    return self.render_revalidation_failure('contents', formset)
                 
-                # Build form data for video content
-                content_form_data = {
-                    'topic': topic_id,
-                    'video_file': files.get(f'video_file_{i}'),
-                    'video_url': data.get(f'video_url_{i}'),
-                }
-                
-                print(f"DEBUG: Processing topic {topic_id}")
-                form = CourseTopicContentsForm(content_form_data, files)
-                
-                if form.is_valid():
-                    try:
-                        print("DEBUG: Form is valid, saving...")
-                        # Save with owner
-                        form.save(owner=self.request.user)
-                        print("DEBUG: Saved content for topic", topic_id)
-                        has_valid_content = True
-                    except Exception as e:
-                        print("DEBUG: Exception during save:", e)
-                        messages.error(self.request, f"Error saving video: {str(e)}")
-                        return self.render_revalidation_failure('contents', form, "Save error")
-                else:
-                    print("DEBUG: Form errors:", form.errors)
-                    error_msg = f"Error in video for topic {topic_id}: "
-                    for field, errors in form.errors.items():
-                        error_msg += f"{field}: {', '.join(errors)} "
-                    messages.error(self.request, error_msg)
-                    return self.render_revalidation_failure('contents', form, "Invalid content")
-                    
-                i += 1
-            
-            print("DEBUG: Finished processing contents step")    
-            # Check if any valid content was processed
-            if not has_valid_content:
-                print("DEBUG: No valid content submitted")
-                messages.error(self.request, "At least one valid video content is required")
-                return self.render_revalidation_failure('contents', CourseTopicContentsForm(), "No valid content")
-            
-            # If we reached here, everything is successful
-            return None 
+                print("DEBUG: Content step completed successfully")
+                return None
+            else:
+                print("DEBUG: Formset errors:", formset.errors)
+                messages.error(self.request, "Please correct the errors below")
+                return self.render_revalidation_failure('contents', formset)
          
         elif step == 'assignments':
             data = self.request.POST

@@ -8,64 +8,106 @@
                 <div class="card shadow-lg">
                     <div class="card-header bg-primary text-white">
                         <h3 class="card-title mb-0">Create New Course</h3>
-                        <p class="mb-0">Step 3 - Course Video Content</p>
+                        <p class="mb-0">Step 3 - Course Content</p>
                     </div>
 
-                    <div class="card-body">
+                    <div class="card-body"
                         <form method="post" enctype="multipart/form-data" novalidate>
                             {% csrf_token %}
                             {{ wizard.management_form }}
-                            
-                            <!-- In your template -->
+                            {{ formset.management_form }}
                             <div id="contents-container">
-                                <!-- Initial Video Content Section -->
-                                <div class="content-section mb-4 border-bottom pb-4">
-                                    <div class="row g-3">
-                                        <!-- Remove button for initial section -->
-                                        <div class="col-12 text-end">
-                                            <button type="button" class="btn btn-sm btn-danger remove-content">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
+                                {% for form in formset %}
+                                <!-- Initial Content Section -->
+                                <div class="content-section" data-index="0">
+                                    <div class="order-badge">1</div>
+                                    <div class="drag-handle">
+                                        <i class="bi bi-grip-horizontal fs-4"></i>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-danger remove-content">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                    {% if formset.non_form_errors %}
+                                        <div class="alert alert-danger">
+                                            {{ formset.non_form_errors }}
                                         </div>
-                                        
-                                        <!-- Content Type as hidden field with video value -->
-                                        <input type="hidden" name="content_type_0" value="video">
-                                        
-                                        <!-- Topic Selection -->
-                                        <div class="col-md-12">
+                                    {% endif %}
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
                                             <label class="form-label fw-bold">Topic</label>
                                             <select name="topic_0" class="form-control topic-select">
                                                 {% for topic in topics %}
-                                                <option value="{{ topic.id }}">{{ topic.name }}</option>
+                                                    <option value="{{ topic.id }}">{{ topic.name }}</option>
                                                 {% endfor %}
                                             </select>
                                         </div>
-
-                                        <!-- Video Fields (always visible) -->
+                                        
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Content Type</label>
+                                            <!-- FIX: Added data-model attribute to all options -->
+                                            <select name="content_type_0" class="form-control content-type-select">
+                                                {% for ct in content_types %}
+                                                    <option value="{{ ct.id }}" data-model="{{ ct.model }}">{{ ct.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        
                                         <div class="col-12">
+                                            <label class="form-label fw-bold">Order</label>
+                                            <input type="number" name="order_0" class="form-control order-input" min="1" value="1">
+                                        </div>
+                                        
+                                        <!-- Dynamic Fields Container -->
+                                        <div class="col-12 content-fields" data-content-type="text" style="display: none;">
+                                            <div class="mb-3">
+                                                <label class="form-label fw-bold">Text Content</label>
+                                                <textarea name="text_content_0" class="form-control" rows="4" placeholder="Enter your text content here..."></textarea>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-12 content-fields" data-content-type="file" style="display: none;">
+                                            <div class="mb-3">
+                                                <label class="form-label fw-bold">File Upload</label>
+                                                <input type="file" name="file_content_0" class="form-control">
+                                                <div class="form-text">Upload PDF, Word, or PowerPoint files</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-12 content-fields" data-content-type="image" style="display: none;">
+                                            <div class="mb-3">
+                                                <label class="form-label fw-bold">Image Upload</label>
+                                                <input type="file" name="image_content_0" class="form-control" accept="image/*">
+                                                <div class="form-text">JPG, PNG, or GIF files</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-12 content-fields" data-content-type="video" style="display: none;">
                                             <div class="mb-3">
                                                 <label class="form-label fw-bold">Video File</label>
                                                 <input type="file" name="video_file_0" class="form-control" accept="video/*">
+                                                <div class="form-text">MP4, MOV, or AVI files</div>
                                             </div>
                                             <div class="mb-3">
                                                 <label class="form-label fw-bold">Video URL</label>
                                                 <input type="url" name="video_url_0" class="form-control" placeholder="https://example.com/video.mp4">
+                                                <div class="form-text">YouTube, Vimeo, or direct video links</div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+                                {% endfor %}
                             </div>
 
-                            <!-- Add Video Content button -->
-                            <div class="mb-4">
+                            <!-- Add Content button -->
+                            <div class="mb-4 mt-3">
                                 <button type="button" id="add-content" class="btn btn-outline-primary">
-                                    <i class="bi bi-plus-circle me-2"></i>Add Video to Another Topic
+                                    <i class="bi bi-plus-circle me-2"></i>Add Another Content
                                 </button>
                             </div>
 
                             <!-- Form Navigation -->
-                            <div class="d-flex justify-content-between mt-5">
-                                <a href="" class="btn btn-outline-primary">
+                            <div class="d-flex justify-content-between mt-5 pt-3 border-top">
+                                <a href="#" class="btn btn-outline-primary">
                                     <i class="bi bi-chevron-left me-2"></i>Previous
                                 </a>
                                 <button type="submit" class="btn btn-primary">
@@ -83,128 +125,274 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const container = document.getElementById('contents-container');
+    const totalFormsInput = document.getElementById('id_form-TOTAL_FORMS');
+    let draggedItem = null;
+    let formCount = parseInt(totalFormsInput.value);
     
-    // Initialize content index based on existing sections
-    let contentIndex = document.querySelectorAll('.content-section').length;
-    let sectionCount = contentIndex;
-
-    // Store all available topics
-    const allTopics = [
-        {% for topic in topics %}
-        {id: "{{ topic.id }}", name: "{{ topic.name|escapejs }}"},
-        {% endfor %}
-    ];
-
-    // Get currently selected topics
-    function getSelectedTopics() {
-        const selectedTopics = new Set();
-        document.querySelectorAll('.topic-select').forEach(select => {
-            if (select.value) {
-                selectedTopics.add(select.value);
-            }
-        });
-        return selectedTopics;
-    }
-
-    // Update topic dropdowns to exclude already selected topics
-    function updateTopicDropdowns() {
-        const selectedTopics = getSelectedTopics();
-        document.querySelectorAll('.topic-select').forEach(select => {
-            if (!select.options) return; // Fix: skip if not a select element
-            const currentValue = select.value;
-            const options = Array.from(select.options);
-
-            // Enable all options first
-            options.forEach(option => {
-                option.disabled = false;
-            });
-
-            // Disable already selected topics in other dropdowns
-            options.forEach(option => {
-                if (option.value && option.value !== currentValue && selectedTopics.has(option.value)) {
-                    option.disabled = true;
-                }
-            });
+    // Initialize all sections
+    function initializeSections() {
+        container.querySelectorAll('.content-section').forEach(section => {
+            initContentTypeSelect(section);
+            setupDragHandlers(section);
         });
     }
-
-    // Add new video content section
+    
+    // Add new content section
     document.getElementById('add-content').addEventListener('click', function() {
-        const selectedTopics = getSelectedTopics();
-        const availableTopics = allTopics.filter(topic => !selectedTopics.has(topic.id));
+        const newIndex = formCount++;
+        totalFormsInput.value = formCount;
         
-        if (availableTopics.length === 0) {
-            alert("All topics already have videos assigned");
-            return;
-        }
-
         const newContent = document.createElement('div');
-        newContent.className = 'content-section mb-4 border-bottom pb-4';
+        newContent.className = 'content-section';
+        newContent.dataset.index = newIndex;
         newContent.innerHTML = `
+            <div class="order-badge">${newIndex + 1}</div>
+            <div class="drag-handle">
+                <i class="bi bi-grip-horizontal fs-4"></i>
+            </div>
+            <button type="button" class="btn btn-sm btn-danger remove-content">
+                <i class="bi bi-trash"></i>
+            </button>
             <div class="row g-3">
-                <div class="col-12 text-end">
-                    <button type="button" class="btn btn-sm btn-danger remove-content">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                </div>
-                <!-- Content Type as hidden field with video value -->
-                <input type="hidden" name="content_type_${contentIndex}" value="video">
-                <div class="col-md-12">
+                <div class="col-md-6">
                     <label class="form-label fw-bold">Topic</label>
-                    <select name="topic_${contentIndex}" class="form-control topic-select">
-                        ${availableTopics.map(topic => 
-                            `<option value="${topic.id}">${topic.name}</option>`
-                        ).join('')}
+                    <select name="form-${newIndex}-topic" class="form-control topic-select">
+                        {% for topic in topics %}    
+                            <option value="{{ topic.id }}">{{ topic.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Content Type</label>
+                    <select name="form-${newIndex}-content_type" class="form-control content-type-select">
+                        {% for ct in content_types %}
+                            <option value="{{ ct.id }}" data-model="{{ ct.model }}">{{ ct.name }}</option>
+                        {% endfor %}
                     </select>
                 </div>
                 <div class="col-12">
+                    <label class="form-label fw-bold">Order</label>
+                    <input type="number" name="form-${newIndex}-order" class="form-control order-input" min="1" value="${newIndex + 1}">
+                </div>
+                <div class="col-12 content-fields" data-content-type="text" style="display: none;">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Text Content</label>
+                        <textarea name="form-${newIndex}-text_content" class="form-control" rows="4" placeholder="Enter your text content here..."></textarea>
+                    </div>
+                </div>
+                <div class="col-12 content-fields" data-content-type="file" style="display: none;">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">File Upload</label>
+                        <input type="file" name="form-${newIndex}-file_content" class="form-control">
+                        <div class="form-text">Upload PDF, Word, or PowerPoint files</div>
+                    </div>
+                </div>
+                <div class="col-12 content-fields" data-content-type="image" style="display: none;">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Image Upload</label>
+                        <input type="file" name="form-${newIndex}-image_content" class="form-control" accept="image/*">
+                        <div class="form-text">JPG, PNG, or GIF files</div>
+                    </div>
+                </div>
+                <div class="col-12 content-fields" data-content-type="video" style="display: none;">
                     <div class="mb-3">
                         <label class="form-label fw-bold">Video File</label>
-                        <input type="file" name="video_file_${contentIndex}" class="form-control" accept="video/*">
+                        <input type="file" name="form-${newIndex}-video_file" class="form-control" accept="video/*">
+                        <div class="form-text">MP4, MOV, or AVI files</div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold">Video URL</label>
-                        <input type="url" name="video_url_${contentIndex}" class="form-control" placeholder="https://example.com/video.mp4">
+                        <input type="url" name="form-${newIndex}-video_url" class="form-control" placeholder="https://example.com/video.mp4">
+                        <div class="form-text">YouTube, Vimeo, or direct video links</div>
                     </div>
                 </div>
             </div>
         `;
         
         container.appendChild(newContent);
-        sectionCount++;
-        contentIndex++;
-        
-        // Add event listener to the new topic select
-        const newSelect = newContent.querySelector('.topic-select');
-        newSelect.addEventListener('change', updateTopicDropdowns);
-        
-        // Update all dropdowns
-        updateTopicDropdowns();
+        initializeSections();
+        reindexSections();
     });
 
-    // Handle remove button clicks
+    // Handle content type changes
+    function initContentTypeSelect(section) {
+        const select = section.querySelector('.content-type-select');
+        if (!select) return;
+        
+        // Function to update fields based on selection
+        function updateFields() {
+            const selectedOption = select.options[select.selectedIndex];
+            if (!selectedOption) return;
+            
+            // Get the content type model from data attribute
+            const contentType = selectedOption.dataset.model;
+            const fields = section.querySelectorAll('.content-fields');
+            
+            // Hide all fields first
+            fields.forEach(field => {
+                field.style.display = 'none';
+            });
+            
+            // Show fields for the selected content type
+            if (contentType) {
+                const fieldToShow = section.querySelector(`.content-fields[data-content-type="${contentType}"]`);
+                if (fieldToShow) {
+                    fieldToShow.style.display = 'block';
+                }
+            }
+        }
+        
+        // Add event listener for changes
+        select.addEventListener('change', updateFields);
+        
+        // Initialize fields immediately
+        updateFields();
+    }
+
+    // Remove content section
     container.addEventListener('click', function(e) {
         if (e.target.classList.contains('remove-content') || 
             e.target.closest('.remove-content')) {
             const btn = e.target.closest('.remove-content');
             const section = btn.closest('.content-section');
             
-            // Only remove if it's not the last section
-            if (document.querySelectorAll('.content-section').length > 1) {
-                section.remove();
-                sectionCount--;
-                updateTopicDropdowns();
+            if (section && container.querySelectorAll('.content-section').length > 1) {
+                // Add animation for removal
+                section.style.opacity = '0';
+                section.style.transform = 'translateX(100px)';
+                
+                setTimeout(() => {
+                    section.remove();
+                    formCount--;
+                    totalFormsInput.value = formCount;
+                    reindexSections();
+                }, 300);
             } else {
-                alert("At least one video content is required");
+                alert("You need at least one content section");
             }
         }
     });
 
-    // Initialize topic dropdowns on page load
-    document.querySelectorAll('.topic-select').forEach(select => {
-        select.addEventListener('change', updateTopicDropdowns);
-    });
-    updateTopicDropdowns();
+    // Reindex sections after any change
+    function reindexSections() {
+        const sections = container.querySelectorAll('.content-section');
+        let newIndex = 0;
+        
+        sections.forEach(section => {
+            // Update data-index attribute
+            section.dataset.index = newIndex;
+            
+            // Update order badge
+            const badge = section.querySelector('.order-badge');
+            if (badge) badge.textContent = newIndex + 1;
+            
+            // Update all form field names
+            const formFields = section.querySelectorAll('[name]');
+            formFields.forEach(field => {
+                const fieldName = field.name;
+                // Extract the field key (e.g., 'topic', 'content_type')
+                const fieldKey = fieldName.split('-').pop();
+                // Create new name with form-<index>-<field> pattern
+                field.name = `form-${newIndex}-${fieldKey}`;
+            });
+            
+            // Update order input value to match position
+            const orderInput = section.querySelector('.order-input');
+            if (orderInput) {
+                orderInput.value = newIndex + 1;
+            }
+            
+            newIndex++;
+        });
+        
+        // Update form count to match new indices
+        formCount = newIndex;
+        totalFormsInput.value = formCount;
+    }
+
+    // Setup drag handlers for reordering
+    function setupDragHandlers(section) {
+        const handle = section.querySelector('.drag-handle');
+        if (!handle) return;
+        
+        handle.addEventListener('mousedown', function(e) {
+            section.classList.add('dragging');
+            draggedItem = section;
+            
+            // Create a placeholder element
+            const placeholder = document.createElement('div');
+            placeholder.className = 'content-section placeholder';
+            placeholder.style.height = section.offsetHeight + 'px';
+            placeholder.style.marginBottom = '1.5rem';
+            section.parentNode.insertBefore(placeholder, section);
+            
+            // Move the original element
+            document.body.appendChild(section);
+            section.style.position = 'absolute';
+            section.style.width = 'calc(100% - 30px)';
+            section.style.zIndex = '1000';
+            section.style.pointerEvents = 'none';
+            
+            function moveHandler(e) {
+                if (!draggedItem) return;
+                
+                // Position the dragged element
+                draggedItem.style.left = e.pageX - draggedItem.offsetWidth/2 + 'px';
+                draggedItem.style.top = e.pageY - 20 + 'px';
+                
+                // Find the closest section
+                const sections = Array.from(container.querySelectorAll('.content-section:not(.dragging)'));
+                const closestSection = sections.reduce((closest, s) => {
+                    const box = s.getBoundingClientRect();
+                    const offset = e.pageY - box.top - box.height/2;
+                    
+                    if (offset < 0 && offset > closest.offset) {
+                        return { offset: offset, element: s };
+                    } else {
+                        return closest;
+                    }
+                }, { offset: Number.NEGATIVE_INFINITY }).element;
+                
+                // Move placeholder to new position
+                if (closestSection) {
+                    container.insertBefore(placeholder, closestSection);
+                } else {
+                    container.appendChild(placeholder);
+                }
+            }
+            
+            function upHandler() {
+                if (!draggedItem) return;
+                
+                // Move dragged item to placeholder position
+                container.insertBefore(draggedItem, placeholder);
+                
+                // Cleanup
+                placeholder.remove();
+                draggedItem.classList.remove('dragging');
+                draggedItem.style.position = '';
+                draggedItem.style.width = '';
+                draggedItem.style.zIndex = '';
+                draggedItem.style.pointerEvents = '';
+                draggedItem.style.left = '';
+                draggedItem.style.top = '';
+                
+                // Reindex sections
+                reindexSections();
+                
+                // Remove event listeners
+                document.removeEventListener('mousemove', moveHandler);
+                document.removeEventListener('mouseup', upHandler);
+                draggedItem = null;
+            }
+            
+            document.addEventListener('mousemove', moveHandler);
+            document.addEventListener('mouseup', upHandler);
+        });
+    }
+
+    // Initialize all sections on page load
+    initializeSections();
 });
 </script>
 {% endblock %}

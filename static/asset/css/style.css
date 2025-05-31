@@ -6567,3 +6567,83 @@ input[type="radio"]:checked + label .option-letter {
     }
 }
 /* END ASSESSMENT RESULTS PAGE */
+/* CONTENT ADD PAGE */
+.content-section {
+	position: relative;
+	padding: 1.5rem;
+	border: 1px solid #dee2e6;
+	border-radius: 0.5rem;
+	margin-bottom: 1.5rem;
+	background: #fff;
+	box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+	transition: all 0.3s ease;
+}
+
+.content-section:hover {
+	box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
+	border-color: #86b7fe;
+}
+
+.remove-content {
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	width: 32px;
+	height: 32px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 10;
+}
+
+.content-fields {
+	padding: 1rem;
+	background-color: #f8f9fa;
+	border-radius: 0.5rem;
+	margin-top: 1rem;
+}
+
+.section-header {
+	background: #e9ecef;
+	padding: 0.5rem 1rem;
+	border-radius: 0.5rem;
+	margin-bottom: 1rem;
+	font-weight: 600;
+}
+
+.content-type-select {
+	cursor: pointer;
+}
+
+.order-badge {
+	position: absolute;
+	top: -10px;
+	left: -10px;
+	width: 30px;
+	height: 30px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: #0d6efd;
+	color: white;
+	font-weight: bold;
+	z-index: 5;
+	box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.2);
+}
+
+.drag-handle {
+	position: absolute;
+	top: 10px;
+	left: 10px;
+	cursor: move;
+	color: #6c757d;
+	z-index: 5;
+}
+
+.content-section.dragging {
+	opacity: 0.7;
+	transform: scale(1.02);
+	box-shadow: 0 0.5rem 1.5rem rgba(0,0,0,0.2);
+}
