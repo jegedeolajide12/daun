@@ -6,6 +6,8 @@ from django.contrib.contenttypes.models import ContentType
 from pkg_resources import require
 from django.forms import modelformset_factory, formset_factory, BaseFormSet
 
+from pages.templatetags import course
+
 from .models import (Course, Topic, Faculty, Assignment, 
                      Submission, Assessment, MCQOption, AssessmentQuestion, 
                      Content, Text, File, Image, Video,
@@ -134,14 +136,14 @@ class CourseTopicContentForm(forms.ModelForm):
     content_type = forms.ModelChoiceField(
         queryset=ContentType.objects.filter(model__in=['text','video','image','file']),
         widget=forms.Select(attrs={
-            'class': 'form-control',
+            'class': 'form-control file-content',
             'placeholder': 'Select Content Type',
         }),
         label='Content Type',
     )
     text_content = forms.CharField(
         widget=forms.Textarea(attrs={
-            'class': 'form-control',
+            'class': 'form-control text-content',
             'rows': 3,
             'placeholder': 'Enter Text Content',
         }),
@@ -150,7 +152,7 @@ class CourseTopicContentForm(forms.ModelForm):
     )
     file_content = forms.FileField(
         widget=forms.ClearableFileInput(attrs={
-            'class': 'form-control',
+            'class': 'form-control file-content',
             'placeholder': 'Upload File Content',
         }),
         label='File Content',
@@ -158,7 +160,7 @@ class CourseTopicContentForm(forms.ModelForm):
     )
     image_content = forms.FileField(
         widget=forms.ClearableFileInput(attrs={
-            'class': 'form-control',
+            'class': 'form-control image-content',
             'placeholder': 'Upload Image Content',
         }),
         label='Image Content',
@@ -166,7 +168,7 @@ class CourseTopicContentForm(forms.ModelForm):
     )
     video_file = forms.FileField(
         widget=forms.ClearableFileInput(attrs={
-            'class': 'form-control',
+            'class': 'form-control video-file',
             'placeholder': 'Upload Video Content',
         }),
         label='Video File',
@@ -174,7 +176,7 @@ class CourseTopicContentForm(forms.ModelForm):
     )
     video_url = forms.URLField(
         widget=forms.URLInput(attrs={
-            'class': 'form-control',
+            'class': 'form-control video-url',
             'placeholder': 'Video URL',
         }),
         label='Video URL',
@@ -183,10 +185,15 @@ class CourseTopicContentForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         self.owner = kwargs.pop('owner', None)
+        course_id = kwargs.pop('course_id', None)
         super().__init__(*args, **kwargs)
-        self.fields['topic'].queryset = Topic.objects.all()
-        self.fields['topic'].widget.attrs.update({'class': 'form-control'})
-        self.fields['order'].widget.attrs.update({'class': 'form-control', 'min': '1'})
+        if course_id is not None:
+            self.fields['topic'].queryset = Topic.objects.filter(course=course_id)
+        else:
+            self.fields['topic'].queryset = Topic.objects.none()
+        self.fields['topic'].widget.attrs.update({'class': 'form-control topic-select'})
+        self.fields['content_type'].widget.attrs.update({'class': 'form-control content-type-select'})
+        self.fields['order'].widget.attrs.update({'class': 'form-control order-input', 'min': '1'})
 
     def clean(self):
         cleaned_data = super().clean()

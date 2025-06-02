@@ -201,6 +201,13 @@ class CourseCreateWizard(SessionWizardView):
                     messages.error(self.request, "Course not found, Please complete the basics step first.")
                     return self.render_goto_step('basics')
             return ModuleFormSet(queryset=Topic.objects.filter(course_id=course_id), data=data)
+        elif step == "contents":
+            course_id = self.storage.extra_data.get('course_id')
+            return ContentFormSet(
+                data=data, 
+                files=files, 
+                form_kwargs={'owner':self.request.user, 'course_id':course_id}
+                )
         return super().get_form(step, data, files)
 
     def get_context_data(self, form, **kwargs):
@@ -223,7 +230,7 @@ class CourseCreateWizard(SessionWizardView):
                     form_kwargs={'owner': self.request.user}
                 )
             else:
-                formset = ContentFormSet(form_kwargs={'owner': self.request.user})
+                formset = ContentFormSet(form_kwargs={'owner': self.request.user, 'course_id': course_id})
             
             context['formset'] = formset
             context['content_types'] = ContentType.objects.filter(
