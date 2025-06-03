@@ -11,9 +11,10 @@
                         <p class="mb-0">Step 3 - Course Content</p>
                     </div>
 
-                    <div class="card-body"
+                    <div class="card-body"></div>
                         <form method="post" enctype="multipart/form-data" novalidate>
                             {% csrf_token %}
+                            {{ wizard.management_form }}
                             {{ formset.management_form }}
                             <div id="contents-container">
                                 {% for form in formset %}
