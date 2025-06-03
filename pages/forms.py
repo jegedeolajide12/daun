@@ -191,9 +191,17 @@ class CourseTopicContentForm(forms.ModelForm):
             self.fields['topic'].queryset = Topic.objects.filter(course=course_id)
         else:
             self.fields['topic'].queryset = Topic.objects.none()
+        if not self.instance.pk and 'order' not in self.initial:
+            self.initial['order'] = 1
+            
         self.fields['topic'].widget.attrs.update({'class': 'form-control topic-select'})
         self.fields['content_type'].widget.attrs.update({'class': 'form-control content-type-select'})
         self.fields['order'].widget.attrs.update({'class': 'form-control order-input', 'min': '1'})
+        self.fields['text_content'].widget.attrs.update({'class': 'form-control'})
+        self.fields['file_content'].widget.attrs.update({'class': 'form-control'})
+        self.fields['image_content'].widget.attrs.update({'class': 'form-control'})
+        self.fields['video_file'].widget.attrs.update({'class': 'form-control'})
+        self.fields['video_url'].widget.attrs.update({'class': 'form-control'})
 
     def clean(self):
         cleaned_data = super().clean()

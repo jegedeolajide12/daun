@@ -227,7 +227,7 @@ class CourseCreateWizard(SessionWizardView):
                 formset = ContentFormSet(
                     self.request.POST,
                     self.request.FILES,
-                    form_kwargs={'owner': self.request.user}
+                    form_kwargs={'owner': self.request.user, 'course_id': course_id}
                 )
             else:
                 formset = ContentFormSet(form_kwargs={'owner': self.request.user, 'course_id': course_id})
