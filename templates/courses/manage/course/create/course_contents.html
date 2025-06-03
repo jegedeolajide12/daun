@@ -11,103 +11,85 @@
                         <p class="mb-0">Step 3 - Course Content</p>
                     </div>
 
-                    <div class="card-body">
+                    <div class="card-body"
                         <form method="post" enctype="multipart/form-data" novalidate>
                             {% csrf_token %}
                             {{ wizard.management_form }}
                             {{ formset.management_form }}
-                            {% if formset.non_form_errors %}
-                                <div class="alert alert-danger">
-                                    {{ formset.non_form_errors }}
-                                </div>
-                            {% endif %}
-                            
-                            <!-- Hidden field to track form count -->
-                            <input type="hidden" id="current-form-count" value="{{ formset|length }}">
-                            
                             <div id="contents-container">
                                 {% for form in formset %}
-                                <div class="content-section" data-index="{{ forloop.counter0 }}">
-                                    <div class="order-badge">{{ forloop.counter }}</div>
+                                <!-- Initial Content Section -->
+                                <div class="content-section" data-index="0">
+                                    <div class="order-badge">1</div>
                                     <div class="drag-handle">
                                         <i class="bi bi-grip-horizontal fs-4"></i>
                                     </div>
                                     <button type="button" class="btn btn-sm btn-danger remove-content">
                                         <i class="bi bi-trash"></i>
                                     </button>
-                                    
+                                    {% if formset.non_form_errors %}
+                                        <div class="alert alert-danger">
+                                            {{ formset.non_form_errors }}
+                                        </div>
+                                    {% endif %}
                                     <div class="row g-3">
-                                        <!-- Topic Field -->
                                         <div class="col-md-6">
                                             <label class="form-label fw-bold">Topic</label>
-                                            {{ form.topic }}
-                                        </div>
-                                        
-                                        <!-- Content Type Field -->
-                                        <div class="col-md-6">
-                                            <label class="form-label fw-bold">Content Type</label>
-                                            <select name="{{ form.content_type.html_name }}" 
-                                                    id="{{ form.content_type.id_for_label }}" 
-                                                    class="form-control content-type-select">
-                                                {% for ct in content_types %}
-                                                    <option value="{{ ct.id }}" 
-                                                            data-model="{{ ct.model }}"
-                                                            {% if form.content_type.value|stringformat:"s" == ct.id|stringformat:"s" %}selected{% endif %}>
-                                                        {{ ct.name }}
-                                                    </option>
+                                            <select name="topic_0" class="form-control topic-select">
+                                                {% for topic in topics %}
+                                                    <option value="{{ topic.id }}">{{ topic.name }}</option>
                                                 {% endfor %}
                                             </select>
                                         </div>
                                         
-                                        <!-- Order Field -->
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Content Type</label>
+                                            <!-- FIX: Added data-model attribute to all options -->
+                                            <select name="content_type_0" class="form-control content-type-select">
+                                                {% for ct in content_types %}
+                                                    <option value="{{ ct.id }}" data-model="{{ ct.model }}">{{ ct.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        
                                         <div class="col-12">
                                             <label class="form-label fw-bold">Order</label>
-                                            {{ form.order }}
+                                            <input type="number" name="order_0" class="form-control order-input" min="1" value="1">
                                         </div>
                                         
                                         <!-- Dynamic Fields Container -->
-                                        <!-- Text -->
-                                        {% with form.text_content as field %}
-                                        <div class="col-12 content-fields text-fields" style="display: none;">
+                                        <div class="col-12 content-fields" data-content-type="text" style="display: none;">
                                             <div class="mb-3">
-                                                {{ field.label_tag }}
-                                                {{ field }}
+                                                <label class="form-label fw-bold">Text Content</label>
+                                                <textarea name="text_content_0" class="form-control" rows="4" placeholder="Enter your text content here..."></textarea>
                                             </div>
                                         </div>
-                                        {% endwith %}
                                         
-                                        <!-- File -->
-                                        {% with form.file_content as field %}
-                                        <div class="col-12 content-fields file-fields" style="display: none;">
+                                        <div class="col-12 content-fields" data-content-type="file" style="display: none;">
                                             <div class="mb-3">
-                                                {{ field.label_tag }}
-                                                {{ field }}
+                                                <label class="form-label fw-bold">File Upload</label>
+                                                <input type="file" name="file_content_0" class="form-control">
                                                 <div class="form-text">Upload PDF, Word, or PowerPoint files</div>
                                             </div>
                                         </div>
-                                        {% endwith %}
                                         
-                                        <!-- Image -->
-                                        {% with form.image_content as field %}
-                                        <div class="col-12 content-fields image-fields" style="display: none;">
+                                        <div class="col-12 content-fields" data-content-type="image" style="display: none;">
                                             <div class="mb-3">
-                                                {{ field.label_tag }}
-                                                {{ field }}
+                                                <label class="form-label fw-bold">Image Upload</label>
+                                                <input type="file" name="image_content_0" class="form-control" accept="image/*">
                                                 <div class="form-text">JPG, PNG, or GIF files</div>
                                             </div>
                                         </div>
-                                        {% endif %}
                                         
-                                        <!-- Video -->
-                                        <div class="col-12 content-fields video-fields" style="display: none;">
+                                        <div class="col-12 content-fields" data-content-type="video" style="display: none;">
                                             <div class="mb-3">
                                                 <label class="form-label fw-bold">Video File</label>
-                                                {{ form.video_file }}
+                                                <input type="file" name="video_file_0" class="form-control" accept="video/*">
                                                 <div class="form-text">MP4, MOV, or AVI files</div>
                                             </div>
                                             <div class="mb-3">
                                                 <label class="form-label fw-bold">Video URL</label>
-                                                {{ form.video_url }}
+                                                <input type="url" name="video_url_0" class="form-control" placeholder="https://example.com/video.mp4">
                                                 <div class="form-text">YouTube, Vimeo, or direct video links</div>
                                             </div>
                                         </div>
@@ -144,42 +126,21 @@
 document.addEventListener('DOMContentLoaded', function() {
     const container = document.getElementById('contents-container');
     const totalFormsInput = document.getElementById('id_form-TOTAL_FORMS');
-    const currentFormCount = document.getElementById('current-form-count');
-    let formCount = currentFormCount ? parseInt(currentFormCount.value) : 1;
     let draggedItem = null;
+    let formCount = parseInt(totalFormsInput.value);
     
-    // Set initial form count
-    if (totalFormsInput) {
-        totalFormsInput.value = formCount;
-    }
-
     // Initialize all sections
     function initializeSections() {
-        container.querySelectorAll('.content-section').forEach((section, index) => {
-            // Initialize only if not already initialized
-            section.querySelector('.order-input').value = index + 1;
-                initContentTypeSelect(section);
-                updateContentFields(section);
-            });
-            if (!section.dataset.initialized) {
-                initContentTypeSelect(section);
-                setupDragHandlers(section);
-                updateContentFields(section);
-                section.dataset.initialized = "true";
-                
-                // Initialize order value
-                const orderInput = section.querySelector('.order-input');
-                if (orderInput) {
-                    orderInput.value = index + 1;
-                }
-            }
+        container.querySelectorAll('.content-section').forEach(section => {
+            initContentTypeSelect(section);
+            setupDragHandlers(section);
         });
     }
     
     // Add new content section
     document.getElementById('add-content').addEventListener('click', function() {
         const newIndex = formCount++;
-        if (totalFormsInput) totalFormsInput.value = formCount;
+        totalFormsInput.value = formCount;
         
         const newContent = document.createElement('div');
         newContent.className = 'content-section';
@@ -213,32 +174,27 @@ document.addEventListener('DOMContentLoaded', function() {
                     <label class="form-label fw-bold">Order</label>
                     <input type="number" name="form-${newIndex}-order" class="form-control order-input" min="1" value="${newIndex + 1}">
                 </div>
-                
-                <!-- Use consistent class names for all field types -->
-                <div class="col-12 content-fields text-fields" style="display: none;">
+                <div class="col-12 content-fields" data-content-type="text" style="display: none;">
                     <div class="mb-3">
                         <label class="form-label fw-bold">Text Content</label>
                         <textarea name="form-${newIndex}-text_content" class="form-control" rows="4" placeholder="Enter your text content here..."></textarea>
                     </div>
                 </div>
-                
-                <div class="col-12 content-fields file-fields" style="display: none;">
+                <div class="col-12 content-fields" data-content-type="file" style="display: none;">
                     <div class="mb-3">
                         <label class="form-label fw-bold">File Upload</label>
                         <input type="file" name="form-${newIndex}-file_content" class="form-control">
                         <div class="form-text">Upload PDF, Word, or PowerPoint files</div>
                     </div>
                 </div>
-                
-                <div class="col-12 content-fields image-fields" style="display: none;">
+                <div class="col-12 content-fields" data-content-type="image" style="display: none;">
                     <div class="mb-3">
                         <label class="form-label fw-bold">Image Upload</label>
                         <input type="file" name="form-${newIndex}-image_content" class="form-control" accept="image/*">
                         <div class="form-text">JPG, PNG, or GIF files</div>
                     </div>
                 </div>
-                
-                <div class="col-12 content-fields video-fields" style="display: none;">
+                <div class="col-12 content-fields" data-content-type="video" style="display: none;">
                     <div class="mb-3">
                         <label class="form-label fw-bold">Video File</label>
                         <input type="file" name="form-${newIndex}-video_file" class="form-control" accept="video/*">
@@ -258,51 +214,39 @@ document.addEventListener('DOMContentLoaded', function() {
         reindexSections();
     });
 
-    // Update content fields based on selected type
-    function updateContentFields(section) {
-        const select = section.querySelector('.content-type-select');
-        if (!select) return;
-        
-        // First hide all content fields
-        section.querySelectorAll('.content-fields').forEach(field => {
-            field.style.display = 'none';
-        });
-        
-        // Then show the appropriate fields
-        const selectedOption = select.options[select.selectedIndex];
-        if (selectedOption) {
-            const contentType = selectedOption.dataset.model;
-            if (contentType === 'text') {
-                const textFields = section.querySelector('.text-fields');
-                if (textFields) textFields.style.display = 'block';
-            } 
-            else if (contentType === 'file') {
-                const fileFields = section.querySelector('.file-fields');
-                if (fileFields) fileFields.style.display = 'block';
-            }
-            else if (contentType === 'image') {
-                const imageFields = section.querySelector('.image-fields');
-                if (imageFields) imageFields.style.display = 'block';
-            }
-            else if (contentType === 'video') {
-                const videoFields = section.querySelector('.video-fields');
-                if (videoFields) videoFields.style.display = 'block';
-            }
-        }
-    }
-
     // Handle content type changes
     function initContentTypeSelect(section) {
         const select = section.querySelector('.content-type-select');
         if (!select) return;
         
-        // Initialize fields immediately
-        updateContentFields(section);
+        // Function to update fields based on selection
+        function updateFields() {
+            const selectedOption = select.options[select.selectedIndex];
+            if (!selectedOption) return;
+            
+            // Get the content type model from data attribute
+            const contentType = selectedOption.dataset.model;
+            const fields = section.querySelectorAll('.content-fields');
+            
+            // Hide all fields first
+            fields.forEach(field => {
+                field.style.display = 'none';
+            });
+            
+            // Show fields for the selected content type
+            if (contentType) {
+                const fieldToShow = section.querySelector(`.content-fields[data-content-type="${contentType}"]`);
+                if (fieldToShow) {
+                    fieldToShow.style.display = 'block';
+                }
+            }
+        }
         
         // Add event listener for changes
-        select.addEventListener('change', function() {
-            updateContentFields(section);
-        });
+        select.addEventListener('change', updateFields);
+        
+        // Initialize fields immediately
+        updateFields();
     }
 
     // Remove content section
@@ -320,7 +264,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 setTimeout(() => {
                     section.remove();
                     formCount--;
-                    if (totalFormsInput) totalFormsInput.value = formCount;
+                    totalFormsInput.value = formCount;
                     reindexSections();
                 }, 300);
             } else {
@@ -347,11 +291,9 @@ document.addEventListener('DOMContentLoaded', function() {
             formFields.forEach(field => {
                 const fieldName = field.name;
                 // Extract the field key (e.g., 'topic', 'content_type')
-                const matches = fieldName.match(/form-(\d+)-(\w+)/);
-                if (matches) {
-                    const fieldKey = matches[2];
-                    field.name = `form-${newIndex}-${fieldKey}`;
-                }
+                const fieldKey = fieldName.split('-').pop();
+                // Create new name with form-<index>-<field> pattern
+                field.name = `form-${newIndex}-${fieldKey}`;
             });
             
             // Update order input value to match position
@@ -365,7 +307,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Update form count to match new indices
         formCount = newIndex;
-        if (totalFormsInput) totalFormsInput.value = formCount;
+        totalFormsInput.value = formCount;
     }
 
     // Setup drag handlers for reordering
@@ -453,5 +395,4 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeSections();
 });
 </script>
-
 {% endblock %}
