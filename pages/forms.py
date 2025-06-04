@@ -124,9 +124,9 @@ class ContentFormSet(BaseFormSet):
         self.owner = kwargs.pop('owner', None)
         super().__init__(*args, **kwargs)
     
-    def _construct_form(self, *args, **kwargs):
+    def _construct_form(self, i, **kwargs):
         kwargs['owner'] = self.owner
-        return super()._construct_form(*args, **kwargs)
+        return super()._construct_form(i, **kwargs)
 
 class CourseTopicContentForm(forms.ModelForm):
     class Meta:
@@ -231,6 +231,8 @@ class CourseTopicContentForm(forms.ModelForm):
         return cleaned_data
 
     def save(self, commit=True, owner=None):
+        if owner is not None:
+            self.owner = owner
         ctype = self.cleaned_data['content_type']
         model = ctype.model
         item = None

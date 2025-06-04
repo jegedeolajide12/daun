@@ -259,8 +259,7 @@ class CourseCreateWizard(SessionWizardView):
     
     def render(self, form=None, **kwargs):
         response = super().render(form, **kwargs)
-        self.request.session.modified = True  # Force session save
-        self.request.session.save()
+        
         return response
 
     def process_step(self, form):
@@ -343,7 +342,7 @@ class CourseCreateWizard(SessionWizardView):
                 for form in formset:
                     if form.has_changed() and form.is_valid():  # Double-check form validity
                         try:
-                            form.save()
+                            form.save(owner=self.request.user)
                             print(f"DEBUG: Saved content: {form.cleaned_data}")
                             has_valid_content = True
                         except Exception as e:
