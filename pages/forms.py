@@ -4,14 +4,14 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.contrib.contenttypes.models import ContentType
 from pkg_resources import require
-from django.forms import modelformset_factory, formset_factory, BaseFormSet
+from django.forms import inlineformset_factory, modelformset_factory, formset_factory, BaseFormSet
 
 from pages.templatetags import course
 
 from .models import (Course, Topic, Faculty, Assignment, 
                      Submission, Assessment, MCQOption, AssessmentQuestion, 
                      Content, Text, File, Image, Video,
-                     CourseTrailer, CourseRequirements, CourseObjectives)
+                     CourseTrailer, CourseRequirements, CourseObjectives, Rubric)
 
 
 class CourseForm(forms.ModelForm):
@@ -280,6 +280,17 @@ ContentFormSet = formset_factory(
 )
 
 
+class RubricForm(forms.ModelForm):
+    class Meta:
+        model = Rubric
+        fields = ['criteria', 'description', 'max_score']
+        widgets = {
+            'criteria': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Criteria'}),
+            'description': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Description'}),
+            'max_score': forms.NumberInput(attrs={'class': 'form-control', 'min': 0, 'placeholder': 'Max Score'}),
+        }
+
+
 class CourseTopicAssignmentsForm(forms.ModelForm):
     class Meta:
         model = Assignment
@@ -313,16 +324,23 @@ class CourseTopicAssignmentsForm(forms.ModelForm):
             }),
         }
     def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user', None)
+        course_id = kwargs.pop('course_id', None)
         super().__init__(*args, **kwargs)
 
-        if self.instance and hasattr(self.instance, 'course') and self.instance.course:
-            self.fields['topic'].queryset = Topic.objects.filter(course=self.instance.course)
+        if course_id:
+            self.fields['topic'].queryset = Topic.objects.filter(course=course_id)
         else:
             self.fields['topic'].queryset = Topic.objects.none()
-        
         self.fields['file'].required = False
-        self.fields['topic'].empty_label = "Select Topic"
+    
+AssignmentFormSet = inlineformset_factory(
+    Topic,
+    Assignment,
+    form=CourseTopicAssignmentsForm,
+    extra=1,
+    can_delete=True,
+    fields=['title', 'description', 'topic', 'file', 'max_score']
+)
 
 
 class CourseTopicAssessmentsForm(forms.ModelForm):

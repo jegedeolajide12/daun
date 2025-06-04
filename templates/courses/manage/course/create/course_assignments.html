@@ -2,10 +2,6 @@
 
 {% block content %}
 <main class="ttr-wrapper">
-    <div class="card-header bg-primary text-white">
-        <h3 class="card-title mb-0">Create New Course</h3>
-        <p class="mb-0">Step 4 - Assignments</p>
-    </div>
     <div class="container py-5">
         <div class="row justify-content-center">
             <div class="col-lg-10">
@@ -20,61 +16,70 @@
                             {% csrf_token %}
                             {{ wizard.management_form }}
                             
+                            {{ formset.management_form }}
                             <div id="assignments-container">
-                                <!-- Initial Assignment -->
+                                {% for form in formset %}
                                 <div class="assignment-section mb-5 border-bottom pb-4">
                                     <div class="row g-3">
-                                        <div class="col-12">
-                                            <h5 class="mb-3">Assignment #1</h5>
+                                        <div class="col-12 d-flex justify-content-between align-items-center">
+                                            <h5>Assignment #{{ forloop.counter }}</h5>
+                                            {{ form.DELETE }}
+                                            <button type="button" class="btn btn-danger btn-sm remove-assignment">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
                                         </div>
                                         
                                         <!-- Assignment Fields -->
                                         <div class="col-md-6">
                                             <label class="form-label fw-bold">Title</label>
-                                            <input type="text" name="title_0" class="form-control" required>
+                                            {{ form.title }}
                                         </div>
                                         
                                         <div class="col-md-6">
                                             <label class="form-label fw-bold">Topic</label>
-                                            <select name="topic_0" class="form-control">
-                                                {% for topic in topics %}
-                                                <option value="{{ topic.id }}">{{ topic.name }}</option>
-                                                {% endfor %}
-                                            </select>
+                                            {{ form.topic }}
                                         </div>
                                         
                                         <div class="col-12">
                                             <label class="form-label fw-bold">Description</label>
-                                            <textarea name="description_0" class="form-control" rows="3"></textarea>
+                                            {{ form.description }}
                                         </div>
                                         
                                         <div class="col-md-6">
                                             <label class="form-label fw-bold">File Upload</label>
-                                            <input type="file" name="file_0" class="form-control">
+                                            {{ form.file }}
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Max Score</label>
+                                            {{ form.max_score }}
                                         </div>
 
                                         <!-- Rubric Section -->
                                         <div class="col-12 mt-4">
                                             <h6 class="mb-3">Rubric Criteria</h6>
-                                            <div class="rubric-container" data-assignment-index="0">
-                                                <!-- Rubric Criteria 1 -->
+                                            <div class="rubric-container" data-assignment-index="{{ forloop.counter0 }}">
+                                                {% for rubric in initial_rubrics %}
                                                 <div class="rubric-criteria mb-3">
                                                     <div class="row g-2">
                                                         <div class="col-md-4">
                                                             <input type="text" 
-                                                                name="rubric_criteria_0[]"
+                                                                name="rubrics_{{ forloop.parentloop.counter0 }}-{{ forloop.counter0 }}-criteria"
+                                                                value="{{ rubric.criteria }}"
                                                                 class="form-control"
                                                                 placeholder="Criteria">
                                                         </div>
                                                         <div class="col-md-4">
                                                             <input type="text" 
-                                                                name="rubric_descriptions_0[]"
+                                                                name="rubrics_{{ forloop.parentloop.counter0 }}-{{ forloop.counter0 }}-description"
+                                                                value="{{ rubric.description }}"
                                                                 class="form-control"
                                                                 placeholder="Description">
                                                         </div>
                                                         <div class="col-md-3">
                                                             <input type="number" 
-                                                                name="rubric_max_scores_0[]"
+                                                                name="rubrics_{{ forloop.parentloop.counter0 }}-{{ forloop.counter0 }}-max_score"
+                                                                value="{{ rubric.max_score }}"
                                                                 class="form-control"
                                                                 placeholder="Max Score"
                                                                 min="0">
@@ -87,6 +92,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
+                                                {% endfor %}
                                             </div>
                                             <button type="button" 
                                                     class="btn btn-outline-secondary btn-sm add-rubric">
@@ -95,6 +101,7 @@
                                         </div>
                                     </div>
                                 </div>
+                                {% endfor %}
                             </div>
 
                             <!-- Add Assignment button -->
@@ -125,28 +132,44 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    let assignmentIndex = 1;
     const assignmentsContainer = document.getElementById('assignments-container');
+    const totalFormsInput = document.getElementById('id_assignment_set-TOTAL_FORMS');
+    let assignmentIndex = parseInt(totalFormsInput.value);
+    let rubricCounters = {};
+
+    // Initialize rubric counters
+    document.querySelectorAll('.rubric-container').forEach(container => {
+        const index = container.dataset.assignmentIndex;
+        rubricCounters[index] = container.querySelectorAll('.rubric-criteria').length;
+    });
 
     // Add new assignment
     document.getElementById('add-assignment').addEventListener('click', function() {
+        const newIndex = assignmentIndex++;
+        totalFormsInput.value = assignmentIndex;
+        
         const newAssignment = document.createElement('div');
         newAssignment.className = 'assignment-section mb-5 border-bottom pb-4';
         newAssignment.innerHTML = `
             <div class="row g-3">
                 <div class="col-12 d-flex justify-content-between align-items-center">
                     <h5>Assignment #${assignmentIndex + 1}</h5>
+                    <div style="display:none">
+                        <input type="checkbox" name="assignment_set-${newIndex}-DELETE" id="id_assignment_set-${newIndex}-DELETE">
+                    </div>
                     <button type="button" class="btn btn-danger btn-sm remove-assignment">
                         <i class="bi bi-trash"></i>
                     </button>
                 </div>
                 
                 <div class="col-md-6">
-                    <input type="text" name="title_${assignmentIndex}" class="form-control" required>
+                    <label class="form-label fw-bold">Title</label>
+                    <input type="text" name="assignment_set-${newIndex}-title" class="form-control" required>
                 </div>
                 
                 <div class="col-md-6">
-                    <select name="topic_${assignmentIndex}" class="form-control">
+                    <label class="form-label fw-bold">Topic</label>
+                    <select name="assignment_set-${newIndex}-topic" class="form-control">
                         {% for topic in topics %}
                         <option value="{{ topic.id }}">{{ topic.name }}</option>
                         {% endfor %}
@@ -154,33 +177,40 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
                 
                 <div class="col-12">
-                    <textarea name="description_${assignmentIndex}" class="form-control" rows="3"></textarea>
+                    <label class="form-label fw-bold">Description</label>
+                    <textarea name="assignment_set-${newIndex}-description" class="form-control" rows="3"></textarea>
                 </div>
                 
                 <div class="col-md-6">
-                    <input type="file" name="file_${assignmentIndex}" class="form-control">
+                    <label class="form-label fw-bold">File Upload</label>
+                    <input type="file" name="assignment_set-${newIndex}-file" class="form-control">
+                </div>
+                
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Max Score</label>
+                    <input type="number" name="assignment_set-${newIndex}-max_score" class="form-control" min="0" max="100" value="100">
                 </div>
 
                 <div class="col-12 mt-4">
                     <h6 class="mb-3">Rubric Criteria</h6>
-                    <div class="rubric-container" data-assignment-index="${assignmentIndex}">
+                    <div class="rubric-container" data-assignment-index="${newIndex}">
                         <div class="rubric-criteria mb-3">
                             <div class="row g-2">
                                 <div class="col-md-4">
                                     <input type="text" 
-                                           name="rubric_criteria_${assignmentIndex}[]"
+                                           name="rubrics_${newIndex}-0-criteria"
                                            class="form-control"
                                            placeholder="Criteria">
                                 </div>
                                 <div class="col-md-4">
                                     <input type="text" 
-                                           name="rubric_descriptions_${assignmentIndex}[]"
+                                           name="rubrics_${newIndex}-0-description"
                                            class="form-control"
                                            placeholder="Description">
                                 </div>
                                 <div class="col-md-3">
                                     <input type="number" 
-                                           name="rubric_max_scores_${assignmentIndex}[]"
+                                           name="rubrics_${newIndex}-0-max_score"
                                            class="form-control"
                                            placeholder="Max Score"
                                            min="0">
@@ -203,13 +233,19 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
         
         assignmentsContainer.appendChild(newAssignment);
-        assignmentIndex++;
+        rubricCounters[newIndex] = 1;  // Initialize rubric counter for this assignment
     });
 
     // Remove assignment
     assignmentsContainer.addEventListener('click', function(e) {
         if(e.target.closest('.remove-assignment')) {
-            e.target.closest('.assignment-section').remove();
+            const assignmentSection = e.target.closest('.assignment-section');
+            const deleteCheckbox = assignmentSection.querySelector('input[type="checkbox"][name$="-DELETE"]');
+            
+            if (deleteCheckbox) {
+                deleteCheckbox.checked = true;
+                assignmentSection.style.display = 'none';
+            }
         }
     });
 
@@ -218,6 +254,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if(e.target.closest('.add-rubric')) {
             const rubricContainer = e.target.closest('.rubric-container');
             const assignmentIndex = rubricContainer.dataset.assignmentIndex;
+            const rubricIndex = rubricCounters[assignmentIndex]++;
             
             const newCriteria = document.createElement('div');
             newCriteria.className = 'rubric-criteria mb-3';
@@ -225,19 +262,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="row g-2">
                     <div class="col-md-4">
                         <input type="text" 
-                               name="rubric_criteria_${assignmentIndex}[]"
+                               name="rubrics_${assignmentIndex}-${rubricIndex}-criteria"
                                class="form-control"
                                placeholder="Criteria">
                     </div>
                     <div class="col-md-4">
                         <input type="text" 
-                               name="rubric_descriptions_${assignmentIndex}[]"
+                               name="rubrics_${assignmentIndex}-${rubricIndex}-description"
                                class="form-control"
                                placeholder="Description">
                     </div>
                     <div class="col-md-3">
                         <input type="number" 
-                               name="rubric_max_scores_${assignmentIndex}[]"
+                               name="rubrics_${assignmentIndex}-${rubricIndex}-max_score"
                                class="form-control"
                                placeholder="Max Score"
                                min="0">

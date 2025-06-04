@@ -47,7 +47,7 @@ from .forms import (FacultyForm, CourseTopicAssignmentsForm, SubmissionForm,
                     CourseTopicAssessmentsForm, MCQOptionForm, CourseBasicsForm, CourseTopicsForm,
                     CourseTopicContentForm, AssessmentQuestionForm, CourseTrailerForm, CourseRequirementsForm, 
                     CourseMarketingForm, CourseObjectivesForm, CourseForm, ModuleFormSet, CourseTopicContentForm, 
-                    ContentFormSet )
+                    ContentFormSet, AssignmentFormSet, RubricForm )
 
 def create_faculty(request):
     if request.method == "POST":
@@ -208,6 +208,13 @@ class CourseCreateWizard(SessionWizardView):
                 files=files, 
                 form_kwargs={'owner':self.request.user, 'course_id':course_id}
                 )
+        elif step == 'assignments':
+            course_id = self.storage.extra_data.get('course_id') or self.request.session.get('wizard_course_id')
+            return AssignmentFormSet(
+                data=data,
+                files=files,
+                form_kwargs={'course_id': course_id}
+            )
         return super().get_form(step, data, files)
 
     def get_context_data(self, form, **kwargs):
@@ -236,6 +243,20 @@ class CourseCreateWizard(SessionWizardView):
             context['content_types'] = ContentType.objects.filter(
                 model__in=['text', 'video', 'image', 'file']
             )
+            context['topics'] = Topic.objects.filter(course_id=course_id)
+        elif self.steps.current == 'assignments':
+            course_id = self.storage.extra_data.get('course_id') or self.request.session.get('wizard_course_id')
+            if self.request.method == 'POST':
+                formset = AssignmentFormSet(
+                    self.request.POST,
+                    self.request.FILES,
+                    form_kwargs={'course_id': course_id}
+                )
+            else:
+                formset = AssignmentFormSet(
+                    form_kwargs={'course_id': course_id}
+                )
+            context['formset'] = formset
             context['topics'] = Topic.objects.filter(course_id=course_id)
         
         return context
@@ -362,53 +383,56 @@ class CourseCreateWizard(SessionWizardView):
                 return self.render_revalidation_failure('contents', formset)
          
         elif step == 'assignments':
-            data = self.request.POST
-            files = self.request.FILES
-            form.fields['topic'].queryset = Topic.objects.filter(course=course)
-            i = 0
-            has_any = False
-            while True:
-                title = data.get(f'title_{i}')
-                description = data.get(f'description_{i}')
-                topic_id = data.get(f'topic_{i}')
-                file = files.get(f'file_{i}')
-                if not title:
-                    break
-                assignment = Assignment.objects.create(
-                    title=title,
-                    description=description,
-                    topic_id=topic_id,
-                    course=course,
-                    file=file if file else None
-                )
-                # Handle rubric criteria for this assignment
-                rubric_criteria = data.getlist(f'rubric_criteria_{i}[]')
-                rubric_description = data.getlist(f'rubric_descriptions_{i}[]')
-                rubric_max_scores = data.getlist(f'rubric_max_scores_{i}[]')
-                for crit, desc, max_score in zip(rubric_criteria, rubric_description, rubric_max_scores):
-                    Rubric.objects.create(
-                        assignment=assignment,
-                        criteria=crit,
-                        description=desc,
-                        max_score=max_score
+            course_id = self.storage.extra_data.get('course_id')
+            if not course_id:
+                return self.render_goto_step('basics')
+            
+            try:
+                course = Course.objects.get(id=course_id)
+            except Course.DoesNotExist:
+                messages.error(self.request, "Course not found.")
+                return self.render_goto_step('basics')
+            
+            # Initialize formset
+            AssignmentFormSet.form = staticmethod(lambda *args, **kwargs: CourseTopicAssignmentsForm(*args, course=course, **kwargs))
+            formset = AssignmentFormSet(
+                self.request.POST,
+                self.request.FILES,
+                instance=course,
+                queryset=Assignment.objects.filter(course=course)
+            )
+            
+            if formset.is_valid():
+                assignments = formset.save(commit=False)
+                
+                # Save assignments and their rubrics
+                for i, assignment in enumerate(assignments):
+                    assignment.course = course
+                    assignment.save()
+                    
+                    # Process rubrics
+                    rubric_formset = forms.formset_factory(RubricForm, extra=0)(
+                        self.request.POST,
+                        prefix=f'rubrics_{i}'
                     )
-                has_any = True
-                i += 1
-            # fallback for single assignment (non-indexed)
-            if not has_any and 'title' in data:
-                assignment = form.save(commit=False)
-                assignment.course = course
-                assignment.save()
-                rubric_criteria = data.getlist('rubric_criteria[]')
-                rubric_description = data.getlist('rubric_descriptions[]')
-                rubric_max_scores = data.getlist('rubric_max_scores[]')
-                for crit, desc, max_score in zip(rubric_criteria, rubric_description, rubric_max_scores):
-                    Rubric.objects.create(
-                        assignment=assignment,
-                        criteria=crit,
-                        description=desc,
-                        max_score=max_score
-                    )
+                    
+                    if rubric_formset.is_valid():
+                        rubrics = rubric_formset.save(commit=False)
+                        for rubric in rubrics:
+                            rubric.assignment = assignment
+                            rubric.save()
+                    else:
+                        # Handle rubric errors
+                        pass
+                
+                # Delete any marked assignments
+                for assignment in formset.deleted_objects:
+                    assignment.delete()
+                
+                return None
+            else:
+                # Handle formset errors
+                return self.render_revalidation_failure('assignments', formset)
 
 
 
