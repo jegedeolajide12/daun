@@ -636,11 +636,13 @@ class CourseDeleteView(OwnerCourseMixin, DeleteView):
 
 @login_required
 def course_enroll(request, course_slug):
-    form = CourseEnrollForm()
+    print("DEBUG: course_enroll view called, method:", request.method)
+    enroll_form = CourseEnrollForm()
     course = get_object_or_404(Course, slug=course_slug)
     if request.method == 'POST':
         enroll_form = CourseEnrollForm(request.POST)
         if enroll_form.is_valid():
+            print("DEBUG: ENROLLING...")
             enrollment, created = Enrollment.objects.get_or_create(student=request.user,course=course)
             if created:
                 course.students.add(request.user)
@@ -656,17 +658,20 @@ def course_enroll(request, course_slug):
                     is_read=False
                 )
                 action.send(request.user, verb='Enrolled in', target=course)
+                print("DEBUG: COURSE ENROLLED")
                 messages.success(request, "You have successfully enrolled in the course!")
                 return redirect('course:course', course_slug=course.slug)
             else:
                 messages.error(request, "You are already enrolled in this course.")
             return redirect('course:course', course_slug=course.slug)
+        else:
+            print("Enroll form error:", enroll_form.errors)
     else:
+        print("Enroll form error:", enroll_form.errors)
         # Initialize the enrollment form with the current course
-        enroll_form = CourseEnrollForm(initial={'course': course})
+        enroll_form = CourseEnrollForm(initial={'course': course.id})
 
-    context = {'course': course, 'enroll_form': enroll_form}
-    return render(request, 'courses/manage/course/course_detail.html', context)
+    return redirect('course:course', course_slug=course.slug)
 
 
 @login_required
@@ -676,37 +681,15 @@ def course_detail(request, course_slug):
     is_student = course.students.filter(id=request.user.id).exists()
     is_instructor = request.user.groups.filter(name="Instructors").exists()
     is_admin = request.user.groups.filter(name="Admin")
-
-    if request.method == 'POST':
-        # Handle form submission
-        enroll_form = CourseEnrollForm(request.POST)
-        if enroll_form.is_valid():
-            enrollment, created = Enrollment.objects.get_or_create(student=request.user, course=course)  # Create an enrollment record
-            if created:
-                course.students.add(request.user)  # Enroll the user in the course
-                # Optionally, you can also create a notification for the course owner
-                Notification.objects.create(
-                    sender = request.user,
-                    related_course=course,
-                    recipient=course.owner,
-                    related_enrollment=enrollment,
-
-                    title="Enrollment Notification",
-                    message=f"{request.user.username} has enrolled in your course: {course.name}",
-                    notification_type="Enrollment",
-                    is_read=False
-                )
-                action.send(request.user, verb='Enrolled in', target=course)
-                messages.success(request, "You have successfully enrolled in the course!")
-                return redirect('course:course', course_slug=course.slug)
-            else:
-                messages.error(request, "You are already enrolled in this course.")
-            return redirect('course:course', course_slug=course.slug)
-    else:
-        # Initialize the enrollment form with the current course
-        enroll_form = CourseEnrollForm(initial={'course': course})
-
-    context = {'course': course, 'enroll_form': enroll_form, 'owner': owner, 'is_student': is_student, 'is_admin':is_admin, 'is_instructor': is_instructor}
+    enroll_form = CourseEnrollForm(initial={'course':course.id})
+    context = {
+        'course': course, 
+        'owner': owner, 
+        'is_student': is_student, 
+        'is_admin':is_admin, 
+        'is_instructor': is_instructor,
+        'enroll_form':enroll_form
+        }
     return render(request, 'courses/manage/course/course_detail.html', context)
 
 def course_unenroll(request, course_slug):

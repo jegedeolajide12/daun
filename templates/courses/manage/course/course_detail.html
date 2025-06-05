@@ -36,19 +36,19 @@
           <span class="h3 font-weight-bold text-dark">$94.99</span>
           <span class="text-muted ml-2"><del>$199.99</del></span>
         </div>
-        {% if not is_student %}
-          <form action="{% url "course:enroll_course" course.slug %}" method="post">
+        {% if is_student %}          
+                  <form method="post" action="{% url "course:course_unenroll" course.slug %}">
+          {% csrf_token %}  
+        <button class="btn btn-primary btn-block mb-2">Unenroll</button>
+        </form>
+        {% else %}
+        <form action="{% url "course:enroll_course" course.slug %}" method="post">
             {% csrf_token %}
+            {{ enroll_form.course }}
           <button class="btn btn-primary btn-block mb-2">Enroll Now</button>
           <button class="btn btn-outline-secondary btn-block"><i class="fas fa-heart mr-1"></i>Wishlist</button>
           </form>
-
-        {% else %}
-        <form method="post" action="{% url "course:course_unenroll" course.slug %}">
-          {% csrf_token %}  
-        <button class="btn btn-primary btn-block mb-2">Unenroll</button>
         {% endif %}
-        </form>
         <div class="text-center mt-2">
           <small class="text-muted">30-Day Money-Back Guarantee</small>
         </div>
