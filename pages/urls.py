@@ -8,7 +8,7 @@ from .views import (index, ManageCourseListView, CourseCreateView, CourseUpdateV
                     mark_notification_read, mark_all_notifications_read, create_assignment,
                     submit_assignment, assignment_detail, grade_assignments, get_submission_details, 
                     grade_submissions, create_assessment, manage_courses, attempt_assessment,
-                    assessment_result, CourseCreateWizard)
+                    assessment_result, CourseCreateWizard, course_enroll)
 
 
 app_name = 'course'
@@ -30,6 +30,7 @@ urlpatterns = [
     path('topic/<int:topic_id>/view/', topic_detail, name='topic_detail'),
     path('content/<int:content_id>/delete', ContentDeleteView.as_view(), name='content_delete'),
     
+    path('course/<slug:course_slug>/enroll/', course_enroll, name="enroll_course"),
     path('courses/<slug:course_slug>/unenroll/', course_unenroll, name='course_unenroll'),
 
 

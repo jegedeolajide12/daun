@@ -210,10 +210,15 @@ class CourseCreateWizard(SessionWizardView):
                 )
         elif step == 'assignments':
             course_id = self.storage.extra_data.get('course_id') or self.request.session.get('wizard_course_id')
+            course = get_object_or_404(Course, id=course_id)
+            # In get_form() for assignments step:
+            print(f"Assignments step - Course ID: {course_id}")
+            print(f"Step: {step} | Storage Course ID: {self.storage.extra_data.get('course_id')} | Session Course ID: {self.request.session.get('wizard_course_id')}")
             return AssignmentFormSet(
                 data=data,
                 files=files,
-                form_kwargs={'course_id': course_id}
+                instance=course,
+                form_kwargs={'course': course}
             )
         return super().get_form(step, data, files)
 
@@ -246,16 +251,7 @@ class CourseCreateWizard(SessionWizardView):
             context['topics'] = Topic.objects.filter(course_id=course_id)
         elif self.steps.current == 'assignments':
             course_id = self.storage.extra_data.get('course_id') or self.request.session.get('wizard_course_id')
-            if self.request.method == 'POST':
-                formset = AssignmentFormSet(
-                    self.request.POST,
-                    self.request.FILES,
-                    form_kwargs={'course_id': course_id}
-                )
-            else:
-                formset = AssignmentFormSet(
-                    form_kwargs={'course_id': course_id}
-                )
+            course = get_object_or_404(Course, id=course_id)
             context['formset'] = formset
             context['topics'] = Topic.objects.filter(course_id=course_id)
         
@@ -637,6 +633,40 @@ class CourseDeleteView(OwnerCourseMixin, DeleteView):
     def post(self, request, *args, **kwargs):
         messages.success(request, "Course deleted successfully!")
         return super().post(request, *args, **kwargs)
+
+@login_required
+def course_enroll(request, course_slug):
+    form = CourseEnrollForm()
+    course = get_object_or_404(Course, slug=course_slug)
+    if request.method == 'POST':
+        enroll_form = CourseEnrollForm(request.POST)
+        if enroll_form.is_valid():
+            enrollment, created = Enrollment.objects.get_or_create(student=request.user,course=course)
+            if created:
+                course.students.add(request.user)
+                Notification.objects.create(
+                    sender = request.user,
+                    related_course=course,
+                    recipient=course.owner,
+                    related_enrollment=enrollment,
+
+                    title="Enrollment Notification",
+                    message=f"{request.user.username} has enrolled in your course: {course.name}",
+                    notification_type="Enrollment",
+                    is_read=False
+                )
+                action.send(request.user, verb='Enrolled in', target=course)
+                messages.success(request, "You have successfully enrolled in the course!")
+                return redirect('course:course', course_slug=course.slug)
+            else:
+                messages.error(request, "You are already enrolled in this course.")
+            return redirect('course:course', course_slug=course.slug)
+    else:
+        # Initialize the enrollment form with the current course
+        enroll_form = CourseEnrollForm(initial={'course': course})
+
+    context = {'course': course, 'enroll_form': enroll_form}
+    return render(request, 'courses/manage/course/course_detail.html', context)
 
 
 @login_required

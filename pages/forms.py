@@ -324,22 +324,22 @@ class CourseTopicAssignmentsForm(forms.ModelForm):
             }),
         }
     def __init__(self, *args, **kwargs):
-        course_id = kwargs.pop('course_id', None)
+        course = kwargs.pop('course', None)
         super().__init__(*args, **kwargs)
 
-        if course_id:
-            self.fields['topic'].queryset = Topic.objects.filter(course=course_id)
+        if course:
+            self.fields['topic'].queryset = Topic.objects.filter(course=course)
         else:
             self.fields['topic'].queryset = Topic.objects.none()
         self.fields['file'].required = False
     
 AssignmentFormSet = inlineformset_factory(
-    Topic,
+    Course,
     Assignment,
     form=CourseTopicAssignmentsForm,
     extra=1,
     can_delete=True,
-    fields=['title', 'description', 'topic', 'file', 'max_score']
+    fields=['title', 'description', 'topic', 'file', 'max_score'],
 )
 
 
