@@ -18,7 +18,7 @@ from accounts.models import CustomUser
 from .forms import CourseEnrollForm
 
 
-class StudentHomePage(ListView):
+class StudentHomePage(LoginRequiredMixin, ListView):
     model = Course
     template_name = 'courses/student_home.html'
     context_object_name = 'courses'

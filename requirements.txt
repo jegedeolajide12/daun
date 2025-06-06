@@ -23,3 +23,6 @@ sqlparse==0.4.3
 typing_extensions==4.9.0
 urllib3==1.26.14
 whitenoise==6.7.0
+django-widget-tweaks==1.5.0
+django-activity-stream==2.0.0
+django-formtools==2.5.1

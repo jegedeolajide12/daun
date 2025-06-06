@@ -3,7 +3,6 @@ from django import forms
 
 from django.core.exceptions import ValidationError
 from django.contrib.contenttypes.models import ContentType
-from pkg_resources import require
 from django.forms import inlineformset_factory, modelformset_factory, formset_factory, BaseFormSet
 
 from pages.templatetags import course
