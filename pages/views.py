@@ -209,7 +209,7 @@ class CourseCreateWizard(SessionWizardView):
                 form_kwargs={'owner':self.request.user, 'course_id':course_id}
                 )
         elif step == 'assignments':
-            course_id = self.storage.extra_data.get('course_id') or self.request.session.get('wizard_course_id')
+            course_id = self.storage.extra_data.get('course_id')
             course = get_object_or_404(Course, id=course_id)
             # In get_form() for assignments step:
             print(f"Assignments step - Course ID: {course_id}")
