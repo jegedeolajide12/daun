@@ -251,6 +251,10 @@ class CourseCreateWizard(SessionWizardView):
             context['topics'] = Topic.objects.filter(course_id=course_id)
         elif self.steps.current == 'assignments':
             course_id = self.storage.extra_data.get('course_id') or self.request.session.get('wizard_course_id')
+            if not course_id:
+                messages.error(self.request, "Course not found. Please complete the basics step first.")
+                return self.render_goto_step('basics')
+            
             course = get_object_or_404(Course, id=course_id)
             context['formset'] = formset
             context['topics'] = Topic.objects.filter(course_id=course_id)
@@ -381,6 +385,7 @@ class CourseCreateWizard(SessionWizardView):
         elif step == 'assignments':
             course_id = self.storage.extra_data.get('course_id')
             if not course_id:
+                messages.error(self.request, "Course not found. Please complete the basics step first.")
                 return self.render_goto_step('basics')
             
             try:
