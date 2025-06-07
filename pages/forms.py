@@ -323,11 +323,13 @@ class CourseTopicAssignmentsForm(forms.ModelForm):
             }),
         }
     def __init__(self, *args, **kwargs):
+        self.course = kwargs.pop('course_id', None)
         course = kwargs.pop('course', None)
+        course_id = kwargs.pop('course_id', None)
         super().__init__(*args, **kwargs)
 
-        if course:
-            self.fields['topic'].queryset = Topic.objects.filter(course=course)
+        if course_id:
+            self.fields['topic'].queryset = Topic.objects.filter(course=course_id)
         else:
             self.fields['topic'].queryset = Topic.objects.none()
         self.fields['file'].required = False

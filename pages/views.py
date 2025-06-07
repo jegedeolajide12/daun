@@ -210,7 +210,7 @@ class CourseCreateWizard(SessionWizardView):
                 )
         elif step == 'assignments':
             course_id = self.storage.extra_data.get('course_id')
-            course = get_object_or_404(Course, id=course_id)
+            course = get_object_or_404(Course.all_objects, id=course_id)
             # In get_form() for assignments step:
             print(f"Assignments step - Course ID: {course_id}")
             print(f"Step: {step} | Storage Course ID: {self.storage.extra_data.get('course_id')} | Session Course ID: {self.request.session.get('wizard_course_id')}")
@@ -255,11 +255,26 @@ class CourseCreateWizard(SessionWizardView):
                 messages.error(self.request, "Course not found. Please complete the basics step first.")
                 return self.render_goto_step('basics')
             
-            course = get_object_or_404(Course, id=course_id)
-            context['formset'] = formset
-            context['topics'] = Topic.objects.filter(course_id=course_id)
+            try:
+                course = Course.all_objects.get(id=course_id)
+                # Initialize the assignments formset
+                formset = AssignmentFormSet(
+                    instance=course,
+                    form_kwargs={'course': course}
+                )
+                
+                context.update({
+                    'formset': formset,
+                    'course': course,
+                    'topics': Topic.objects.filter(course_id=course_id),
+                    'initial_rubrics': Rubric.objects.none()  # Or provide actual initial rubrics if needed
+                })
+            except Course.DoesNotExist:
+                messages.error(self.request, "Course not found.")
+                return self.render_goto_step('basics')
         
         return context
+        
 
         
     
@@ -389,7 +404,7 @@ class CourseCreateWizard(SessionWizardView):
                 return self.render_goto_step('basics')
             
             try:
-                course = Course.objects.get(id=course_id)
+                course = Course.all_objects.get(id=course_id)
             except Course.DoesNotExist:
                 messages.error(self.request, "Course not found.")
                 return self.render_goto_step('basics')
