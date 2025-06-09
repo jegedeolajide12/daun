@@ -19,7 +19,7 @@
                             {{ formset.management_form }}
                             <div id="assignments-container">
                                 {% for form in formset %}
-                                <div class="assignment-section mb-5 border-bottom pb-4">
+                                <div class="assignment-section mb-5 border-bottom pb-4" data-assignment-index="{{ forloop.counter0 }}">
                                     <div class="row g-3">
                                         <div class="col-12 d-flex justify-content-between align-items-center">
                                             <h5>Assignment #{{ forloop.counter }}</h5>
@@ -104,6 +104,52 @@
                                 {% endfor %}
                             </div>
 
+                            <!-- Empty assignment form (hidden) -->
+                            <div id="empty-assignment-form" style="display:none;">
+                                <div class="assignment-section mb-5 border-bottom pb-4" data-assignment-index="__prefix__">
+                                    <div class="row g-3">
+                                        <div class="col-12 d-flex justify-content-between align-items-center">
+                                            <h5>Assignment #<span class="assignment-counter">{{ forloop.counter }}</span></h5>
+                                            <input type="hidden" name="assignment_set-__prefix__-id" id="id_assignment_set-__prefix__-id">
+                                            <input type="checkbox" name="assignment_set-__prefix__-DELETE" id="id_assignment_set-__prefix__-DELETE">
+                                            <button type="button" class="btn btn-danger btn-sm remove-assignment">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                        <!-- Render all assignment fields using the empty form -->
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Title</label>
+                                            {{ formset.empty_form.title }}
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Topic</label>
+                                            {{ formset.empty_form.topic }}
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label fw-bold">Description</label>
+                                            {{ formset.empty_form.description }}
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">File Upload</label>
+                                            {{ formset.empty_form.file }}
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Max Score</label>
+                                            {{ formset.empty_form.max_score }}
+                                        </div>
+                                        <div class="col-12 mt-4">
+                                            <h6 class="mb-3">Rubric Criteria</h6>
+                                            <div class="rubric-container">
+                                                <!-- Empty rubric container -->
+                                            </div>
+                                            <button type="button" class="btn btn-outline-secondary btn-sm add-rubric">
+                                                <i class="bi bi-plus"></i> Add Criteria
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- Add Assignment button -->
                             <div class="mb-4">
                                 <button type="button" id="add-assignment" class="btn btn-outline-primary">
@@ -127,14 +173,15 @@
         </div>
     </div>
 </main>
-{% endblock %}
 
-{% block extra_js %}
+
+
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const assignmentsContainer = document.getElementById('assignments-container');
     const totalFormsInput = document.getElementById('id_assignment_set-TOTAL_FORMS');
-    let assignmentIndex = parseInt(totalFormsInput.value);
+    let assignmentIndex = totalFormsInput ? parseInt(totalFormsInput.value) : 0;
     let rubricCounters = {};
 
     // Initialize rubric counters
@@ -145,100 +192,45 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Add new assignment
     document.getElementById('add-assignment').addEventListener('click', function() {
-        const newIndex = assignmentIndex++;
-        totalFormsInput.value = assignmentIndex;
+        const newIndex = assignmentIndex;
+        assignmentIndex++;
         
+        if (totalFormsInput) {
+            totalFormsInput.value = assignmentIndex;
+        }
+        
+        // Clone the empty form template
+        const emptyForm = document.getElementById('empty-assignment-form').cloneNode(true);
+        emptyForm.style.display = 'block';
+        emptyForm.id = ''; // Remove ID to avoid duplicates
+        
+        // Replace all __prefix__ placeholders with the new index
+        let newFormHtml = emptyForm.innerHTML.replace(/__prefix__/g, newIndex);
+        
+        // Create a new div for the assignment
         const newAssignment = document.createElement('div');
         newAssignment.className = 'assignment-section mb-5 border-bottom pb-4';
-        newAssignment.innerHTML = `
-            <div class="row g-3">
-                <div class="col-12 d-flex justify-content-between align-items-center">
-                    <h5>Assignment #${assignmentIndex + 1}</h5>
-                    <div style="display:none">
-                        <input type="checkbox" name="assignment_set-${newIndex}-DELETE" id="id_assignment_set-${newIndex}-DELETE">
-                    </div>
-                    <button type="button" class="btn btn-danger btn-sm remove-assignment">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                </div>
-                
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">Title</label>
-                    <input type="text" name="assignment_set-${newIndex}-title" class="form-control" required>
-                </div>
-                
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">Topic</label>
-                    <select name="assignment_set-${newIndex}-topic" class="form-control">
-                        {% for topic in topics %}
-                        <option value="{{ topic.id }}">{{ topic.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                
-                <div class="col-12">
-                    <label class="form-label fw-bold">Description</label>
-                    <textarea name="assignment_set-${newIndex}-description" class="form-control" rows="3"></textarea>
-                </div>
-                
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">File Upload</label>
-                    <input type="file" name="assignment_set-${newIndex}-file" class="form-control">
-                </div>
-                
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">Max Score</label>
-                    <input type="number" name="assignment_set-${newIndex}-max_score" class="form-control" min="0" max="100" value="100">
-                </div>
-
-                <div class="col-12 mt-4">
-                    <h6 class="mb-3">Rubric Criteria</h6>
-                    <div class="rubric-container" data-assignment-index="${newIndex}">
-                        <div class="rubric-criteria mb-3">
-                            <div class="row g-2">
-                                <div class="col-md-4">
-                                    <input type="text" 
-                                           name="rubrics_${newIndex}-0-criteria"
-                                           class="form-control"
-                                           placeholder="Criteria">
-                                </div>
-                                <div class="col-md-4">
-                                    <input type="text" 
-                                           name="rubrics_${newIndex}-0-description"
-                                           class="form-control"
-                                           placeholder="Description">
-                                </div>
-                                <div class="col-md-3">
-                                    <input type="number" 
-                                           name="rubrics_${newIndex}-0-max_score"
-                                           class="form-control"
-                                           placeholder="Max Score"
-                                           min="0">
-                                </div>
-                                <div class="col-md-1">
-                                    <button type="button" 
-                                            class="btn btn-danger btn-sm remove-rubric">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <button type="button" 
-                            class="btn btn-outline-secondary btn-sm add-rubric">
-                        <i class="bi bi-plus"></i> Add Criteria
-                    </button>
-                </div>
-            </div>
-        `;
+        newAssignment.setAttribute('data-assignment-index', newIndex);
+        newAssignment.innerHTML = newFormHtml;
         
+        // Update the assignment counter
+        const counterSpan = newAssignment.querySelector('.assignment-counter');
+        if (counterSpan) {
+            counterSpan.textContent = assignmentIndex + 1;
+        }
+        
+        // Append to container
         assignmentsContainer.appendChild(newAssignment);
-        rubricCounters[newIndex] = 1;  // Initialize rubric counter for this assignment
+        
+        // Initialize rubric counter for this assignment
+        rubricCounters[newIndex] = 0;
     });
+
 
     // Remove assignment
     assignmentsContainer.addEventListener('click', function(e) {
-        if(e.target.closest('.remove-assignment')) {
+        // Handle assignment deletion
+        if (e.target.closest('.remove-assignment')) {
             const assignmentSection = e.target.closest('.assignment-section');
             const deleteCheckbox = assignmentSection.querySelector('input[type="checkbox"][name$="-DELETE"]');
             
@@ -247,13 +239,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 assignmentSection.style.display = 'none';
             }
         }
+        
+        // Handle rubric deletion
+        if (e.target.closest('.remove-rubric')) {
+            e.target.closest('.rubric-criteria').remove();
+        }
     });
 
     // Add rubric criteria
-    document.addEventListener('click', function(e) {
-        if(e.target.closest('.add-rubric')) {
-            const rubricContainer = e.target.closest('.rubric-container');
-            const assignmentIndex = rubricContainer.dataset.assignmentIndex;
+    assignmentsContainer.addEventListener('click', function(e) {
+        if (e.target.closest('.add-rubric')) {
+            const assignmentSection = e.target.closest('.assignment-section');
+            const rubricContainer = assignmentSection.querySelector('.rubric-container');
+            const assignmentIndex = assignmentSection.dataset.assignmentIndex;
+            
+            // Initialize counter if needed
+            if (typeof rubricCounters[assignmentIndex] === 'undefined') {
+                rubricCounters[assignmentIndex] = 0;
+            }
+            
             const rubricIndex = rubricCounters[assignmentIndex]++;
             
             const newCriteria = document.createElement('div');
@@ -262,22 +266,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="row g-2">
                     <div class="col-md-4">
                         <input type="text" 
-                               name="rubrics_${assignmentIndex}-${rubricIndex}-criteria"
-                               class="form-control"
-                               placeholder="Criteria">
+                            name="rubrics_${assignmentIndex}-${rubricIndex}-criteria"
+                            class="form-control"
+                            placeholder="Criteria">
                     </div>
                     <div class="col-md-4">
                         <input type="text" 
-                               name="rubrics_${assignmentIndex}-${rubricIndex}-description"
-                               class="form-control"
-                               placeholder="Description">
+                            name="rubrics_${assignmentIndex}-${rubricIndex}-description"
+                            class="form-control"
+                            placeholder="Description">
                     </div>
                     <div class="col-md-3">
                         <input type="number" 
-                               name="rubrics_${assignmentIndex}-${rubricIndex}-max_score"
-                               class="form-control"
-                               placeholder="Max Score"
-                               min="0">
+                            name="rubrics_${assignmentIndex}-${rubricIndex}-max_score"
+                            class="form-control"
+                            placeholder="Max Score"
+                            min="0">
                     </div>
                     <div class="col-md-1">
                         <button type="button" 
@@ -287,11 +291,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 </div>
             `;
-            
             rubricContainer.appendChild(newCriteria);
         }
     });
-
     // Remove rubric criteria
     document.addEventListener('click', function(e) {
         if(e.target.closest('.remove-rubric')) {

@@ -289,6 +289,14 @@ class RubricForm(forms.ModelForm):
             'max_score': forms.NumberInput(attrs={'class': 'form-control', 'min': 0, 'placeholder': 'Max Score'}),
         }
 
+RubricFormSet = inlineformset_factory(
+    Assignment,
+    Rubric,
+    form=RubricForm,
+    extra=1,
+    can_delete=True,
+)
+
 
 class CourseTopicAssignmentsForm(forms.ModelForm):
     class Meta:
@@ -328,8 +336,8 @@ class CourseTopicAssignmentsForm(forms.ModelForm):
         course_id = kwargs.pop('course_id', None)
         super().__init__(*args, **kwargs)
 
-        if course_id:
-            self.fields['topic'].queryset = Topic.objects.filter(course=course_id)
+        if course is not None:
+            self.fields['topic'].queryset = Topic.objects.filter(course=course)
         else:
             self.fields['topic'].queryset = Topic.objects.none()
         self.fields['file'].required = False

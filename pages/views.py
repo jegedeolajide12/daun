@@ -47,7 +47,7 @@ from .forms import (FacultyForm, CourseTopicAssignmentsForm, SubmissionForm,
                     CourseTopicAssessmentsForm, MCQOptionForm, CourseBasicsForm, CourseTopicsForm,
                     CourseTopicContentForm, AssessmentQuestionForm, CourseTrailerForm, CourseRequirementsForm, 
                     CourseMarketingForm, CourseObjectivesForm, CourseForm, ModuleFormSet, CourseTopicContentForm, 
-                    ContentFormSet, AssignmentFormSet, RubricForm )
+                    ContentFormSet, AssignmentFormSet, RubricForm, RubricFormSet )
 
 def create_faculty(request):
     if request.method == "POST":
@@ -267,16 +267,14 @@ class CourseCreateWizard(SessionWizardView):
                     'formset': formset,
                     'course': course,
                     'topics': Topic.objects.filter(course_id=course_id),
-                    'initial_rubrics': Rubric.objects.none()  # Or provide actual initial rubrics if needed
+                    'initial_rubrics': Rubric.objects.none(),
+                    'empty_form': formset.empty_form
                 })
             except Course.DoesNotExist:
                 messages.error(self.request, "Course not found.")
                 return self.render_goto_step('basics')
         
         return context
-        
-
-        
     
 
     def get_form_initial(self, step):
@@ -415,7 +413,7 @@ class CourseCreateWizard(SessionWizardView):
                 self.request.POST,
                 self.request.FILES,
                 instance=course,
-                queryset=Assignment.objects.filter(course=course)
+                queryset=Assignment.all_objects.filter(course=course)
             )
             
             if formset.is_valid():
@@ -427,9 +425,10 @@ class CourseCreateWizard(SessionWizardView):
                     assignment.save()
                     
                     # Process rubrics
-                    rubric_formset = forms.formset_factory(RubricForm, extra=0)(
+                    rubric_formset = RubricFormSet(
                         self.request.POST,
-                        prefix=f'rubrics_{i}'
+                        prefix=f'rubrics_{i}',
+                        queryset=Rubric.all_objects.filter(assignment=assignment)
                     )
                     
                     if rubric_formset.is_valid():
@@ -588,7 +587,6 @@ class CourseCreateWizard(SessionWizardView):
         messages.success(self.request, "Course created successfully!")
         return redirect('course:course', course_slug=course.slug)
     
-
 
 
 class OwnerCourseMixin(OwnerMixin, LoginRequiredMixin, PermissionRequiredMixin):
