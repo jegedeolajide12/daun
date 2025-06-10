@@ -295,6 +295,7 @@ RubricFormSet = inlineformset_factory(
     form=RubricForm,
     extra=1,
     can_delete=True,
+    fields=['criteria', 'description', 'max_score']
 )
 
 

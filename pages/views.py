@@ -263,12 +263,25 @@ class CourseCreateWizard(SessionWizardView):
                     form_kwargs={'course': course}
                 )
                 
+                assignment_forms = []
+                for i, assignment_form in enumerate(formset):
+                    if assignment_form.instance.pk:
+                        rubric_formset = RubricFormSet(
+                            instance=assignment_form.instance,
+                            prefix=f'ribrics_{i}'
+                        )
+                    else:
+                        rubric_formset = RubricFormSet(prefix=f'rubrics_{i}')
+                    assignment_forms.append((assignment_form, rubric_formset))
+
                 context.update({
                     'formset': formset,
                     'course': course,
                     'topics': Topic.objects.filter(course_id=course_id),
                     'initial_rubrics': Rubric.objects.none(),
-                    'empty_form': formset.empty_form
+                    'empty_form': formset.empty_form,
+                    'assignment_forms': assignment_forms,
+                    'RubricFormSet': RubricFormSet,
                 })
             except Course.DoesNotExist:
                 messages.error(self.request, "Course not found.")
@@ -408,37 +421,33 @@ class CourseCreateWizard(SessionWizardView):
                 return self.render_goto_step('basics')
             
             # Initialize formset
-            AssignmentFormSet.form = staticmethod(lambda *args, **kwargs: CourseTopicAssignmentsForm(*args, course=course, **kwargs))
             formset = AssignmentFormSet(
                 self.request.POST,
                 self.request.FILES,
                 instance=course,
-                queryset=Assignment.all_objects.filter(course=course)
+                form_kwargs={'course': course}
             )
             
             if formset.is_valid():
                 assignments = formset.save(commit=False)
                 
-                # Save assignments and their rubrics
-                for i, assignment in enumerate(assignments):
+                for assignment in assignments:
                     assignment.course = course
                     assignment.save()
-                    
-                    # Process rubrics
+                
+                # Process rubrics for each assignment
+                for i, assignment in enumerate(assignments):
                     rubric_formset = RubricFormSet(
                         self.request.POST,
                         prefix=f'rubrics_{i}',
-                        queryset=Rubric.all_objects.filter(assignment=assignment)
+                        instance=assignment
                     )
                     
                     if rubric_formset.is_valid():
-                        rubrics = rubric_formset.save(commit=False)
-                        for rubric in rubrics:
-                            rubric.assignment = assignment
-                            rubric.save()
+                        rubric_formset.save()
                     else:
                         # Handle rubric errors
-                        pass
+                        messages.error(self.request, f"Error in rubrics for assignment: {assignment.title}")
                 
                 # Delete any marked assignments
                 for assignment in formset.deleted_objects:
@@ -446,9 +455,7 @@ class CourseCreateWizard(SessionWizardView):
                 
                 return None
             else:
-                # Handle formset errors
                 return self.render_revalidation_failure('assignments', formset)
-
 
 
         elif step == 'assessments':
