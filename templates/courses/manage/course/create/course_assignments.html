@@ -123,49 +123,58 @@ document.addEventListener('DOMContentLoaded', function() {
     // Assignment Form Management
     const assignmentsContainer = document.getElementById('assignments-container');
     const totalFormsInput = document.querySelector('[name="assignment_set-TOTAL_FORMS"]');
-    const assignmentCounter = document.querySelectorAll('.assignment-section').length;
+    
+    // Store initial assignment count
+    const initialAssignmentCount = assignmentsContainer.querySelectorAll('.assignment-section').length;
     
     // Function to update all assignment numbers and indices
     function updateAssignments() {
-        const visibleAssignments = Array.from(assignmentsContainer.querySelectorAll('.assignment-section:not([style*="display: none"])'));
+        // Only get visible assignment sections
+        const visibleAssignments = Array.from(assignmentsContainer.querySelectorAll('.assignment-section'))
+            .filter(section => section.style.display !== 'none');
         
         visibleAssignments.forEach((section, index) => {
-            // Update visual numbering
+            // Update the visual numbering
             const counterElement = section.querySelector('h5');
             if (counterElement) {
                 counterElement.innerHTML = `Assignment #${index + 1}`;
             }
             
-            // Update data attribute
+            // Update the data attribute
             section.dataset.assignmentIndex = index;
             
-            // Update form field names
-            const assignmentPrefix = `assignment_set-${index}`;
-            const oldPrefix = `assignment_set-${section.dataset.originalIndex}`;
+            // Store the original index for future updates
+            section.dataset.originalIndex = index;
             
-            // Update assignment fields
+            // Update form field names if needed
+            const newPrefix = `assignment_set-${index}`;
+            const oldPrefix = `assignment_set-${section.dataset.oldIndex || index}`;
+            
+            // Update all input names in this section
             section.querySelectorAll('input, select, textarea').forEach(input => {
                 if (input.name && input.name.startsWith(oldPrefix)) {
-                    input.name = input.name.replace(oldPrefix, assignmentPrefix);
+                    input.name = input.name.replace(oldPrefix, newPrefix);
                 }
             });
             
-            // Update rubric management forms
+            // Update rubric management forms if they exist
             const rubricManagement = section.querySelector('.rubric-management');
             if (rubricManagement) {
                 rubricManagement.querySelectorAll('input').forEach(input => {
                     if (input.name.includes('rubrics_')) {
-                        input.name = input.name.replace(/rubrics_\d+/, `rubrics_${index}`);
-                        input.id = input.id.replace(/rubrics_\d+/, `rubrics_${index}`);
+                        const oldRubricPrefix = `rubrics_${section.dataset.oldIndex || index}`;
+                        const newRubricPrefix = `rubrics_${index}`;
+                        input.name = input.name.replace(oldRubricPrefix, newRubricPrefix);
+                        input.id = input.id.replace(oldRubricPrefix, newRubricPrefix);
                     }
                 });
             }
             
-            // Store original index for future updates
-            section.dataset.originalIndex = index;
+            // Store the old index for next update
+            section.dataset.oldIndex = index;
         });
         
-        // Update total forms count
+        // Update the total forms count
         if (totalFormsInput) {
             totalFormsInput.value = visibleAssignments.length;
         }
@@ -173,18 +182,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Add new assignment
     document.getElementById('add-assignment').addEventListener('click', function() {
-        const currentAssignmentCount = assignmentsContainer.querySelectorAll('.assignment-section').length;
-        const newIndex = currentAssignmentCount;
+        // Get the current total form count
+        const newIndex = totalFormsInput ? parseInt(totalFormsInput.value) : initialAssignmentCount;
         
-        // Clone the last assignment form
-        const lastAssignment = assignmentsContainer.querySelector('.assignment-section:last-child');
-        if (!lastAssignment) return;
+        // Find the last visible assignment to clone
+        const visibleAssignments = Array.from(assignmentsContainer.querySelectorAll('.assignment-section'))
+            .filter(section => section.style.display !== 'none');
         
-        const newAssignment = lastAssignment.cloneNode(true);
+        if (visibleAssignments.length === 0) {
+            console.error("No visible assignments to clone");
+            return;
+        }
+        
+        const lastVisibleAssignment = visibleAssignments[visibleAssignments.length - 1];
+        
+        // Clone the assignment form
+        const newAssignment = lastVisibleAssignment.cloneNode(true);
         newAssignment.dataset.assignmentIndex = newIndex;
         newAssignment.dataset.originalIndex = newIndex;
+        newAssignment.dataset.oldIndex = newIndex;
         
-        // Reset values
+        // Reset values and remove errors
         newAssignment.querySelectorAll('input, select, textarea').forEach(input => {
             if (input.name && !input.name.includes('DELETE') && !input.name.includes('id')) {
                 if (input.type === 'checkbox' || input.type === 'radio') {
@@ -192,13 +210,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else {
                     input.value = '';
                 }
-            }
-            
-            // Remove any existing error messages
-            input.classList.remove('is-invalid');
-            const errorElement = input.nextElementSibling;
-            if (errorElement && errorElement.classList.contains('invalid-feedback')) {
-                errorElement.remove();
+                
+                // Remove any existing error messages
+                input.classList.remove('is-invalid');
+                const errorElement = input.nextElementSibling;
+                if (errorElement && errorElement.classList.contains('invalid-feedback')) {
+                    errorElement.remove();
+                }
             }
         });
         
@@ -208,7 +226,7 @@ document.addEventListener('DOMContentLoaded', function() {
             rubricContainer.innerHTML = '';
         }
         
-        // Add new management form for rubrics
+        // Create new rubric management form
         const rubricManagement = document.createElement('div');
         rubricManagement.className = 'rubric-management';
         rubricManagement.style.display = 'none';
@@ -223,22 +241,23 @@ document.addEventListener('DOMContentLoaded', function() {
         // Append to container
         assignmentsContainer.appendChild(newAssignment);
         
-        // Update total forms count
+        // Update the total forms count
         if (totalFormsInput) {
-            totalFormsInput.value = parseInt(totalFormsInput.value) + 1;
+            totalFormsInput.value = newIndex + 1;
         }
         
-        // Update all assignments
+        // Update all assignments (numbers and indices)
         updateAssignments();
     });
 
-    // Initialize assignment numbers
+    // Initialize assignment numbers and store original indices
     document.querySelectorAll('.assignment-section').forEach((section, index) => {
         section.dataset.originalIndex = index;
+        section.dataset.oldIndex = index;
     });
     updateAssignments();
 
-    // Event delegation for dynamic elements
+    // Event delegation for all dynamic elements
     document.addEventListener('click', function(e) {
         // Handle assignment deletion
         if (e.target.closest('.remove-assignment')) {
