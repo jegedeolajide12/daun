@@ -33,32 +33,60 @@
                                         <div class="col-md-6">
                                             <label class="form-label fw-bold">Title</label>
                                             {{ form.title }}
+                                            {% if form.title.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.title.errors }}
+                                                </div>
+                                            {% endif %}
                                         </div>
                                         
                                         <div class="col-md-6">
                                             <label class="form-label fw-bold">Topic</label>
                                             {{ form.topic }}
+                                            {% if form.topic.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.topic.errors }}
+                                                </div>
+                                            {% endif %}
                                         </div>
                                         
                                         <div class="col-12">
                                             <label class="form-label fw-bold">Description</label>
                                             {{ form.description }}
+                                            {% if form.description.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.description.errors }}
+                                                </div>
+                                            {% endif %}
                                         </div>
                                         
                                         <div class="col-md-6">
                                             <label class="form-label fw-bold">File Upload</label>
                                             {{ form.file }}
+                                            {% if form.file.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.file.errors }}
+                                                </div>
+                                            {% endif %}
                                         </div>
                                         
                                         <div class="col-md-6">
                                             <label class="form-label fw-bold">Max Score</label>
                                             {{ form.max_score }}
+                                            {% if form.max_score.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.max_score.errors }}
+                                                </div>
+                                            {% endif %}
                                         </div>
 
                                         <!-- Rubric Section -->
                                         <div class="col-12 mt-4">
                                             <h6 class="mb-3">Rubric Criteria</h6>
-                                            {{ rubric_formset.management_form }}
+                                            <!-- Hidden management form for rubrics -->
+                                            <div class="rubric-management" style="display: none;">
+                                                {{ rubric_formset.management_form }}
+                                            </div>
                                             <div class="rubric-container" data-assignment-index="{{ forloop.counter0 }}">
                                                 {% for rubric_form in rubric_formset %}
                                                 <div class="rubric-criteria mb-3">
@@ -66,14 +94,29 @@
                                                     <div class="row g-2">
                                                         <div class="col-md-4">
                                                             {{ rubric_form.criteria }}
+                                                            {% if rubric_form.criteria.errors %}
+                                                                <div class="invalid-feedback d-block">
+                                                                    {{ rubric_form.criteria.errors }}
+                                                                </div>
+                                                            {% endif %}
                                                         </div>
                                                         <div class="col-md-4">
                                                             {{ rubric_form.description }}
+                                                            {% if rubric_form.description.errors %}
+                                                                <div class="invalid-feedback d-block">
+                                                                    {{ rubric_form.description.errors }}
+                                                                </div>
+                                                            {% endif %}
                                                         </div>
                                                         <div class="col-md-3">
                                                             {{ rubric_form.max_score }}
+                                                            {% if rubric_form.max_score.errors %}
+                                                                <div class="invalid-feedback d-block">
+                                                                    {{ rubric_form.max_score.errors }}
+                                                                </div>
+                                                            {% endif %}
                                                         </div>
-                                                        <div class="col-md-1">
+                                                        <div class="col-md-1 d-flex align-items-center">
                                                             {% if rubric_form.DELETE %}
                                                                 {{ rubric_form.DELETE }}
                                                             {% endif %}
@@ -103,9 +146,9 @@
 
                             <!-- Form Navigation -->
                             <div class="d-flex justify-content-between mt-5">
-                                <a href="#" class="btn btn-outline-primary">
+                                <button type="button" class="btn btn-outline-primary prev-step">
                                     <i class="bi bi-chevron-left me-2"></i>Previous
-                                </a>
+                                </button>
                                 <button type="submit" class="btn btn-primary">
                                     Next Step<i class="bi bi-chevron-right ms-2"></i>
                                 </button>
@@ -123,58 +166,65 @@ document.addEventListener('DOMContentLoaded', function() {
     // Assignment Form Management
     const assignmentsContainer = document.getElementById('assignments-container');
     const totalFormsInput = document.querySelector('[name="assignment_set-TOTAL_FORMS"]');
-    
-    // Store initial assignment count
     const initialAssignmentCount = assignmentsContainer.querySelectorAll('.assignment-section').length;
     
     // Function to update all assignment numbers and indices
     function updateAssignments() {
-        // Only get visible assignment sections
         const visibleAssignments = Array.from(assignmentsContainer.querySelectorAll('.assignment-section'))
             .filter(section => section.style.display !== 'none');
         
-        visibleAssignments.forEach((section, index) => {
-            // Update the visual numbering
+        visibleAssignments.forEach((section, newIndex) => {
+            const oldIndex = section.dataset.assignmentIndex;
+            
+            // Update visual numbering
             const counterElement = section.querySelector('h5');
             if (counterElement) {
-                counterElement.innerHTML = `Assignment #${index + 1}`;
+                counterElement.innerHTML = `Assignment #${newIndex + 1}`;
             }
             
-            // Update the data attribute
-            section.dataset.assignmentIndex = index;
+            // Update assignment form fields
+            const newAssignmentPrefix = `assignment_set-${newIndex}`;
+            const oldAssignmentPrefix = `assignment_set-${oldIndex}`;
             
-            // Store the original index for future updates
-            section.dataset.originalIndex = index;
-            
-            // Update form field names if needed
-            const newPrefix = `assignment_set-${index}`;
-            const oldPrefix = `assignment_set-${section.dataset.oldIndex || index}`;
-            
-            // Update all input names in this section
             section.querySelectorAll('input, select, textarea').forEach(input => {
-                if (input.name && input.name.startsWith(oldPrefix)) {
-                    input.name = input.name.replace(oldPrefix, newPrefix);
+                if (input.name && input.name.startsWith(oldAssignmentPrefix)) {
+                    input.name = input.name.replace(oldAssignmentPrefix, newAssignmentPrefix);
+                    input.id = input.id.replace(oldAssignmentPrefix, newAssignmentPrefix);
                 }
             });
             
-            // Update rubric management forms if they exist
+            // Update rubric management forms
             const rubricManagement = section.querySelector('.rubric-management');
             if (rubricManagement) {
                 rubricManagement.querySelectorAll('input').forEach(input => {
                     if (input.name.includes('rubrics_')) {
-                        const oldRubricPrefix = `rubrics_${section.dataset.oldIndex || index}`;
-                        const newRubricPrefix = `rubrics_${index}`;
+                        const oldRubricPrefix = `rubrics_${oldIndex}`;
+                        const newRubricPrefix = `rubrics_${newIndex}`;
                         input.name = input.name.replace(oldRubricPrefix, newRubricPrefix);
                         input.id = input.id.replace(oldRubricPrefix, newRubricPrefix);
                     }
                 });
             }
             
-            // Store the old index for next update
-            section.dataset.oldIndex = index;
+            // Update rubric form fields
+            const rubricContainer = section.querySelector('.rubric-container');
+            if (rubricContainer) {
+                rubricContainer.dataset.assignmentIndex = newIndex;
+                rubricContainer.querySelectorAll('input, select, textarea').forEach(input => {
+                    if (input.name && input.name.includes('rubrics_')) {
+                        const oldRubricPrefix = `rubrics_${oldIndex}`;
+                        const newRubricPrefix = `rubrics_${newIndex}`;
+                        input.name = input.name.replace(oldRubricPrefix, newRubricPrefix);
+                        input.id = input.id.replace(oldRubricPrefix, newRubricPrefix);
+                    }
+                });
+            }
+            
+            // Update data attributes
+            section.dataset.assignmentIndex = newIndex;
         });
         
-        // Update the total forms count
+        // Update total forms count
         if (totalFormsInput) {
             totalFormsInput.value = visibleAssignments.length;
         }
@@ -182,25 +232,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Add new assignment
     document.getElementById('add-assignment').addEventListener('click', function() {
-        // Get the current total form count
-        const newIndex = totalFormsInput ? parseInt(totalFormsInput.value) : initialAssignmentCount;
+        const totalForms = totalFormsInput ? parseInt(totalFormsInput.value) : initialAssignmentCount;
+        const newIndex = totalForms;
         
         // Find the last visible assignment to clone
         const visibleAssignments = Array.from(assignmentsContainer.querySelectorAll('.assignment-section'))
             .filter(section => section.style.display !== 'none');
         
-        if (visibleAssignments.length === 0) {
-            console.error("No visible assignments to clone");
-            return;
-        }
+        if (visibleAssignments.length === 0) return;
         
         const lastVisibleAssignment = visibleAssignments[visibleAssignments.length - 1];
         
-        // Clone the assignment form
+        // Clone assignment form
         const newAssignment = lastVisibleAssignment.cloneNode(true);
         newAssignment.dataset.assignmentIndex = newIndex;
-        newAssignment.dataset.originalIndex = newIndex;
-        newAssignment.dataset.oldIndex = newIndex;
         
         // Reset values and remove errors
         newAssignment.querySelectorAll('input, select, textarea').forEach(input => {
@@ -211,7 +256,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     input.value = '';
                 }
                 
-                // Remove any existing error messages
+                // Remove errors
                 input.classList.remove('is-invalid');
                 const errorElement = input.nextElementSibling;
                 if (errorElement && errorElement.classList.contains('invalid-feedback')) {
@@ -219,6 +264,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         });
+        
+        // Uncheck delete checkbox
+        const deleteCheckbox = newAssignment.querySelector('input[type="checkbox"][name$="-DELETE"]');
+        if (deleteCheckbox) deleteCheckbox.checked = false;
         
         // Clear rubric container
         const rubricContainer = newAssignment.querySelector('.rubric-container');
@@ -241,23 +290,28 @@ document.addEventListener('DOMContentLoaded', function() {
         // Append to container
         assignmentsContainer.appendChild(newAssignment);
         
-        // Update the total forms count
+        // Update total forms count
         if (totalFormsInput) {
-            totalFormsInput.value = newIndex + 1;
+            totalFormsInput.value = totalForms + 1;
         }
         
-        // Update all assignments (numbers and indices)
+        // Update all assignments
         updateAssignments();
+        
+        // Add one rubric to the new assignment
+        const addRubricButton = newAssignment.querySelector('.add-rubric');
+        if (addRubricButton) {
+            addRubricButton.dispatchEvent(new Event('click'));
+        }
     });
 
-    // Initialize assignment numbers and store original indices
+    // Initialize assignment indices
     document.querySelectorAll('.assignment-section').forEach((section, index) => {
-        section.dataset.originalIndex = index;
-        section.dataset.oldIndex = index;
+        section.dataset.assignmentIndex = index;
     });
     updateAssignments();
 
-    // Event delegation for all dynamic elements
+    // Event delegation for dynamic elements
     document.addEventListener('click', function(e) {
         // Handle assignment deletion
         if (e.target.closest('.remove-assignment')) {
@@ -267,8 +321,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (deleteCheckbox) {
                 deleteCheckbox.checked = true;
                 assignmentSection.style.display = 'none';
-                
-                // Update all assignments after deletion
                 updateAssignments();
             }
             e.preventDefault();
@@ -295,17 +347,17 @@ document.addEventListener('DOMContentLoaded', function() {
             const assignmentIndex = assignmentSection.dataset.assignmentIndex;
             const rubricContainer = assignmentSection.querySelector('.rubric-container');
             
-            // Get or create rubric management form
+            // Get rubric management form
             let managementDiv = assignmentSection.querySelector('.rubric-management');
             if (!managementDiv) {
                 managementDiv = document.createElement('div');
                 managementDiv.className = 'rubric-management';
                 managementDiv.style.display = 'none';
                 managementDiv.innerHTML = `
-                    <input type="hidden" name="rubrics_${assignmentIndex}-TOTAL_FORMS" value="0" id="id_rubrics_${assignmentIndex}-TOTAL_FORMS">
-                    <input type="hidden" name="rubrics_${assignmentIndex}-INITIAL_FORMS" value="0" id="id_rubrics_${assignmentIndex}-INITIAL_FORMS">
-                    <input type="hidden" name="rubrics_${assignmentIndex}-MIN_NUM_FORMS" value="0" id="id_rubrics_${assignmentIndex}-MIN_NUM_FORMS">
-                    <input type="hidden" name="rubrics_${assignmentIndex}-MAX_NUM_FORMS" value="1000" id="id_rubrics_${assignmentIndex}-MAX_NUM_FORMS">
+                    <input type="hidden" name="rubrics_${assignmentIndex}-TOTAL_FORMS" value="0">
+                    <input type="hidden" name="rubrics_${assignmentIndex}-INITIAL_FORMS" value="0">
+                    <input type="hidden" name="rubrics_${assignmentIndex}-MIN_NUM_FORMS" value="0">
+                    <input type="hidden" name="rubrics_${assignmentIndex}-MAX_NUM_FORMS" value="1000">
                 `;
                 assignmentSection.appendChild(managementDiv);
             }
@@ -330,7 +382,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         <input type="number" name="rubrics_${assignmentIndex}-${rubricIndex}-max_score" 
                                class="form-control" placeholder="Max Score" min="0" required>
                     </div>
-                    <div class="col-md-1">
+                    <div class="col-md-1 d-flex align-items-center">
+                        <input type="hidden" name="rubrics_${assignmentIndex}-${rubricIndex}-DELETE">
                         <button type="button" class="btn btn-danger btn-sm remove-rubric">
                             <i class="bi bi-trash"></i>
                         </button>
@@ -347,7 +400,17 @@ document.addEventListener('DOMContentLoaded', function() {
             
             e.preventDefault();
         }
+        
+        // Handle previous step button
+        if (e.target.closest('.prev-step')) {
+            // Go to previous step in wizard
+            const prevStepButton = document.querySelector('button[name="wizard_prev_step"]');
+            if (prevStepButton) {
+                prevStepButton.click();
+            }
+        }
     });
 });
 </script>
+
 {% endblock %}

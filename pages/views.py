@@ -268,7 +268,7 @@ class CourseCreateWizard(SessionWizardView):
                     if assignment_form.instance.pk:
                         rubric_formset = RubricFormSet(
                             instance=assignment_form.instance,
-                            prefix=f'ribrics_{i}'
+                            prefix=f'rubrics_{i}'
                         )
                     else:
                         rubric_formset = RubricFormSet(prefix=f'rubrics_{i}')
@@ -410,33 +410,22 @@ class CourseCreateWizard(SessionWizardView):
          
         elif step == 'assignments':
             course_id = self.storage.extra_data.get('course_id')
-            if not course_id:
-                messages.error(self.request, "Course not found. Please complete the basics step first.")
-                return self.render_goto_step('basics')
-            
-            try:
-                course = Course.all_objects.get(id=course_id)
-            except Course.DoesNotExist:
-                messages.error(self.request, "Course not found.")
-                return self.render_goto_step('basics')
-            
-            # Initialize formset
+            course = get_object_or_404(Course.all_objects, id=course_id)
             formset = AssignmentFormSet(
                 self.request.POST,
                 self.request.FILES,
                 instance=course,
                 form_kwargs={'course': course}
             )
-            
+
             if formset.is_valid():
                 assignments = formset.save(commit=False)
                 
-                for assignment in assignments:
+                for i, assignment in enumerate(assignments):
                     assignment.course = course
                     assignment.save()
-                
-                # Process rubrics for each assignment
-                for i, assignment in enumerate(assignments):
+                    
+                    # Process rubrics for this assignment
                     rubric_formset = RubricFormSet(
                         self.request.POST,
                         prefix=f'rubrics_{i}',
@@ -456,7 +445,6 @@ class CourseCreateWizard(SessionWizardView):
                 return None
             else:
                 return self.render_revalidation_failure('assignments', formset)
-
 
         elif step == 'assessments':
 

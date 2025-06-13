@@ -333,16 +333,22 @@ class CourseTopicAssignmentsForm(forms.ModelForm):
         }
     def __init__(self, *args, **kwargs):
         self.course = kwargs.pop('course_id', None)
-        course = kwargs.pop('course', None)
-        course_id = kwargs.pop('course_id', None)
         super().__init__(*args, **kwargs)
 
         if course is not None:
-            self.fields['topic'].queryset = Topic.objects.filter(course=course)
+            self.fields['topic'].queryset = Topic.objects.filter(course=self.course)
         else:
             self.fields['topic'].queryset = Topic.objects.none()
         self.fields['file'].required = False
     
+    def is_empty(self):
+        """Check if the form is empty (extra form and no data)."""
+        return all(
+            self.cleaned_data.get(field) in [None, '', []] 
+            for field in self.fields 
+            if field not in ['DELETE', 'id']
+        )
+
 AssignmentFormSet = inlineformset_factory(
     Course,
     Assignment,
