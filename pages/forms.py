@@ -332,7 +332,7 @@ class CourseTopicAssignmentsForm(forms.ModelForm):
             }),
         }
     def __init__(self, *args, **kwargs):
-        self.course = kwargs.pop('course_id', None)
+        self.course = kwargs.pop('course', None)
         super().__init__(*args, **kwargs)
 
         if course is not None:

@@ -410,7 +410,16 @@ class CourseCreateWizard(SessionWizardView):
          
         elif step == 'assignments':
             course_id = self.storage.extra_data.get('course_id')
-            course = get_object_or_404(Course.all_objects, id=course_id)
+            if not course_id:
+                messages.error(self.request, "Course not found. Please complete the basics step first.")
+                return self.render_goto_step('basics')
+            
+            try:
+                course = Course.all_objects.get(id=course_id)
+            except Course.DoesNotExist:
+                messages.error(self.request, "Course not found.")
+                return self.render_goto_step('basics')
+
             formset = AssignmentFormSet(
                 self.request.POST,
                 self.request.FILES,
@@ -418,33 +427,49 @@ class CourseCreateWizard(SessionWizardView):
                 form_kwargs={'course': course}
             )
 
-            if formset.is_valid():
-                assignments = formset.save(commit=False)
+            # First validate the assignment formset
+            if not formset.is_valid():
+                # Store the formset in the context for re-rendering
+                context = self.get_context_data(form=formset)
+                return self.render_to_response(context)
+
+            # If assignments are valid, validate rubrics
+            assignments = formset.save(commit=False)
+            has_errors = False
+
+            for i, assignment in enumerate(assignments):
+                assignment.course = course
+                assignment.save()
                 
-                for i, assignment in enumerate(assignments):
-                    assignment.course = course
-                    assignment.save()
-                    
-                    # Process rubrics for this assignment
-                    rubric_formset = RubricFormSet(
-                        self.request.POST,
-                        prefix=f'rubrics_{i}',
-                        instance=assignment
-                    )
-                    
-                    if rubric_formset.is_valid():
-                        rubric_formset.save()
-                    else:
-                        # Handle rubric errors
-                        messages.error(self.request, f"Error in rubrics for assignment: {assignment.title}")
+                rubric_formset = RubricFormSet(
+                    self.request.POST,
+                    prefix=f'rubrics_{i}',
+                    instance=assignment
+                )
                 
-                # Delete any marked assignments
-                for assignment in formset.deleted_objects:
-                    assignment.delete()
-                
-                return None
-            else:
-                return self.render_revalidation_failure('assignments', formset)
+                if not rubric_formset.is_valid():
+                    has_errors = True
+                    # Add errors to messages
+                    for error in rubric_formset.non_form_errors():
+                        messages.error(self.request, f"Rubric error: {error}")
+                    for form in rubric_formset:
+                        for field, errors in form.errors.items():
+                            for error in errors:
+                                messages.error(self.request, f"Rubric {field}: {error}")
+                else:
+                    rubric_formset.save()
+
+            # Delete any marked assignments
+            for assignment in formset.deleted_objects:
+                assignment.delete()
+
+            if has_errors:
+                # Rebuild context with the formset to show errors
+                context = self.get_context_data(form=formset)
+                return self.render_to_response(context)
+
+            messages.success(self.request, "Assignments and rubrics saved successfully")
+            return None
 
         elif step == 'assessments':
 
