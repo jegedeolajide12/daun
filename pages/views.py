@@ -26,7 +26,7 @@ from django.apps import apps
 from django.contrib.auth.models import Group
 from django.http import JsonResponse
 from django.core.paginator import Paginator
-from django.forms import modelformset_factory
+from django.forms import modelformset_factory, inlineformset_factory
 
 from django.core.files.storage import FileSystemStorage
 
@@ -162,7 +162,6 @@ FORMS = [
     ('basics', CourseBasicsForm),
     ('topics', ModuleFormSet),
     ('contents', ContentFormSet),
-    ('assignments', CourseTopicAssignmentsForm),
     ('assessments', CourseTopicAssessmentsForm),
     ('marketing', CourseMarketingForm)
 ]
@@ -171,7 +170,6 @@ TEMPLATES = {
     'basics': 'courses/manage/course/create/course_basics.html',
     'topics': 'courses/manage/course/create/course_topics.html',
     'contents': 'courses/manage/course/create/course_contents.html',
-    'assignments': 'courses/manage/course/create/course_assignments.html',
     'assessments': 'courses/manage/course/create/course_assessments.html',
     'marketing': 'courses/manage/course/create/course_marketing.html',
 }
@@ -208,18 +206,6 @@ class CourseCreateWizard(SessionWizardView):
                 files=files, 
                 form_kwargs={'owner':self.request.user, 'course_id':course_id}
                 )
-        elif step == 'assignments':
-            course_id = self.storage.extra_data.get('course_id')
-            course = get_object_or_404(Course.all_objects, id=course_id)
-            # In get_form() for assignments step:
-            print(f"Assignments step - Course ID: {course_id}")
-            print(f"Step: {step} | Storage Course ID: {self.storage.extra_data.get('course_id')} | Session Course ID: {self.request.session.get('wizard_course_id')}")
-            return AssignmentFormSet(
-                data=data,
-                files=files,
-                instance=course,
-                form_kwargs={'course': course}
-            )
         return super().get_form(step, data, files)
 
     def get_context_data(self, form, **kwargs):
@@ -249,44 +235,7 @@ class CourseCreateWizard(SessionWizardView):
                 model__in=['text', 'video', 'image', 'file']
             )
             context['topics'] = Topic.objects.filter(course_id=course_id)
-        elif self.steps.current == 'assignments':
-            course_id = self.storage.extra_data.get('course_id') or self.request.session.get('wizard_course_id')
-            if not course_id:
-                messages.error(self.request, "Course not found. Please complete the basics step first.")
-                return self.render_goto_step('basics')
             
-            try:
-                course = Course.all_objects.get(id=course_id)
-                # Initialize the assignments formset
-                formset = AssignmentFormSet(
-                    instance=course,
-                    form_kwargs={'course': course}
-                )
-                
-                assignment_forms = []
-                for i, assignment_form in enumerate(formset):
-                    if assignment_form.instance.pk:
-                        rubric_formset = RubricFormSet(
-                            instance=assignment_form.instance,
-                            prefix=f'rubrics_{i}'
-                        )
-                    else:
-                        rubric_formset = RubricFormSet(prefix=f'rubrics_{i}')
-                    assignment_forms.append((assignment_form, rubric_formset))
-
-                context.update({
-                    'formset': formset,
-                    'course': course,
-                    'topics': Topic.objects.filter(course_id=course_id),
-                    'initial_rubrics': Rubric.objects.none(),
-                    'empty_form': formset.empty_form,
-                    'assignment_forms': assignment_forms,
-                    'RubricFormSet': RubricFormSet,
-                })
-            except Course.DoesNotExist:
-                messages.error(self.request, "Course not found.")
-                return self.render_goto_step('basics')
-        
         return context
     
 
@@ -408,69 +357,7 @@ class CourseCreateWizard(SessionWizardView):
                 messages.error(self.request, "Please correct the errors below")
                 return self.render_revalidation_failure('contents', formset)
          
-        elif step == 'assignments':
-            course_id = self.storage.extra_data.get('course_id')
-            if not course_id:
-                messages.error(self.request, "Course not found. Please complete the basics step first.")
-                return self.render_goto_step('basics')
-            
-            try:
-                course = Course.all_objects.get(id=course_id)
-            except Course.DoesNotExist:
-                messages.error(self.request, "Course not found.")
-                return self.render_goto_step('basics')
-
-            formset = AssignmentFormSet(
-                self.request.POST,
-                self.request.FILES,
-                instance=course,
-                form_kwargs={'course': course}
-            )
-
-            # First validate the assignment formset
-            if not formset.is_valid():
-                # Store the formset in the context for re-rendering
-                context = self.get_context_data(form=formset)
-                return self.render_to_response(context)
-
-            # If assignments are valid, validate rubrics
-            assignments = formset.save(commit=False)
-            has_errors = False
-
-            for i, assignment in enumerate(assignments):
-                assignment.course = course
-                assignment.save()
-                
-                rubric_formset = RubricFormSet(
-                    self.request.POST,
-                    prefix=f'rubrics_{i}',
-                    instance=assignment
-                )
-                
-                if not rubric_formset.is_valid():
-                    has_errors = True
-                    # Add errors to messages
-                    for error in rubric_formset.non_form_errors():
-                        messages.error(self.request, f"Rubric error: {error}")
-                    for form in rubric_formset:
-                        for field, errors in form.errors.items():
-                            for error in errors:
-                                messages.error(self.request, f"Rubric {field}: {error}")
-                else:
-                    rubric_formset.save()
-
-            # Delete any marked assignments
-            for assignment in formset.deleted_objects:
-                assignment.delete()
-
-            if has_errors:
-                # Rebuild context with the formset to show errors
-                context = self.get_context_data(form=formset)
-                return self.render_to_response(context)
-
-            messages.success(self.request, "Assignments and rubrics saved successfully")
-            return None
-
+        
         elif step == 'assessments':
 
             data = self.request.POST

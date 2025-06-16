@@ -165,7 +165,8 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Assignment Form Management
     const assignmentsContainer = document.getElementById('assignments-container');
-    const totalFormsInput = document.querySelector('[name="assignment_set-TOTAL_FORMS"]');
+    const totalFormsInput = document.querySelector('[name="assignment_set-TOTAL_FORMS"]') || 
+                            document.querySelector('[id$="-TOTAL_FORMS"]');
     const initialAssignmentCount = assignmentsContainer.querySelectorAll('.assignment-section').length;
     
     // Function to update all assignment numbers and indices
@@ -194,15 +195,11 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             
             // Update rubric management forms
-            const rubricManagement = section.querySelector('.rubric-management');
-            if (rubricManagement) {
-                rubricManagement.querySelectorAll('input').forEach(input => {
-                    if (input.name.includes('rubrics_')) {
-                        const oldRubricPrefix = `rubrics_${oldIndex}`;
-                        const newRubricPrefix = `rubrics_${newIndex}`;
-                        input.name = input.name.replace(oldRubricPrefix, newRubricPrefix);
-                        input.id = input.id.replace(oldRubricPrefix, newRubricPrefix);
-                    }
+            // After updating all names, also update the management form
+            const managementDiv = section.querySelector('.rubric-management');
+            if (managementDiv) {
+                managementDiv.querySelectorAll('input').forEach(input => {
+                    input.name = input.name.replace(`rubrics_${oldIndex}`, `rubrics_${newIndex}`);
                 });
             }
             
@@ -327,6 +324,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Handle rubric deletion
+
         if (e.target.closest('.remove-rubric')) {
             const rubricItem = e.target.closest('.rubric-criteria');
             if (rubricItem) {
@@ -412,5 +410,12 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-
+<!-- Add this at the bottom of your template -->
+<script>
+console.log("Form data:", {
+    {% for key, value in request.POST.items %}
+        "{{ key }}": "{{ value }}",
+    {% endfor %}
+});
+</script>
 {% endblock %}

@@ -349,13 +349,14 @@ class CourseTopicAssignmentsForm(forms.ModelForm):
             if field not in ['DELETE', 'id']
         )
 
+
 AssignmentFormSet = inlineformset_factory(
     Course,
     Assignment,
     form=CourseTopicAssignmentsForm,
     extra=1,
     can_delete=True,
-    fields=['title', 'description', 'topic', 'file', 'max_score'],
+    fields=['title', 'description', 'topic', 'file', 'max_score']
 )
 
 
