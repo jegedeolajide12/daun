@@ -26,7 +26,46 @@
                                     </div>
                                 </div>
                             </div>
+                            <!-- Price Tier Section -->
+                            <div class="mb-5 border-bottom pb-4">
+                                <h5 class="mb-4">Pricing</h5>
+                                <div class="row g-3">
+                                    <div class="col-md-12">
+                                        <label class="form-label fw-bold">Price Tier</label>
+                                        {{ form.price_tier }}
+                                        {% if form.price_tier.errors %}
+                                            <div class="text-danger">
+                                                {% for error in form.price_tier.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
 
+                            <!-- Status Section -->
+                            <div class="mb-5 border-bottom pb-4">
+                                <h5 class="mb-4">Course Status</h5>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="form-check form-switch">
+                                            {{ form.is_active }}
+                                            <label class="form-check-label fw-bold" for="{{ form.is_active.id_for_label }}">
+                                                Make Course Active
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check form-switch">
+                                            {{ form.is_featured }}
+                                            <label class="form-check-label fw-bold" for="{{ form.is_featured.id_for_label }}">
+                                                Feature This Course
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <!-- Learning Objectives -->
                             <div class="mb-5 border-bottom pb-4">
                                 <h5 class="mb-4">Learning Objectives</h5>

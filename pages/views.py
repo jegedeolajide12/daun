@@ -239,6 +239,9 @@ class CourseCreateWizard(SessionWizardView):
                 model__in=['text', 'video', 'image', 'file']
             )
             context['topics'] = Topic.objects.filter(course_id=course_id)
+        elif self.steps.current == 'marketing':
+            # Add marketing form to context
+            context['form'] = form
         
         
         return context
