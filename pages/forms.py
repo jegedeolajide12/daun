@@ -3,7 +3,10 @@ from django import forms
 
 from django.core.exceptions import ValidationError
 from django.contrib.contenttypes.models import ContentType
-from django.forms import inlineformset_factory, modelformset_factory, formset_factory, BaseFormSet
+from django.forms import (inlineformset_factory, modelformset_factory, 
+                          formset_factory, BaseFormSet,
+                          BaseInlineFormSet
+                          )
 
 from pages.templatetags import course
 
@@ -360,6 +363,35 @@ AssignmentFormSet = inlineformset_factory(
 )
 
 
+
+class BaseMCQOptionFormSet(BaseInlineFormSet):
+    def clean(self):
+        super().clean()
+        # Validate at least one correct option per question
+        if any(self.errors):
+            return
+            
+        correct_options = 0
+        for form in self.forms:
+            if not form.cleaned_data.get('DELETE', False):
+                if form.cleaned_data.get('is_correct', False):
+                    correct_options += 1
+        
+        if correct_options < 1:
+            raise forms.ValidationError("At least one option must be marked as correct")
+
+class BaseAssessmentQuestionFormSet(BaseInlineFormSet):
+    def clean(self):
+        super().clean()
+        # Validate at least two options per question
+        for form in self.forms:
+            if form.cleaned_data and not form.cleaned_data.get('DELETE', False):
+                option_formset = form.option_formset
+                if option_formset and len(option_formset.forms) < 2:
+                    raise forms.ValidationError("Each question must have at least two options")
+
+
+
 class CourseTopicAssessmentsForm(forms.ModelForm):
     class Meta:
         model = Assessment
@@ -383,27 +415,76 @@ class CourseTopicAssessmentsForm(forms.ModelForm):
             }),
         }
     def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user', None)
+        course_id = kwargs.pop('course_id', None)
         super().__init__(*args, **kwargs)
-
-        if user and user.is_authenticated:
-            self.fields['topic'].queryset = Topic.objects.filter(course__owner=user)
-        else:
-            self.fields['topic'].queryset = Topic.objects.none()
         
-        self.fields['topic'].empty_label = "Select Topic"
-    
-    def clean(self):
-        points = self.cleaned_data.get('points')
-        if points is not None and points < 0:
-            raise ValidationError("Points cannot be negative.")
-        return self.cleaned_data
-    
+        self.fields['topic'].queryset = Topic.objects.filter(course=course_id)
+        
+        # Initialize formsets only if we have instance data
+        if self.data or self.files:
+            self.question_formset = AssessmentQuestionFormSet(
+                data=self.data,
+                files=self.files,
+                prefix='questions',
+                instance=self.instance
+            )
+            
+            self.option_formsets = []
+            for i, question_form in enumerate(self.question_formset):
+                option_formset = MCQOptionFormSet(
+                    data=self.data,
+                    files=self.files,
+                    prefix=f'options-{i}',
+                    instance=question_form.instance
+                )
+                question_form.option_formset = option_formset
+                self.option_formsets.append(option_formset)
+
+    def is_valid(self):
+        # Validate main form and all nested formsets
+        valid = super().is_valid()
+        
+        if not self.question_formset.is_valid():
+            valid = False
+            
+        for question_form in self.question_formset:
+            if hasattr(question_form, 'option_formset'):
+                if not question_form.option_formset.is_valid():
+                    valid = False
+        
+        return valid
+
     def clean_time_limit(self):
         time_limit = self.cleaned_data.get('time_limit')
         if time_limit is not None and time_limit < 1:
             raise ValidationError("Time limit must be at least 1 minute.")
         return time_limit
+
+
+    def save(self, commit=True):
+        assessment = super().save(commit=commit)
+        
+        if commit:
+            # Save questions and options
+            questions = self.question_formset.save(commit=False)
+            
+            for question in questions:
+                question.assessment = assessment
+                question.save()
+                
+                # Get the form that created this question
+                for question_form in self.question_formset:
+                    if question_form.instance == question and hasattr(question_form, 'option_formset'):
+                        options = question_form.option_formset.save(commit=False)
+                        for option in options:
+                            option.question = question
+                            option.save()
+                        question_form.option_formset.save_m2m()
+            
+            self.question_formset.save_m2m()
+        
+        return assessment
+    
 
 class AssessmentQuestionForm(forms.ModelForm):
     class Meta:
@@ -435,6 +516,27 @@ class MCQOptionForm(forms.ModelForm):
                 'class': 'form-check-input is-correct-checkbox',
             }),
         }
+
+
+# Create formsets
+MCQOptionFormSet = inlineformset_factory(
+    AssessmentQuestion, MCQOption, 
+    form=MCQOptionForm, 
+    extra=1,
+    can_delete=True,
+    fields=['option_text', 'is_correct'],
+    formset=BaseMCQOptionFormSet
+)
+
+AssessmentQuestionFormSet = inlineformset_factory(
+    Assessment, AssessmentQuestion, 
+    form=AssessmentQuestionForm, 
+    extra=1,
+    can_delete=True,
+    fields=['question', 'explanation'],
+    formset=BaseAssessmentQuestionFormSet
+)
+
 
 class CourseTrailerForm(forms.ModelForm):
     class Meta:

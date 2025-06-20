@@ -33,8 +33,8 @@
       <div class="course-detail-hero-card bg-white shadow rounded p-4 mt-4 mt-md-0" style="min-width:320px; max-width:360px;">
         <img src="{{ course.cover_image.url }}" alt="{{ course.title|default:course.name }}" class="img-fluid rounded mb-3" style="object-fit:cover; min-height:160px; max-height:180px;">
         <div class="mb-2">
-          <span class="h3 font-weight-bold text-dark">$94.99</span>
-          <span class="text-muted ml-2"><del>$199.99</del></span>
+          <span class="h3 font-weight-bold text-dark">${{ course.discount_price }}</span>
+          <span class="text-muted ml-2"><del>${{ course.price_tier }}</del></span>
         </div>
         {% if is_student %}          
                   <form method="post" action="{% url "course:course_unenroll" course.slug %}">

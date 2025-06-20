@@ -1,7 +1,7 @@
 {% extends 'user_navbar.html' %}
 
 {% block content %}
-<main class="ttr-wrapper">"
+<main class="ttr-wrapper">
     <div class="container py-5">
         <div class="row justify-content-center">
             <div class="col-lg-10">
@@ -12,68 +12,135 @@
                     </div>
 
                     <div class="card-body">
-                        <form method="post" novalidate>
+                        <form method="post" novalidate id="assessment-form">
                             {% csrf_token %}
                             {{ wizard.management_form }}
                             
+                            <!-- Assessment Fields -->
+                            <div class="row mb-4">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Points</label>
+                                        {{ form.points }}
+                                        {% if form.points.errors %}
+                                            <div class="text-danger">
+                                                {% for error in form.points.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Time Limit (min)</label>
+                                        {{ form.time_limit }}
+                                        {% if form.time_limit.errors %}
+                                            <div class="text-danger">
+                                                {% for error in form.time_limit.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Topic</label>
+                                        {{ form.topic }}
+                                        {% if form.topic.errors %}
+                                            <div class="text-danger">
+                                                {% for error in form.topic.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Questions Formset -->
+                            
                             <div id="questions-container">
-                                <!-- Initial Question -->
-                                <div class="question-section mb-4 border-bottom pb-4">
-                                    <div class="d-flex justify-content-between align-items-center mb-3">
-                                        <h5>Question #1</h5>
-                                        <button type="button" class="btn btn-danger btn-sm remove-question">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </div>
-                                    
-                                    <div class="mb-3">
-                                        <label class="form-label fw-bold">Question Text</label>
-                                        <input type="text" name="questions[0][text]" 
-                                            class="form-control" required>
-                                    </div>
-                                    
-                                    <div class="mb-3">
-                                        <label class="form-label fw-bold">Explanation</label>
-                                        <textarea name="questions[0][explanation]" 
-                                                class="form-control" rows="2"></textarea>
-                                    </div>
-                                    
-                                    <div class="options-container mb-3">
-                                        <label class="form-label fw-bold">Options</label>
-                                        <div class="option mb-2">
-                                            <div class="row g-2 align-items-center">
-                                                <div class="col-md-6">
-                                                    <input type="text" 
-                                                        name="questions[0][options][1][text]"
-                                                        class="form-control" 
-                                                        placeholder="Option text" required>
+                                {{ form.question_formset.management_form }}
+                                {% for question_form in form.question_formset %}
+                                    <div class="question-section mb-4 border-bottom pb-4" data-index="{{ forloop.counter0 }}">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <h5>Question #<span class="question-number">{{ forloop.counter }}</span></h5>
+                                            <button type="button" class="btn btn-danger btn-sm remove-question">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                        
+                                        {{ question_form.id }}
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Question Text</label>
+                                            {{ question_form.question }}
+                                            {% if question_form.question.errors %}
+                                                <div class="text-danger">
+                                                    {{ question_form.question.errors }}
                                                 </div>
-                                                <div class="col-md-4">
-                                                    <div class="form-check">
-                                                        <input type="checkbox" 
-                                                            name="questions[0][options][1][is_correct]"
-                                                            class="form-check-input" 
-                                                            value="true"
-                                                            id="q0-opt1-correct">
-                                                        <label class="form-check-label" for="q0-opt1-correct">
-                                                            Correct Answer
-                                                        </label>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Explanation</label>
+                                            {{ question_form.explanation }}
+                                            {% if question_form.explanation.errors %}
+                                                <div class="text-danger">
+                                                    {{ question_form.explanation.errors }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <!-- Options Formset -->
+                                        
+                                        <div class="options-container mb-3">
+                                            <label class="form-label fw-bold">Options</label>
+                                            {{ question_form.option_formset.management_form }}
+                                            {% for option_form in question_form.option_formset %}
+                                                <div class="option mb-2" data-index="{{ forloop.counter0 }}">
+                                                    {{ option_form.id }}
+                                                    <div class="row g-2 align-items-center">
+                                                        <div class="col-md-6">
+                                                            {{ option_form.option_text }}
+                                                            {% if option_form.option_text.errors %}
+                                                                <div class="text-danger">
+                                                                    {{ option_form.option_text.errors }}
+                                                                </div>
+                                                            {% endif %}
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-check">
+                                                                {{ option_form.is_correct }}
+                                                                <label class="form-check-label" for="{{ option_form.is_correct.id_for_label }}">
+                                                                    Correct Answer
+                                                                </label>
+                                                                {% if option_form.is_correct.errors %}
+                                                                    <div class="text-danger">
+                                                                        {{ option_form.is_correct.errors }}
+                                                                    </div>
+                                                                {% endif %}
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-2">
+                                                            {% if option_form.DELETE %}
+                                                                {{ option_form.DELETE }}
+                                                                <button type="button" class="btn btn-danger btn-sm remove-option">
+                                                                    <i class="bi bi-trash"></i>
+                                                                </button>
+                                                            {% endif %}
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-2">
-                                                    <button type="button" 
-                                                            class="btn btn-danger btn-sm remove-option">
-                                                        <i class="bi bi-trash"></i>
-                                                    </button>
-                                                </div>
-                                            </div>
+                                            {% endfor %}
                                         </div>
+                                        
+                                        <button type="button" class="btn btn-outline-primary btn-sm add-option">
+                                            <i class="bi bi-plus"></i> Add Option
+                                        </button>
                                     </div>
-                                    
-                                    <button type="button" class="btn btn-outline-primary btn-sm add-option">
-                                        <i class="bi bi-plus"></i> Add Option
-                                    </button>
-                                </div>
+                                {% endfor %}
                             </div>
 
                             <!-- Add Question button -->
@@ -98,148 +165,276 @@
             </div>
         </div>
     </div>
-{% endblock %}
+</main>
 
-{% block extra_js %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    let qIndex = document.querySelectorAll('.question-section').length;
-    const questionsContainer = document.getElementById('questions-container');
+<!-- Hidden template for new questions -->
+<div id="empty-question" style="display:none;">
+    <div class="question-section mb-4 border-bottom pb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5>Question #<span class="question-number"></span></h5>
+            <button type="button" class="btn btn-danger btn-sm remove-question">
+                <i class="bi bi-trash"></i>
+            </button>
+        </div>
+        
+        <input type="hidden" name="questions-__prefix__-id" id="id_questions-__prefix__-id">
+        <div class="mb-3">
+            <label class="form-label fw-bold">Question Text</label>
+            <input type="text" name="questions-__prefix__-question" class="form-control" required id="id_questions-__prefix__-question">
+        </div>
+        
+        <div class="mb-3">
+            <label class="form-label fw-bold">Explanation</label>
+            <textarea name="questions-__prefix__-explanation" class="form-control" rows="2" id="id_questions-__prefix__-explanation"></textarea>
+        </div>
+        
+        <!-- Options management form -->
+        <input type="hidden" name="questions-__prefix__-options-TOTAL_FORMS" value="0" id="id_questions-__prefix__-options-TOTAL_FORMS">
+        <input type="hidden" name="questions-__prefix__-options-INITIAL_FORMS" value="0" id="id_questions-__prefix__-options-INITIAL_FORMS">
+        <input type="hidden" name="questions-__prefix__-options-MIN_NUM_FORMS" value="0" id="id_questions-__prefix__-options-MIN_NUM_FORMS">
+        <input type="hidden" name="questions-__prefix__-options-MAX_NUM_FORMS" value="1000" id="id_questions-__prefix__-options-MAX_NUM_FORMS">
+        
+        <div class="options-container mb-3">
+            <label class="form-label fw-bold">Options</label>
+        </div>
+        
+        <button type="button" class="btn btn-outline-primary btn-sm add-option">
+            <i class="bi bi-plus"></i> Add Option
+        </button>
+    </div>
+</div>
 
-    // Add new question
-    document.getElementById('add-question').addEventListener('click', function() {
-        const newQuestion = document.createElement('div');
-        newQuestion.className = 'question-section mb-4 border-bottom pb-4';
-        newQuestion.innerHTML = `
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5>Question #${qIndex + 1}</h5>
-                <button type="button" class="btn btn-danger btn-sm remove-question">
+<!-- Hidden template for new options -->
+<div id="empty-option" style="display:none;">
+    <div class="option mb-2">
+        <input type="hidden" name="questions-__qprefix__-options-__prefix__-id" id="id_questions-__qprefix__-options-__prefix__-id">
+        <div class="row g-2 align-items-center">
+            <div class="col-md-6">
+                <input type="text" name="questions-__qprefix__-options-__prefix__-option_text" class="form-control" placeholder="Option text" required id="id_questions-__qprefix__-options-__prefix__-option_text">
+            </div>
+            <div class="col-md-4">
+                <div class="form-check">
+                    <input type="checkbox" name="questions-__qprefix__-options-__prefix__-is_correct" class="form-check-input" id="id_questions-__qprefix__-options-__prefix__-is_correct">
+                    <label class="form-check-label" for="id_questions-__qprefix__-options-__prefix__-is_correct">
+                        Correct Answer
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <input type="hidden" name="questions-__qprefix__-options-__prefix__-DELETE">
+                <button type="button" class="btn btn-danger btn-sm remove-option">
                     <i class="bi bi-trash"></i>
                 </button>
             </div>
-            <div class="mb-3">
-                <label class="form-label fw-bold">Question Text</label>
-                <input type="text" name="questions[${qIndex}][text]" 
-                       class="form-control" required>
-            </div>
-            <div class="mb-3">
-                <label class="form-label fw-bold">Explanation</label>
-                <textarea name="questions[${qIndex}][explanation]" 
-                          class="form-control" rows="2"></textarea>
-            </div>
-            <div class="options-container mb-3">
-                <label class="form-label fw-bold">Options</label>
-                <div class="option mb-2">
-                    <div class="row g-2 align-items-center">
-                        <div class="col-md-6">
-                            <input type="text" 
-                                   name="questions[${qIndex}][options][1][text]"
-                                   class="form-control" 
-                                   placeholder="Option text" required>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-check">
-                                <input type="checkbox" 
-                                       name="questions[${qIndex}][options][1][is_correct]"
-                                       class="form-check-input" 
-                                       value="true"
-                                       id="q${qIndex}-opt1-correct">
-                                <label class="form-check-label" for="q${qIndex}-opt1-correct">
-                                    Correct Answer
-                                </label>
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <button type="button" 
-                                    class="btn btn-danger btn-sm remove-option">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <button type="button" class="btn btn-outline-primary btn-sm add-option">
-                <i class="bi bi-plus"></i> Add Option
-            </button>
-        `;
+        </div>
+    </div>
+</div>
 
-        questionsContainer.appendChild(newQuestion);
-        qIndex++;
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const questionsContainer = document.getElementById('questions-container');
+    const questionFormsetPrefix = 'questions';
+    const optionFormsetPrefix = 'options';
+    const questionManagementForm = document.getElementById('id_' + questionFormsetPrefix + '-TOTAL_FORMS');
+    let questionCount = parseInt(questionManagementForm.value);
+    
+    // Function to update question numbers and reindex all elements
+    function updateQuestionNumbers() {
+        // Get all visible questions
+        const visibleQuestions = Array.from(questionsContainer.querySelectorAll('.question-section'))
+            .filter(q => q.style.display !== 'none');
+        
+        // Reindex questions and update displayed numbers
+        visibleQuestions.forEach((section, index) => {
+            section.dataset.index = index;
+            section.querySelector('.question-number').textContent = index + 1;
+            
+            // Update all question field names
+            const questionIdInput = section.querySelector('input[name^="questions-"][name$="-id"]');
+            const questionInput = section.querySelector('input[name^="questions-"][name$="-question"]');
+            const explanationInput = section.querySelector('textarea[name^="questions-"][name$="-explanation"]');
+            
+            if (questionIdInput) questionIdInput.name = `questions-${index}-id`;
+            if (questionInput) questionInput.name = `questions-${index}-question`;
+            if (explanationInput) explanationInput.name = `questions-${index}-explanation`;
+            
+            // Update options management forms
+            const optionManagementForms = section.querySelectorAll('input[name^="questions-"][name$="-options-TOTAL_FORMS"]');
+            optionManagementForms.forEach(form => {
+                form.name = `questions-${index}-options-TOTAL_FORMS`;
+                form.id = `id_questions-${index}-options-TOTAL_FORMS`;
+            });
+
+            
+            
+            // Reindex options
+            const optionsContainer = section.querySelector('.options-container');
+            const visibleOptions = Array.from(optionsContainer.querySelectorAll('.option'))
+                .filter(opt => opt.style.display !== 'none');
+            
+            visibleOptions.forEach((option, optIndex) => {
+                option.dataset.index = optIndex;
+                
+                // Update option field names
+                const optionIdInput = option.querySelector('input[name$="-id"]');
+                const optionTextInput = option.querySelector('input[name$="-option_text"]');
+                const isCorrectInput = option.querySelector('input[name$="-is_correct"]');
+                const deleteInput = option.querySelector('input[name$="-DELETE"]');
+                
+                if (optionIdInput) optionIdInput.name = `questions-${index}-options-${optIndex}-id`;
+                if (optionTextInput) optionTextInput.name = `questions-${index}-options-${optIndex}-option_text`;
+                if (isCorrectInput) isCorrectInput.name = `questions-${index}-options-${optIndex}-is_correct`;
+                if (deleteInput) deleteInput.name = `questions-${index}-options-${optIndex}-DELETE`;
+            });
+            
+            // Update option management form value
+            const optionManagementForm = document.getElementById(`id_questions-${index}-options-TOTAL_FORMS`);
+            if (optionManagementForm) {
+                optionManagementForm.value = visibleOptions.length;
+            }
+        });
+        
+        // Update total questions count
+        questionCount = visibleQuestions.length;
+        questionManagementForm.value = questionCount;
+    }
+    
+    // Add new question
+    document.getElementById('add-question').addEventListener('click', function() {
+        // Get the empty question template
+        const emptyQuestion = document.getElementById('empty-question');
+        // Clone the template content
+        const newQuestion = emptyQuestion.cloneNode(true);
+        newQuestion.style.display = '';
+        
+        // Replace all __prefix__ placeholders with current question count
+        let newHTML = newQuestion.innerHTML.replace(/__prefix__/g, questionCount);
+        newQuestion.innerHTML = newHTML;
+        
+        // Find the question section inside the cloned content
+        const questionSection = newQuestion.querySelector('.question-section');
+        questionSection.dataset.index = questionCount;
+        
+        questionsContainer.appendChild(questionSection);
+        questionCount++;
+        questionManagementForm.value = questionCount;
+        updateQuestionNumbers();
     });
 
     // Remove question
     questionsContainer.addEventListener('click', function(e) {
         if(e.target.closest('.remove-question')) {
-            e.target.closest('.question-section').remove();
-        }
-    });
-
-    // Add option
-    document.addEventListener('click', function(e) {
-        if(e.target.closest('.add-option')) {
             const questionSection = e.target.closest('.question-section');
+            
+            // Mark the question for deletion
+            const deleteInput = questionSection.querySelector(`input[name$="-DELETE"]`);
+            if (deleteInput) {
+                deleteInput.value = 'on';
+                questionSection.style.display = 'none';
+            } else {
+                questionSection.remove();
+            }
+            
+            // Reindex all questions
+            updateQuestionNumbers();
+        }
+    });
+
+    // Add new option
+    questionsContainer.addEventListener('click', function(e) {
+        if(e.target.closest('.add-option')) {
+            const addButton = e.target.closest('.add-option');
+            const questionSection = addButton.closest('.question-section');
+            const qIndex = questionSection.dataset.index;
             const optionsContainer = questionSection.querySelector('.options-container');
-            const qIndex = Array.from(questionsContainer.children)
-                               .indexOf(questionSection);
-            const optionCount = optionsContainer.querySelectorAll('.option').length + 1;
-
-            const newOption = document.createElement('div');
-            newOption.className = 'option mb-2';
-            newOption.innerHTML = `
-                <div class="row g-2 align-items-center">
-                    <div class="col-md-6">
-                        <input type="text" 
-                               name="questions[${qIndex}][options][${optionCount}][text]"
-                               class="form-control" 
-                               placeholder="Option text" required>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="form-check">
-                            <input type="checkbox" 
-                                   name="questions[${qIndex}][options][${optionCount}][is_correct]"
-                                   class="form-check-input" 
-                                   value="true"
-                                   id="q${qIndex}-opt${optionCount}-correct">
-                            <label class="form-check-label" for="q${qIndex}-opt${optionCount}-correct">
-                                Correct Answer
-                            </label>
-                        </div>
-                    </div>
-                    <div class="col-md-2">
-                        <button type="button" 
-                                class="btn btn-danger btn-sm remove-option">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </div>
-                </div>
-            `;
-
+            
+            // Get current option count for this question
+            const visibleOptions = Array.from(optionsContainer.querySelectorAll('.option'))
+                .filter(opt => opt.style.display !== 'none');
+            const optionCount = visibleOptions.length;
+            
+            // Get the empty option template
+            const emptyOption = document.getElementById('empty-option');
+            // Clone the template content
+            const newOption = emptyOption.cloneNode(true);
+            newOption.style.display = '';
+            
+            // Replace placeholders
+            let newHTML = newOption.innerHTML
+                .replace(/__prefix__/g, optionCount)
+                .replace(/__qprefix__/g, qIndex);
+            newOption.innerHTML = newHTML;
+            
             optionsContainer.appendChild(newOption);
+            
+            // Update option management form
+            const optionManagementForm = document.getElementById(`id_${questionFormsetPrefix}-${qIndex}-${optionFormsetPrefix}-TOTAL_FORMS`);
+            if (optionManagementForm) {
+                optionManagementForm.value = optionCount + 1;
+            }
+            
+            // Reindex all questions (to handle potential gaps)
+            updateQuestionNumbers();
         }
     });
 
-    // Remove option and reindex
-    document.addEventListener('click', function(e) {
+    // Remove option
+    questionsContainer.addEventListener('click', function(e) {
         if(e.target.closest('.remove-option')) {
-            const option = e.target.closest('.option');
-            const optionsContainer = option.closest('.options-container');
-            option.remove();
-
-            // Reindex remaining options
-            optionsContainer.querySelectorAll('.option').forEach((opt, index) => {
-                const oIndex = index + 1;
-                opt.querySelectorAll('input').forEach(input => {
-                    input.name = input.name.replace(/\[options\]\[\d+\]/g, `[options][${oIndex}]`);
-                });
-                // Update checkbox IDs
-                const checkbox = opt.querySelector('.form-check-input');
-                const label = opt.querySelector('.form-check-label');
-                const newId = `q${qIndex}-opt${oIndex}-correct`;
-                checkbox.id = newId;
-                label.htmlFor = newId;
-            });
+            const removeButton = e.target.closest('.remove-option');
+            const option = removeButton.closest('.option');
+            const questionSection = option.closest('.question-section');
+            
+            // Mark the option for deletion
+            const deleteInput = option.querySelector(`input[name$="-DELETE"]`);
+            if (deleteInput) {
+                deleteInput.value = 'on';
+                option.style.display = 'none';
+            } else {
+                option.remove();
+            }
+            
+            // Reindex all questions
+            updateQuestionNumbers();
         }
     });
+    
+    // Validate question options
+    function validateQuestionOptions(questionSection) {
+        const qIndex = questionSection.dataset.index;
+        const options = questionSection.querySelectorAll('.option:not([style*="display: none"])');
+        let errorDiv = questionSection.querySelector('.options-error');
+        
+        // Clear previous errors
+        if (errorDiv) {
+            errorDiv.remove();
+        }
+        
+        // Check minimum options
+        if (options.length < 2) {
+            errorDiv = document.createElement('div');
+            errorDiv.className = 'text-danger mb-3 options-error';
+            errorDiv.textContent = 'Each question must have at least two options';
+            questionSection.querySelector('.options-container').after(errorDiv);
+        }
+        
+        // Check at least one correct
+        let hasCorrect = false;
+        options.forEach(option => {
+            const checkbox = option.querySelector('input[type="checkbox"]');
+            if (checkbox && checkbox.checked) hasCorrect = true;
+        });
+        
+        if (!hasCorrect) {
+            errorDiv = document.createElement('div');
+            errorDiv.className = 'text-danger mb-3 options-error';
+            errorDiv.textContent = 'At least one option must be marked as correct';
+            questionSection.querySelector('.options-container').after(errorDiv);
+        }
+    }
+    
+    // Initialize question numbers
+    updateQuestionNumbers();
 });
 </script>
 {% endblock %}

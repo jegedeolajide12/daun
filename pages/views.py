@@ -41,13 +41,16 @@ from .models import (
                 Faculty, Notification, Enrollment, Assignment,
                 Submission, UserTask, Grade, RubricScore, Rubric,
                 MCQOption, Assessment, SubmissionFile, AssessmentQuestion,
-                AssessmentAttempt, MCQResponse, CourseObjectives, CourseRequirements
+                AssessmentAttempt, MCQResponse, CourseObjectives, CourseRequirements,
+                CourseTrailer
                 )
 from .forms import (FacultyForm, CourseTopicAssignmentsForm, SubmissionForm, 
                     CourseTopicAssessmentsForm, MCQOptionForm, CourseBasicsForm, CourseTopicsForm,
                     CourseTopicContentForm, AssessmentQuestionForm, CourseTrailerForm, CourseRequirementsForm, 
                     CourseMarketingForm, CourseObjectivesForm, CourseForm, ModuleFormSet, CourseTopicContentForm, 
-                    ContentFormSet, AssignmentFormSet, RubricForm, RubricFormSet )
+                    ContentFormSet, AssignmentFormSet, RubricForm, RubricFormSet,
+                    AssessmentQuestionFormSet, MCQOptionFormSet 
+                    )
 
 def create_faculty(request):
     if request.method == "POST":
@@ -162,7 +165,6 @@ FORMS = [
     ('basics', CourseBasicsForm),
     ('topics', ModuleFormSet),
     ('contents', ContentFormSet),
-    ('assessments', CourseTopicAssessmentsForm),
     ('marketing', CourseMarketingForm)
 ]
 
@@ -170,7 +172,6 @@ TEMPLATES = {
     'basics': 'courses/manage/course/create/course_basics.html',
     'topics': 'courses/manage/course/create/course_topics.html',
     'contents': 'courses/manage/course/create/course_contents.html',
-    'assessments': 'courses/manage/course/create/course_assessments.html',
     'marketing': 'courses/manage/course/create/course_marketing.html',
 }
             
@@ -207,6 +208,9 @@ class CourseCreateWizard(SessionWizardView):
                 form_kwargs={'owner':self.request.user, 'course_id':course_id}
                 )
         return super().get_form(step, data, files)
+    
+    
+
 
     def get_context_data(self, form, **kwargs):
         context = super().get_context_data(form=form, **kwargs)
@@ -235,7 +239,8 @@ class CourseCreateWizard(SessionWizardView):
                 model__in=['text', 'video', 'image', 'file']
             )
             context['topics'] = Topic.objects.filter(course_id=course_id)
-            
+        
+        
         return context
     
 
@@ -252,6 +257,8 @@ class CourseCreateWizard(SessionWizardView):
             else:
                 initial['course_id'] = course_id
         return initial
+    
+
     
     def render(self, form=None, **kwargs):
         response = super().render(form, **kwargs)
@@ -356,137 +363,56 @@ class CourseCreateWizard(SessionWizardView):
                 print("DEBUG: Formset errors:", formset.errors)
                 messages.error(self.request, "Please correct the errors below")
                 return self.render_revalidation_failure('contents', formset)
-         
-        
-        elif step == 'assessments':
-
-            data = self.request.POST
-            files = self.request.FILES
-            form.fields['topic'].queryset = Topic.objects.filter(course=course)
-            options_valid = True
-            questions_data = []
-
-            # Parse questions and options
-            for key in data:
-                if key.startswith('questions[') and key.endswith('][text]'):
-                    q_index = key.split('[')[1].split(']')[0]
-                    question_text = data.get(f'questions[{q_index}][text]')
-                    explanation = data.get(f'questions[{q_index}][explanation]')
-
-                    options = []
-                    option_index = 1
-                    while True:
-                        opt_text = data.get(f'questions[{q_index}][options][{option_index}][text]')
-                        if not opt_text:
-                            break
-                        is_correct = data.get(f'questions[{q_index}][options][{option_index}][is_correct]')
-                        options.append({
-                            'text': opt_text,
-                            'is_correct': is_correct == 'true' or is_correct == 'on',
-                            'order': option_index
-                        })
-                        option_index += 1
-                    questions_data.append({
-                        'text': question_text,
-                        'explanation': explanation,
-                        'options': options
-                    })
-
-            # Validation
-            for q in questions_data:
-                if len(q['options']) < 2:
-                    options_valid = False
-                    messages.error(self.request, "Please provide at least two options for each question.")
-                if not any(opt['is_correct'] for opt in q['options']):
-                    options_valid = False
-                    messages.error(self.request, "Please select at least one correct option for each question.")
-
-            # Deduplication
-            unique_questions = []
-            seen_questions = set()
-            for q in questions_data:
-                q_text = (q['text'] or '').strip().lower()
-                if q_text and q_text not in seen_questions:
-                    # Deduplicate options for this question by option_text
-                    unique_options = []
-                    seen_options = set()
-                    for opt in q['options']:
-                        opt_text = (opt['text'] or '').strip().lower()
-                        if opt_text and opt_text not in seen_options:
-                            unique_options.append(opt)
-                            seen_options.add(opt_text)
-                    q['options'] = unique_options
-                    unique_questions.append(q)
-                    seen_questions.add(q_text)
-            questions_data = unique_questions
-
-            # If validation fails, return early (do not save)
-            if not options_valid or not questions_data:
-                return  # The wizard will re-render the form and show messages
-
-            # Save to DB atomically
-            try:
-                with transaction.atomic():
-                    assessment = form.save(commit=False)
-                    assessment.course = course
-                    assessment.created_by = self.request.user
-                    assessment.save()
-
-                    for q in questions_data:
-                        question = AssessmentQuestion.objects.create(
-                            assessment=assessment,
-                            text=q['text'],
-                            explanation=q['explanation']
-                        )
-                        for opt in q['options']:
-                            MCQOption.objects.create(
-                                question=question,
-                                option_text=opt['text'],
-                                is_correct=opt['is_correct'],
-                                order=opt['order']
-                            )
-            except Exception as e:
-                messages.error(self.request, f"An error occurred while saving the assessment: {e}")
-                return  # The wizard will re-render the form and show messages
-
-
 
 
         elif step == 'marketing':
-            data = form.cleaned_data
-            other_data = self.request.POST
-            files = self.request.FILES
+            course_id = self.storage.extra_data.get('course_id')
+            try:
+                course = Course.all_objects.get(id=course_id)
+            except Course.DoesNotExist:
+                messages.error(self.request, "Course not found. Please complete the previous steps first.")
+                return self.render_goto_step('basics')
 
-            trailer_form = CourseTrailerForm(other_data, files=files)
-            form.save()
-
-            # Accept multiple objectives and requirements
-            objectives = other_data.getlist('objectives[]') or [
-                v for k, v in other_data.items() if k.startswith('objective_')
-            ]
-            requirements = other_data.getlist('requirements[]') or [
-                v for k, v in other_data.items() if k.startswith('requirement_')
-            ]
-
-            if trailer_form.is_valid() and form.is_valid():
-                with transaction.atomic():
-                    # Save trailer
-                    trailer = trailer_form.save(commit=False)
-                    trailer.course = course
-                    trailer.save()
-
-                    # Save multiple requirements
-                    for req in requirements:
-                        req = req.strip()
-                        if req:
-                            CourseRequirements.objects.create(course=course, requirement=req)
-
-                    # Save multiple objectives
-                    for obj in objectives:
-                        obj = obj.strip()
-                        if obj:
-                            CourseObjectives.objects.create(course=course, objective=obj)
-
+            # Bind form to current course instance
+            form.instance = course
+            
+            # Process main marketing form
+            if form.is_valid():
+                form.save()
+                
+                # Process trailer video
+                if 'video_file' in self.request.FILES:
+                    # Delete existing trailer if any
+                    CourseTrailer.objects.filter(course=course).delete()
+                    
+                    # Create new trailer
+                    CourseTrailer.objects.create(
+                        course=course,
+                        file=self.request.FILES['video_file']
+                    )
+                
+                # Process objectives
+                CourseObjectives.objects.filter(course=course).delete()
+                for objective in self.request.POST.getlist('objectives[]'):
+                    if objective.strip():  # Skip empty entries
+                        CourseObjectives.objects.create(
+                            course=course,
+                            objective=objective.strip()
+                        )
+                
+                # Process requirements
+                CourseRequirements.objects.filter(course=course).delete()
+                for requirement in self.request.POST.getlist('requirements[]'):
+                    if requirement.strip():  # Skip empty entries
+                        CourseRequirements.objects.create(
+                            course=course,
+                            requirement=requirement.strip()
+                        )
+                
+                messages.success(self.request, "Marketing information saved successfully!")
+            else:
+                messages.error(self.request, "Please correct errors in the marketing form")
+                return self.render_revalidation_failure('marketing', form)
 
     def done(self, form_list, **kwargs):
         course_id = self.storage.extra_data.get('course_id')

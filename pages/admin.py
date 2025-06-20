@@ -4,7 +4,9 @@ from .models import (Faculty, Course, Topic, Video,
                      UserTask, Enrollment, Notification, 
                      Assignment, Submission, SubmissionFile, Grade, 
                      Rubric, Assessment, MCQOption, AssessmentQuestion,
-                     AssessmentAttempt, MCQResponse)
+                     AssessmentAttempt, MCQResponse, CourseObjectives, CourseRequirements,
+                     CourseTrailer
+                    )
 
 # Register your models here.
 
@@ -100,4 +102,7 @@ admin.site.register(SubmissionFile)
 admin.site.register(Grade)
 admin.site.register(Rubric)
 admin.site.register(AssessmentAttempt)
+admin.site.register(CourseRequirements)
+admin.site.register(CourseObjectives)
+admin.site.register(CourseTrailer)
 
