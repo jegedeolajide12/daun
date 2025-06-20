@@ -282,262 +282,6 @@ ContentFormSet = formset_factory(
 )
 
 
-class RubricForm(forms.ModelForm):
-    class Meta:
-        model = Rubric
-        fields = ['criteria', 'description', 'max_score']
-        widgets = {
-            'criteria': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Criteria'}),
-            'description': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Description'}),
-            'max_score': forms.NumberInput(attrs={'class': 'form-control', 'min': 0, 'placeholder': 'Max Score'}),
-        }
-
-RubricFormSet = inlineformset_factory(
-    Assignment,
-    Rubric,
-    form=RubricForm,
-    extra=1,
-    can_delete=True,
-    fields=['criteria', 'description', 'max_score']
-)
-
-
-class CourseTopicAssignmentsForm(forms.ModelForm):
-    class Meta:
-        model = Assignment
-        fields = ['title', 'description', 'topic', 'file', 'max_score']
-        widgets = {
-            'title': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Enter Assignment Name',
-                'id': 'id_title',
-            }),
-            'description': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 3,
-                'placeholder': 'Enter Assignment Description',
-                'id': 'id_description',
-            }),
-            'topic': forms.Select(attrs={
-                'class': 'form-control',
-                'placeholder': 'Select Topic',
-                'id': 'id_topic',
-            }),
-            'file': forms.ClearableFileInput(attrs={
-                'class': 'form-control',
-            }),
-            'max_score': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'min': 0,
-                'max': 100,
-                'placeholder': 'Enter Max Score',
-                'id': 'id_max_score',
-            }),
-        }
-    def __init__(self, *args, **kwargs):
-        self.course = kwargs.pop('course', None)
-        super().__init__(*args, **kwargs)
-
-        if course is not None:
-            self.fields['topic'].queryset = Topic.objects.filter(course=self.course)
-        else:
-            self.fields['topic'].queryset = Topic.objects.none()
-        self.fields['file'].required = False
-    
-    def is_empty(self):
-        """Check if the form is empty (extra form and no data)."""
-        return all(
-            self.cleaned_data.get(field) in [None, '', []] 
-            for field in self.fields 
-            if field not in ['DELETE', 'id']
-        )
-
-
-AssignmentFormSet = inlineformset_factory(
-    Course,
-    Assignment,
-    form=CourseTopicAssignmentsForm,
-    extra=1,
-    can_delete=True,
-    fields=['title', 'description', 'topic', 'file', 'max_score']
-)
-
-
-
-class BaseMCQOptionFormSet(BaseInlineFormSet):
-    def clean(self):
-        super().clean()
-        # Validate at least one correct option per question
-        if any(self.errors):
-            return
-            
-        correct_options = 0
-        for form in self.forms:
-            if not form.cleaned_data.get('DELETE', False):
-                if form.cleaned_data.get('is_correct', False):
-                    correct_options += 1
-        
-        if correct_options < 1:
-            raise forms.ValidationError("At least one option must be marked as correct")
-
-class BaseAssessmentQuestionFormSet(BaseInlineFormSet):
-    def clean(self):
-        super().clean()
-        # Validate at least two options per question
-        for form in self.forms:
-            if form.cleaned_data and not form.cleaned_data.get('DELETE', False):
-                option_formset = form.option_formset
-                if option_formset and len(option_formset.forms) < 2:
-                    raise forms.ValidationError("Each question must have at least two options")
-
-
-
-class CourseTopicAssessmentsForm(forms.ModelForm):
-    class Meta:
-        model = Assessment
-        fields = ['points', 'time_limit', 'topic']
-        widgets = {
-            'points': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'min': 0,
-                'max': 100,
-                'placeholder': 'Enter Points',
-            }),
-            'time_limit': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'min': 1,
-                'placeholder': 'Enter Time Limit (in minutes)',
-            }),
-            'topic': forms.Select(attrs={
-                'class': 'form-control',
-                'placeholder': 'Select Topic',
-                'id': 'id_topic',
-            }),
-        }
-    def __init__(self, *args, **kwargs):
-        course_id = kwargs.pop('course_id', None)
-        super().__init__(*args, **kwargs)
-        
-        self.fields['topic'].queryset = Topic.objects.filter(course=course_id)
-        
-        # Initialize formsets only if we have instance data
-        if self.data or self.files:
-            self.question_formset = AssessmentQuestionFormSet(
-                data=self.data,
-                files=self.files,
-                prefix='questions',
-                instance=self.instance
-            )
-            
-            self.option_formsets = []
-            for i, question_form in enumerate(self.question_formset):
-                option_formset = MCQOptionFormSet(
-                    data=self.data,
-                    files=self.files,
-                    prefix=f'options-{i}',
-                    instance=question_form.instance
-                )
-                question_form.option_formset = option_formset
-                self.option_formsets.append(option_formset)
-
-    def is_valid(self):
-        # Validate main form and all nested formsets
-        valid = super().is_valid()
-        
-        if not self.question_formset.is_valid():
-            valid = False
-            
-        for question_form in self.question_formset:
-            if hasattr(question_form, 'option_formset'):
-                if not question_form.option_formset.is_valid():
-                    valid = False
-        
-        return valid
-
-    def clean_time_limit(self):
-        time_limit = self.cleaned_data.get('time_limit')
-        if time_limit is not None and time_limit < 1:
-            raise ValidationError("Time limit must be at least 1 minute.")
-        return time_limit
-
-
-    def save(self, commit=True):
-        assessment = super().save(commit=commit)
-        
-        if commit:
-            # Save questions and options
-            questions = self.question_formset.save(commit=False)
-            
-            for question in questions:
-                question.assessment = assessment
-                question.save()
-                
-                # Get the form that created this question
-                for question_form in self.question_formset:
-                    if question_form.instance == question and hasattr(question_form, 'option_formset'):
-                        options = question_form.option_formset.save(commit=False)
-                        for option in options:
-                            option.question = question
-                            option.save()
-                        question_form.option_formset.save_m2m()
-            
-            self.question_formset.save_m2m()
-        
-        return assessment
-    
-
-class AssessmentQuestionForm(forms.ModelForm):
-    class Meta:
-        model = AssessmentQuestion
-        fields = ['question', 'explanation']
-        widgets = {
-            'question': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 3,
-                'placeholder': 'Enter Question',
-            }),
-            'explanation': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 3,
-                'placeholder': 'Enter Explanation',
-            }),
-        }
-    
-class MCQOptionForm(forms.ModelForm):
-    class Meta:
-        model = MCQOption
-        fields = ['option_text', 'is_correct']
-        widgets = {
-            'option_text': forms.TextInput(attrs={
-                'class': 'form-control option-text',
-                'placeholder': 'Enter Option Text',
-            }),
-            'is_correct': forms.CheckboxInput(attrs={
-                'class': 'form-check-input is-correct-checkbox',
-            }),
-        }
-
-
-# Create formsets
-MCQOptionFormSet = inlineformset_factory(
-    AssessmentQuestion, MCQOption, 
-    form=MCQOptionForm, 
-    extra=1,
-    can_delete=True,
-    fields=['option_text', 'is_correct'],
-    formset=BaseMCQOptionFormSet
-)
-
-AssessmentQuestionFormSet = inlineformset_factory(
-    Assessment, AssessmentQuestion, 
-    form=AssessmentQuestionForm, 
-    extra=1,
-    can_delete=True,
-    fields=['question', 'explanation'],
-    formset=BaseAssessmentQuestionFormSet
-)
-
-
 class CourseTrailerForm(forms.ModelForm):
     class Meta:
         model = CourseTrailer
@@ -593,6 +337,53 @@ class FacultyForm(forms.ModelForm):
             }),
         }
 
+
+class AssignmentForm(forms.ModelForm):
+    class Meta:
+        model = Assignment
+        fields = ['title', 'description', 'topic', 'file', 'max_score']
+        widgets = {
+            'title': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter Assignment Name',
+                'id': 'id_title',
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Enter Assignment Description',
+                'id': 'id_description',
+            }),
+            'topic': forms.Select(attrs={
+                'class': 'form-control',
+                'placeholder': 'Select Topic',
+                'id': 'id_topic',
+            }),
+            'file': forms.ClearableFileInput(attrs={
+                'class': 'form-control',
+            }),
+            'max_score': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': 0,
+                'max': 100,
+                'placeholder': 'Enter Max Score',
+                'id': 'id_max_score',
+            }),
+        }
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super(AssignmentForm, self).__init__(*args, **kwargs)
+
+        if self.instance and hasattr(self.instance, 'course') and self.instance.course:
+            self.fields['topic'].queryset = Topic.objects.filter(course=self.instance.course)
+        else:
+            self.fields['topic'].queryset = Topic.objects.none()
+        
+        self.fields['file'].required = False
+        self.fields['topic'].empty_label = "Select Topic"
+
+
+
 class SubmissionForm(forms.ModelForm):
     content = forms.CharField(
         widget=forms.Textarea(attrs={
@@ -628,4 +419,78 @@ class SubmissionForm(forms.ModelForm):
         
         return files
 
+class AssessmentForm(forms.ModelForm):
+    class Meta:
+        model = Assessment
+        fields = ['points', 'time_limit', 'topic']
+        widgets = {
+            'points': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': 0,
+                'max': 100,
+                'placeholder': 'Enter Points',
+            }),
+            'time_limit': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': 1,
+                'placeholder': 'Enter Time Limit (in minutes)',
+            }),
+            'topic': forms.Select(attrs={
+                'class': 'form-control',
+                'placeholder': 'Select Topic',
+                'id': 'id_topic',
+            }),
+        }
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super(AssessmentForm, self).__init__(*args, **kwargs)
 
+        if user and user.is_authenticated:
+            self.fields['topic'].queryset = Topic.objects.filter(course__owner=user)
+        else:
+            self.fields['topic'].queryset = Topic.objects.none()
+        
+        self.fields['topic'].empty_label = "Select Topic"
+    
+    def clean(self):
+        points = self.cleaned_data.get('points')
+        if points is not None and points < 0:
+            raise ValidationError("Points cannot be negative.")
+        return self.cleaned_data
+    
+    def clean_time_limit(self):
+        time_limit = self.cleaned_data.get('time_limit')
+        if time_limit is not None and time_limit < 1:
+            raise ValidationError("Time limit must be at least 1 minute.")
+        return time_limit
+
+class AssessmentQuestionForm(forms.ModelForm):
+    class Meta:
+        model = AssessmentQuestion
+        fields = ['question', 'explanation']
+        widgets = {
+            'question': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Enter Question',
+            }),
+            'explanation': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Enter Explanation',
+            }),
+        }
+    
+class MCQOptionForm(forms.ModelForm):
+    class Meta:
+        model = MCQOption
+        fields = ['option_text', 'is_correct']
+        widgets = {
+            'option_text': forms.TextInput(attrs={
+                'class': 'form-control option-text',
+                'placeholder': 'Enter Option Text',
+            }),
+            'is_correct': forms.CheckboxInput(attrs={
+                'class': 'form-check-input is-correct-checkbox',
+            }),
+        }

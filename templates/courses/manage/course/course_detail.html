@@ -65,6 +65,16 @@
         <div class="mb-5">
           <h3 class="font-weight-bold mb-3">Course Overview</h3>
           <div class="text-muted" style="font-size:1.08rem;">{{ course.overview|linebreaksbr }}</div>
+              <div class="mb-3">
+                  {% if trailer %}
+                    <div class="mb-3">
+                      <video controls class="w-100 rounded shadow-sm">
+                        <source src="{{ trailer.file.url }}" type="video/mp4">
+                        Your browser does not support the video tag.
+                      </video>
+                    </div>
+                  {% endif %}
+              </div>
         </div>
         <!-- Curriculum -->
         <div class="mb-5">

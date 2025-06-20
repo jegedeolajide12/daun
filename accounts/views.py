@@ -192,8 +192,8 @@ def admin_dashboard(request):
     user = get_user_model()
     actions = Action.objects.all()
     
-    created_courses = Course.objects.filter(owner=request.user)
-    enrolled_courses = Course.objects.filter(students=request.user)
+    created_courses = Course.all_objects.filter(owner=request.user)
+    enrolled_courses = Course.all_objects.filter(students=request.user)
     user_courses = list(enrolled_courses) + list(created_courses)
     # Count total courses
     courses_count = Course.objects.count()

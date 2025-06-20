@@ -299,9 +299,7 @@ class CourseCreateWizard(SessionWizardView):
                 self.request.session['course_id'] = course.id  # Store course ID in session
                 self.request.session['wizard_course_id'] = course.id  # Store in session for later use
                 self.request.session.modified = True
-                print("DEBUG: course_id in storage:", self.storage.extra_data.get('course_id'))
-               
-            else:
+                return None
                 messages.error(self.request, "Error creating course.")
                 return
 
@@ -325,6 +323,7 @@ class CourseCreateWizard(SessionWizardView):
                     instance.save()
                 formset.save_m2m()
                 messages.success(self.request, "You have successfully created the Topics for the course")
+                return None
             else:
                 messages.error(self.request, "Invalid topic data: " + str(formset.errors))
                 return
@@ -376,22 +375,23 @@ class CourseCreateWizard(SessionWizardView):
                 messages.error(self.request, "Course not found. Please complete the previous steps first.")
                 return self.render_goto_step('basics')
 
-            # Bind form to current course instance
-            form.instance = course
-            
-            # Process main marketing form
+            # Process the form with submitted data
+            form = self.get_form(data=self.request.POST, files=self.request.FILES)
+            form.instance = course  # Bind to existing course
+
             if form.is_valid():
-                form.save()
+                # Save the marketing fields (price_tier, is_active, is_featured)
+                course = form.save()  # This saves the bound instance
                 
                 # Process trailer video
-                if 'video_file' in self.request.FILES:
+                if 'file' in self.request.FILES:
                     # Delete existing trailer if any
                     CourseTrailer.objects.filter(course=course).delete()
                     
                     # Create new trailer
                     CourseTrailer.objects.create(
                         course=course,
-                        file=self.request.FILES['video_file']
+                        file=self.request.FILES['file']
                     )
                 
                 # Process objectives
@@ -413,13 +413,24 @@ class CourseCreateWizard(SessionWizardView):
                         )
                 
                 messages.success(self.request, "Marketing information saved successfully!")
+                return None
             else:
-                messages.error(self.request, "Please correct errors in the marketing form")
-                return self.render_revalidation_failure('marketing', form)
+                # Add specific error messages for debugging
+                if 'price_tier' in form.errors:
+                    messages.error(self.request, "Please select a valid price tier")
+                if 'is_active' in form.errors:
+                    messages.error(self.request, "Invalid active status selection")
+                if 'is_featured' in form.errors:
+                    messages.error(self.request, "Invalid featured status selection")
+                    
+                return
+            
 
     def done(self, form_list, **kwargs):
         course_id = self.storage.extra_data.get('course_id')
         course = Course.all_objects.get(id=course_id)
+        course.published = True
+        course.save()
         messages.success(self.request, "Course created successfully!")
         return redirect('course:course', course_slug=course.slug)
     
@@ -536,13 +547,15 @@ def course_detail(request, course_slug):
     is_instructor = request.user.groups.filter(name="Instructors").exists()
     is_admin = request.user.groups.filter(name="Admin")
     enroll_form = CourseEnrollForm(initial={'course':course.id})
+    trailer = course.trailer
     context = {
-        'course': course, 
-        'owner': owner, 
-        'is_student': is_student, 
-        'is_admin':is_admin, 
+        'course': course,
+        'owner': owner,
+        'is_student': is_student,
+        'is_admin':is_admin,
         'is_instructor': is_instructor,
-        'enroll_form':enroll_form
+        'enroll_form':enroll_form,
+        'trailer': trailer
         }
     return render(request, 'courses/manage/course/course_detail.html', context)
 

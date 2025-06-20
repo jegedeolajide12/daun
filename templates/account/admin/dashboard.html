@@ -246,10 +246,11 @@
                                                     {{ course.course_topics.count }} Topics
                                                 </p>
                                             </div>
-											{% if course in enrolled_courses %}
+											{% if course.published %}
 											<div class="badge ml-2">
-												<a href="#" class="btn button-sm green radius-xl">ENROLLED</a>
+												<a href="#" class="btn button-sm green radius-xl">PUBLISHED</a>
 											</div>
+											{% if course in enrolled_courses %}
 											<li class="d-flex align-items-center py-3 border-bottom">
 												<div class="progress flex-grow-1" style="height: 24px; border-radius: 12px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
 													<div class="progress-bar progress-bar-striped progress-bar-animated 
@@ -268,9 +269,10 @@
 													</div>
 												</div>
 											</li>
+											{% endif %}
 											{% else %}
 											<div class="badge ml-2">
-												<a href="#" class="btn button-sm red radius-xl">YOUR COURSE</a>
+												<a href="#" class="btn button-sm red radius-xl">Draft</a>
 											</div>
 											<div class="text-end ml-3">
                                                 <a href="#" class="btn btn-sm btn-outline-primary">Edit</a>

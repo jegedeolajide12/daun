@@ -33,24 +33,12 @@
             {% if contents %}
               <div class="mb-3">
                 {% for content in contents %}
-                  {% if content.item|model_name == 'video' and content.item.file %}
+                  {% if content.item|model_name == 'video' %}
                     <div class="mb-3">
                       <video controls class="w-100 rounded shadow-sm">
                         <source src="{{ content.item.file.url }}" type="video/mp4">
                         Your browser does not support the video tag.
                       </video>
-                    </div>
-                  {% elif content.item|model_name == 'image' and content.item.file %}
-                    <div class="mb-3">
-                      <img src="{{ content.item.file.url }}" class="img-fluid rounded shadow-sm" alt="Image Content">
-                    </div>
-                  {% elif content.item|model_name == 'text' %}
-                    <div class="mb-3">
-                      <div class="bg-light p-3 rounded">{{ content.item.text|linebreaks }}</div>
-                    </div>
-                  {% elif content.item|model_name == 'file' and content.item.file %}
-                    <div class="mb-3">
-                      <a href="{{ content.item.file.url }}" class="btn btn-outline-primary" download>{{ content.item.file.name }}</a>
                     </div>
                   {% endif %}
                 {% endfor %}
