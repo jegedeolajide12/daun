@@ -1,47 +1,94 @@
 {% extends "navbar.html" %}
 
 {% block content %}
-    <div class="page-content bg-white">
-        <!-- inner page banner -->
-        <div class="page-banner ovbl-dark" style="background-image:url(assets/images/banner/banner2.jpg);">
-            <div class="container">
-                <div class="page-banner-entry">
-                    <h1 class="text-white">Email Confirmation</h1>
+<div class="confirmation-container">
+    <!-- Hero Section -->
+    <div class="confirmation-hero">
+        <div class="confirmation-content">
+            <div class="confirmation-icon">
+                <i class="fas fa-envelope-open-text"></i>
+            </div>
+            <h1 class="confirmation-title">Verify Your Email Address</h1>
+            <p>Email confirmation helps us ensure your account security and deliver important notifications.</p>
+            
+            <div class="hero-features" style="margin-top: 2rem; text-align: left;">
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+                    <div>Protect your account from unauthorized access</div>
                 </div>
-            </div>
-        </div>
-        <!-- Breadcrumb row -->
-        <div class="breadcrumb-row">
-            <div class="container">
-                <ul class="list-inline">
-                    <li><a href="#">Home</a></li>
-                    <li>Email Confirmation</li>
-                </ul>
-            </div>
-        </div>
-        <!-- Breadcrumb row END -->
-        <!-- inner page banner END -->
-        <div class="content-block">
-            <div class="section-area section-sp2">
-                <div class="container">
-                    <div class="row">
-                        <div class="col-md-12 heading-bx text-center">
-                            <h2 class="title-head text-uppercase m-b0">Email Confirmation</h2>
-                            {% if confirmation %}
-                                <p>Confirm that {{ confirmation.email_address.user.username }} owns this email?</p>
-                                <form method="post">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-primary" style="padding: 10px 20px; color: white; text-decoration: none; background-color: #007bff; border-radius: 5px;">
-                                        Confirm
-                                    </button>
-                                </form>
-                            {% else %}
-                                <p>This confirmation link is invalid or has expired.</p>
-                            {% endif %}
-                        </div>
-                    </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-bell"></i></div>
+                    <div>Receive important course updates and notifications</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-key"></i></div>
+                    <div>Regain access if you forget your password</div>
                 </div>
             </div>
         </div>
     </div>
+    
+    <!-- Confirmation Form -->
+    <div class="confirmation-form-container">
+        <div class="confirmation-card">
+            <div class="confirmation-header">
+                <div class="confirmation-icon-large">
+                    {% if confirmation %}
+                        <i class="fas fa-envelope confirmation-success"></i>
+                    {% else %}
+                        <i class="fas fa-exclamation-triangle confirmation-error"></i>
+                    {% endif %}
+                </div>
+                <h2 class="confirmation-heading">
+                    {% if confirmation %}
+                        Confirm Your Email
+                    {% else %}
+                        Invalid Confirmation Link
+                    {% endif %}
+                </h2>
+                
+                <p class="confirmation-subheading">
+                    {% if confirmation %}
+                        Please confirm that <strong>{{ confirmation.email_address.user.username }}</strong> 
+                        owns the email address <strong>{{ confirmation.email_address.email }}</strong>.
+                    {% else %}
+                        This email confirmation link has expired or is invalid.
+                    {% endif %}
+                </p>
+            </div>
+            
+            {% if confirmation %}
+                <div class="confirmation-status status-success">
+                    <i class="fas fa-info-circle"></i> This link will expire in 3 days for security
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="confirmation-actions">
+                        <button type="submit" class="confirmation-btn confirmation-primary">
+                            Confirm Email
+                        </button>
+                        <a href="{% url 'course:index' %}" class="confirmation-btn confirmation-secondary">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            {% else %}
+                <div class="confirmation-status status-error">
+                    <i class="fas fa-exclamation-circle"></i> Please request a new confirmation email
+                </div>
+                
+                <div class="confirmation-actions">
+                    <a href="{% url 'account_email' %}" class="confirmation-btn confirmation-primary">
+                        Request New Confirmation
+                    </a>
+                    <a href="{% url 'course:index' %}" class="confirmation-btn confirmation-secondary">
+                        Return Home
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
 {% endblock %}

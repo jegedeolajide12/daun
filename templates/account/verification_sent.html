@@ -1,42 +1,65 @@
-{% extends parent_template|default:"navbar.html" %}
-{% load static %}
-{% block content %}
+{% extends "navbar.html" %}
 
-    <!-- Content -->
-    <div class="page-content bg-white">
-        <!-- inner page banner -->
-        <div class="page-banner ovbl-dark" style="background-image:url(assets/images/banner/banner2.jpg);">
-            <div class="container">
-                <div class="page-banner-entry">
-                    <h1 class="text-white">Confirm Email</h1>
-				 </div>
+{% block content %}
+<div class="confirmation-container">
+    <!-- Hero Section -->
+    <div class="confirmation-hero">
+        <div class="confirmation-content">
+            <div class="confirmation-icon">
+                <i class="fas fa-envelope-open-text"></i>
+            </div>
+            <h1 class="confirmation-title">Verify Your Email Address</h1>
+            <p>Email confirmation helps us ensure your account security and deliver important notifications.</p>
+            
+            <div class="hero-features" style="margin-top: 2rem; text-align: left;">
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+                    <div>Protect your account from unauthorized access</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-bell"></i></div>
+                    <div>Receive important course updates and notifications</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-key"></i></div>
+                    <div>Regain access if you forget your password</div>
+                </div>
             </div>
         </div>
-		<!-- Breadcrumb row -->
-		<div class="breadcrumb-row">
-			<div class="container">
-				<ul class="list-inline">
-					<li><a href="#">Home</a></li>
-					<li>Confirm Email</li>
-				</ul>
-			</div>
-		</div>
-		<!-- Breadcrumb row END -->
-        <!-- inner page banner END -->
-		<div class="content-block">
-            <!-- About Us -->
-			<div class="section-area section-sp2">
-                <div class="container">
-					<div class="row">
-						<div class="col-md-12 heading-bx text-center">
-							<h2 class="title-head text-uppercase m-b0">Check Your Email</h2>
-                            <p>We have sent a confirmation email to your inbox. Please check your email and click the confirmation link to complete the process.</p>
-                            <p>If you don't see the email, please check your spam folder or <a href="{% url 'account_email' %}">resend the confirmation email</a>.</p>
-						</div>
-					</div>
-				</div>
-            </div>
-		</div>
     </div>
-    <!-- Content END-->
+    
+    <!-- Confirmation Form -->
+    <div class="confirmation-form-container">
+        <div class="confirmation-card">
+            <div class="confirmation-header">
+                <div class="confirmation-icon-large">
+                        <i class="fas fa-envelope confirmation-success"></i>
+                </div>
+                <h2 class="confirmation-heading">
+                        Confirm Your Email
+                </h2>
+                
+                <p class="confirmation-subheading">
+                        We have sent a confirmation email to your inbox.
+						Please check your email and click the confirmation link to complete the process. 
+                </p>
+            </div>
+			<div class="confirmation-status status-success">
+				<i class="fas fa-info-circle"></i> This link will expire in 3 days for security
+			</div>
+			
+			
+				<div class="confirmation-actions">
+					<a href="{% url 'account_email' %}" type="submit" class="confirmation-btn confirmation-primary">
+						Resend Confirmation
+					</a>
+					<a href="{% url 'course:index' %}" class="confirmation-btn confirmation-secondary">
+						Cancel
+					</a>
+				</div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
+
