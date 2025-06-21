@@ -322,3 +322,10 @@ def mail_draft(request):
 def mail_compose(request):
     context = {}
     return render(request, 'account/mail/mail_compose.html', context)
+
+@login_required
+def chatroom(request):
+    context = {
+        'user': request.user,
+    }
+    return render(request, 'account/students/chat/chatroom.html', context)

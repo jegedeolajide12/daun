@@ -11,7 +11,7 @@ from .views import (admin_dashboard,
                     reject_application,
                     instructors_list,
                     instructor_profile,
-                    rate_instructor,
+                    rate_instructor, chatroom
                     ) 
 
 app_name = 'account'
@@ -29,4 +29,7 @@ urlpatterns = [
     path('user/instructor/rate/<int:instructor_id>/', rate_instructor, name='rate_instructor'),
     path('user/instructor/verify/<int:application_id>/', verify_application, name='verify_application'),
     path('user/instructor/reject/<int:application_id>/', reject_application, name='reject_application'),
+
+
+    path('user/course/chatroom/', chatroom, name="course_chatroom")
 ]

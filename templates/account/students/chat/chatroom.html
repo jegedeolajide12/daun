@@ -1,0 +1,350 @@
+{% extends "navbar.html" %}
+{% load static %}
+{% block content %}
+<div class="chatroom-container">
+    <div class="chatroom-header">
+        <h2><i class="fas fa-comments"></i> Student Chatroom</h2>
+        <div class="actions">
+            <button class="btn"><i class="fas fa-cog"></i></button>
+            <button class="btn"><i class="fas fa-user-friends"></i></button>
+        </div>
+    </div>
+    
+    <div class="chatroom-main">
+        <div class="chatroom-sidebar">
+            <div class="sidebar-header">
+                <button class="toggle-sidebar">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="sidebar-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search channels...">
+                </div>
+            </div>
+            
+            <div class="channels-list">
+                <div class="channel-item active">
+                    <div class="channel-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <div class="channel-info">
+                        <div class="channel-name">Computer Science 101</div>
+                        <div class="channel-last">You: I'll share my notes later</div>
+                    </div>
+                    <div class="channel-meta">
+                        <div class="channel-time">10:42 AM</div>
+                        <div class="channel-badge">3</div>
+                    </div>
+                </div>
+                
+                <div class="channel-item">
+                    <div class="channel-icon">
+                        <i class="fas fa-flask"></i>
+                    </div>
+                    <div class="channel-info">
+                        <div class="channel-name">Chemistry Study Group</div>
+                        <div class="channel-last">Alex: The exam is next week</div>
+                    </div>
+                    <div class="channel-meta">
+                        <div class="channel-time">9:15 AM</div>
+                    </div>
+                </div>
+                
+                <div class="channel-item">
+                    <div class="channel-icon">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <div class="channel-info">
+                        <div class="channel-name">Literature Club</div>
+                        <div class="channel-last">Sarah: Did you read chapter 5?</div>
+                    </div>
+                    <div class="channel-meta">
+                        <div class="channel-time">Yesterday</div>
+                    </div>
+                </div>
+                
+                <div class="channel-item">
+                    <div class="channel-icon">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <div class="channel-info">
+                        <div class="channel-name">Programming Help</div>
+                        <div class="channel-last">Mike: Fixed the bug in the code</div>
+                    </div>
+                    <div class="channel-meta">
+                        <div class="channel-time">Yesterday</div>
+                    </div>
+                </div>
+                
+                <div class="channel-item">
+                    <div class="channel-icon">
+                        <i class="fas fa-calculator"></i>
+                    </div>
+                    <div class="channel-info">
+                        <div class="channel-name">Math Study Group</div>
+                        <div class="channel-last">Prof. Johnson: Assignment due Friday</div>
+                    </div>
+                    <div class="channel-meta">
+                        <div class="channel-time">Mar 12</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="chatroom-content">
+            <div class="chat-header">
+                <button class="toggle-sidebar">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="chat-info">
+                    <div class="chat-title">Computer Science 101</div>
+                    <div class="chat-status">
+                        <span class="online-dot"></span>
+                        12 online
+                    </div>
+                </div>
+                <div class="chat-actions">
+                    <button class="chat-action-btn">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <button class="chat-action-btn">
+                        <i class="fas fa-phone-alt"></i>
+                    </button>
+                    <button class="chat-action-btn">
+                        <i class="fas fa-video"></i>
+                    </button>
+                    <button class="chat-action-btn">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="messages-container" id="messagesContainer">
+                <div class="message received">
+                    <div class="message-avatar">AJ</div>
+                    <div class="message-content">
+                        <div class="message-bubble">
+                            Hey everyone! Does anyone have the notes from yesterday's lecture? I missed class.
+                        </div>
+                        <div class="message-info">
+                            <span>Alex Johnson</span>
+                            <span class="message-time">10:30 AM</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="message sent">
+                    <div class="message-content">
+                        <div class="message-bubble">
+                            I have them! I'll share the PDF in a few minutes. The lecture was mostly about algorithms.
+                        </div>
+                        <div class="message-info">
+                            <span>You</span>
+                            <span class="message-time">10:32 AM</span>
+                            <i class="fas fa-check-double"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="message received">
+                    <div class="message-avatar">MS</div>
+                    <div class="message-content">
+                        <div class="message-bubble">
+                            Thanks! Also, does anyone know if the assignment is due this Friday or next?
+                        </div>
+                        <div class="message-info">
+                            <span>Maria Sanchez</span>
+                            <span class="message-time">10:35 AM</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="message received">
+                    <div class="message-avatar">PT</div>
+                    <div class="message-content">
+                        <div class="message-bubble">
+                            It's due next Friday. The professor mentioned it at the end of class.
+                        </div>
+                        <div class="message-info">
+                            <span>Peter Thompson</span>
+                            <span class="message-time">10:36 AM</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="message sent">
+                    <div class="message-content">
+                        <div class="message-bubble">
+                            Here's the link to the notes: https://drive.google.com/notes-cs101
+                        </div>
+                        <div class="message-info">
+                            <span>You</span>
+                            <span class="message-time">10:40 AM</span>
+                            <i class="fas fa-check-double"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="message received">
+                    <div class="message-avatar">AJ</div>
+                    <div class="message-content">
+                        <div class="message-bubble">
+                            You're a lifesaver! Thank you so much.
+                        </div>
+                        <div class="message-info">
+                            <span>Alex Johnson</span>
+                            <span class="message-time">10:41 AM</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="message-input-area">
+                <div class="input-container">
+                    <div class="input-actions">
+                        <button class="input-action">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        <button class="input-action">
+                            <i class="fas fa-paperclip"></i>
+                        </button>
+                        <button class="input-action">
+                            <i class="fas fa-image"></i>
+                        </button>
+                    </div>
+                    
+                    <textarea class="message-input" placeholder="Type your message..." id="messageInput"></textarea>
+                    
+                    <button class="send-button" id="sendButton">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="new-message-notification">
+    <div>
+        <strong>New message</strong>
+        <div>From Alex Johnson</div>
+    </div>
+    <button class="close-notification">
+        <i class="fas fa-times"></i>
+    </button>
+</div>
+
+<script>
+    // Chat functionality
+    const messagesContainer = document.getElementById('messagesContainer');
+    const messageInput = document.getElementById('messageInput');
+    const sendButton = document.getElementById('sendButton');
+    const toggleButtons = document.querySelectorAll('.toggle-sidebar');
+    
+    // Auto-scroll to bottom of messages
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    
+    // Send message function
+    function sendMessage() {
+        const messageText = messageInput.value.trim();
+        if (messageText) {
+            // Create new message element
+            const messageEl = document.createElement('div');
+            messageEl.classList.add('message', 'sent');
+            messageEl.innerHTML = `
+                <div class="message-content">
+                    <div class="message-bubble">
+                        ${messageText}
+                    </div>
+                    <div class="message-info">
+                        <span>You</span>
+                        <span class="message-time">${getCurrentTime()}</span>
+                        <i class="fas fa-check-double"></i>
+                    </div>
+                </div>
+            `;
+            
+            // Add to messages container
+            messagesContainer.appendChild(messageEl);
+            
+            // Clear input and scroll to bottom
+            messageInput.value = '';
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            // Simulate a response after 1-3 seconds
+            setTimeout(simulateResponse, 1000 + Math.random() * 2000);
+        }
+    }
+    
+    // Get current time in HH:MM format
+    function getCurrentTime() {
+        const now = new Date();
+        return now.getHours().toString().padStart(2, '0') + ':' + 
+                now.getMinutes().toString().padStart(2, '0');
+    }
+    
+    // Simulate a response from another user
+    function simulateResponse() {
+        const responses = [
+            "Thanks for sharing!",
+            "I have a question about that...",
+            "That makes sense, thanks!",
+            "Can you explain that again?",
+            "Did anyone start the assignment yet?",
+            "I'll check it out, thanks!",
+            "The professor mentioned something different in class yesterday."
+        ];
+        
+        const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+        const users = [
+            { name: "Alex Johnson", initials: "AJ" },
+            { name: "Maria Sanchez", initials: "MS" },
+            { name: "Peter Thompson", initials: "PT" }
+        ];
+        const randomUser = users[Math.floor(Math.random() * users.length)];
+        
+        const messageEl = document.createElement('div');
+        messageEl.classList.add('message', 'received');
+        messageEl.innerHTML = `
+            <div class="message-avatar">${randomUser.initials}</div>
+            <div class="message-content">
+                <div class="message-bubble">
+                    ${randomResponse}
+                </div>
+                <div class="message-info">
+                    <span>${randomUser.name}</span>
+                    <span class="message-time">${getCurrentTime()}</span>
+                </div>
+            </div>
+        `;
+        
+        messagesContainer.appendChild(messageEl);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        
+        // Show notification
+        document.querySelector('.new-message-notification').style.display = 'flex';
+    }
+    
+    // Event listeners
+    sendButton.addEventListener('click', sendMessage);
+    
+    messageInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+    
+    // Toggle sidebar on mobile
+    toggleButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            document.querySelector('.chatroom-sidebar').classList.toggle('active');
+        });
+    });
+    
+    // Close notification
+    document.querySelector('.close-notification').addEventListener('click', () => {
+        document.querySelector('.new-message-notification').style.display = 'none';
+    });
+</script>
+{% endblock %}
