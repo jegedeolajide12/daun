@@ -1,101 +1,189 @@
 {% extends parent_template|default:"navbar.html" %}
 {% load static %}
 {% block content %}
-    <div class="account-form">
-        <div class="account-head" style="background-image:url('{% static "assets/images/background/bg2.jpg" %}');">
-            <a href="{% url "course:index" %}"><img src="{% static "assets/images/logo-white-2.png" %}" alt=""></a>
-        </div>
-        <div class="account-form-inner">
-            <div class="account-container">
-                <div class="heading-bx left">
-                    <h2 class="title-head">Apply to be an instructor <span>Now</span></h2>
-                    <p>Login Your Account <a href="{% url "account_login" %}">Click here</a></p>
-                </div>    
-                <form class="contact-bx" method="post" action="{% url "account:instructor_application" %}" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    {% if form.non_field_errors %}
-                        <ul class="errorlist">
-                            {% for error in form.non_field_errors %}
-                                <li>{{ error }}</li>
-                            {% endfor %}
-                        </ul>
-                    {% endif %}
-                    <div class="row placeani">
-                        
-                        <!-- Profile Picture Field -->
-                        <div class="col-lg-12">
-                            <div class="form-group">
-                                <div class="input-group">
-                                    <label for="id_profile_picture">Profile Picture</label>
-                                    {{ form.profile_picture }}
-                                    {% if form.profile_picture.errors %}
-                                        <ul class="errorlist">
-                                            {% for error in form.profile_picture.errors %}
-                                                <li>{{ error }}</li>
-                                            {% endfor %}
-                                        </ul>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Date of Birth Field -->
-                        <div class="col-lg-12">
-                            <div class="form-group">
-                                <div class="input-group">
-                                    <label for="id_date_of_birth">Date of Birth</label>
-                                    {{ form.date_of_birth }}
-                                    {% if form.date_of_birth.errors %}
-                                        <ul class="errorlist">
-                                            {% for error in form.date_of_birth.errors %}
-                                                <li>{{ error }}</li>
-                                            {% endfor %}
-                                        </ul>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Bio Field -->
-                        <div class="col-lg-12">
-                            <div class="form-group">
-                                <div class="input-group">
-                                    <label for="id_bio">Short Bio</label>
-                                    {{ form.bio }}
-                                    {% if form.bio.errors %}
-                                        <ul class="errorlist">
-                                            {% for error in form.bio.errors %}
-                                                <li>{{ error }}</li>
-                                            {% endfor %}
-                                        </ul>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Phone Number Field -->
-                        <div class="col-lg-12">
-                            <div class="form-group">
-                                <div class="input-group">
-                                    <label for="id_phone_number">Phone Number</label>
-                                    {{ form.phone_number }}
-                                    {% if form.phone_number.errors %}
-                                        <ul class="errorlist">
-                                            {% for error in form.phone_number.errors %}
-                                                <li>{{ error }}</li>
-                                            {% endfor %}
-                                        </ul>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Submit Button -->
-                        <div class="col-lg-12 m-b30">
-                            <button name="submit" type="submit" value="Submit" class="btn button-md">Submit Application</button>
-                        </div>
-                    </div>
-                </form>
+<div class="application-container">
+    <!-- Hero Section -->
+    <div class="application-hero">
+        <div class="application-content">
+            <div class="application-icon">
+                <i class="fas fa-chalkboard-teacher"></i>
+            </div>
+            <h1 class="application-title">Become an Instructor</h1>
+            <p>Share your knowledge with thousands of students and earn money doing what you love.</p>
+            
+            <div class="application-benefits">
+                <div class="benefit-item">
+                    <div class="benefit-icon"><i class="fas fa-money-bill-wave"></i></div>
+                    <div><strong>Earn income</strong> - Get paid for every student enrolled in your courses</div>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon"><i class="fas fa-globe"></i></div>
+                    <div><strong>Reach students worldwide</strong> - Teach to a global audience</div>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon"><i class="fas fa-tools"></i></div>
+                    <div><strong>Powerful teaching tools</strong> - Everything you need to create great courses</div>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon"><i class="fas fa-users"></i></div>
+                    <div><strong>Join our community</strong> - Connect with other instructors</div>
+                </div>
             </div>
         </div>
+    </div>
+    
+    <!-- Application Form -->
+    <div class="application-form-container">
+        <div class="application-card">
+            <div class="application-header">
+                <h2 class="application-heading">Instructor Application</h2>
+                <p class="application-subheading">Please complete the form below to apply as an instructor</p>
+            </div>
+            
+            <form class="contact-bx" method="post" action="{% url "account:instructor_application" %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                    <div class="error-message">
+                        {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                
+                <!-- Profile Picture Field -->
+                <div class="form-group">
+                    <label class="form-label">Profile Picture</label>
+                    <div class="form-file">
+                        <input type="file" name="profile_picture" id="id_profile_picture" class="file-input" accept="image/*">
+                        <label for="id_profile_picture" class="file-label">
+                            <div class="file-icon">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                            </div>
+                            <div class="file-text">Click to upload your profile picture</div>
+                            <div class="file-name" id="file-name">No file selected</div>
+                        </label>
+                    </div>
+                    {% if form.profile_picture.errors %}
+                        <div class="error-message">
+                            {% for error in form.profile_picture.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Date of Birth Field -->
+                <div class="form-group">
+                    <label for="id_date_of_birth" class="form-label">Date of Birth</label>
+                    <input type="date" name="date_of_birth" id="id_date_of_birth" class="form-input" 
+                           value="{% if form.date_of_birth.value %}{{ form.date_of_birth.value }}{% endif %}">
+                    {% if form.date_of_birth.errors %}
+                        <div class="error-message">
+                            {% for error in form.date_of_birth.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Bio Field -->
+                <div class="form-group">
+                    <label for="id_bio" class="form-label">Short Bio</label>
+                    <textarea name="bio" id="id_bio" class="form-textarea" 
+                              placeholder="Tell us about your background, expertise, and teaching experience">{% if form.bio.value %}{{ form.bio.value }}{% endif %}</textarea>
+                    <div class="form-subtitle">Minimum 150 characters</div>
+                    {% if form.bio.errors %}
+                        <div class="error-message">
+                            {% for error in form.bio.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Phone Number Field -->
+                <div class="form-group">
+                    <label for="id_phone_number" class="form-label">Phone Number</label>
+                    <input type="tel" name="phone_number" id="id_phone_number" class="form-input" 
+                           value="{% if form.phone_number.value %}{{ form.phone_number.value }}{% endif %}" 
+                           placeholder="Enter your phone number with country code">
+                    {% if form.phone_number.errors %}
+                        <div class="error-message">
+                            {% for error in form.phone_number.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Submit Button -->
+                <button type="submit" class="submit-button">Submit Application</button>
+                
+                <p class="login-link">
+                    Already have an instructor account? <a href="{% url "account_login" %}">Sign in here</a>
+                </p>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // File name display for profile picture
+    const fileInput = document.getElementById('id_profile_picture');
+    const fileNameDisplay = document.getElementById('file-name');
+    
+    if (fileInput && fileNameDisplay) {
+        fileInput.addEventListener('change', function() {
+            if (this.files && this.files.length > 0) {
+                fileNameDisplay.textContent = this.files[0].name;
+            } else {
+                fileNameDisplay.textContent = 'No file selected';
+            }
+        });
+    }
+    
+    // Character counter for bio field
+    const bioField = document.getElementById('id_bio');
+    const charCountDisplay = document.createElement('div');
+    charCountDisplay.className = 'form-subtitle';
+    charCountDisplay.style.textAlign = 'right';
+    charCountDisplay.style.marginTop = '0.3rem';
+    
+    if (bioField) {
+        bioField.parentNode.appendChild(charCountDisplay);
+        
+        function updateCharCount() {
+            const charCount = bioField.value.length;
+            charCountDisplay.textContent = `${charCount}/150 characters`;
+            
+            if (charCount < 150) {
+                charCountDisplay.style.color = '#ef4444';
+            } else {
+                charCountDisplay.style.color = '#10b981';
+            }
+        }
+        
+        bioField.addEventListener('input', updateCharCount);
+        updateCharCount();
+    }
+    
+    // Set minimum date for date of birth (18 years ago)
+    const dobField = document.getElementById('id_date_of_birth');
+    if (dobField) {
+        const today = new Date();
+        const minDate = new Date();
+        minDate.setFullYear(today.getFullYear() - 18);
+        
+        const minDateString = minDate.toISOString().split('T')[0];
+        dobField.setAttribute('max', minDateString);
+        
+        // Add a note about age requirement
+        const ageNote = document.createElement('div');
+        ageNote.className = 'form-subtitle';
+        ageNote.textContent = 'You must be at least 18 years old to apply';
+        dobField.parentNode.appendChild(ageNote);
+    }
+</script>
+
 {% endblock %}
