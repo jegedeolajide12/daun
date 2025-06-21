@@ -38,7 +38,7 @@ urlpatterns = [
     path('notifications/<int:notification_id>/mark-read', mark_notification_read, name='mark_notification_read'),
     path('notifications/mark-all-read/', mark_all_notifications_read, name='mark_all_read'),
 
-    path('course/<int:course_id>/assignment/create/', create_assignment, name='create_assignment'),
+    path('course/assignment/create/', create_assignment, name='create_assignment'),
     path('course/<int:course_id>/topic/<int:topic_id>/assignment/<int:assignment_id>/submit', submit_assignment, name='submit_assignment'),
     path('assignment/<int:assignment_id>/topic/<int:topic_id>/course/<int:course_id>/detail', assignment_detail, name='assignment_detail'),
     path('students/assignments/grade', grade_assignments, name='grade_assignments'),

@@ -44,12 +44,11 @@ from .models import (
                 AssessmentAttempt, MCQResponse, CourseObjectives, CourseRequirements,
                 CourseTrailer
                 )
-from .forms import (FacultyForm, CourseTopicAssignmentsForm, SubmissionForm, 
-                    CourseTopicAssessmentsForm, MCQOptionForm, CourseBasicsForm, CourseTopicsForm,
+from .forms import (FacultyForm, AssignmentForm, SubmissionForm, 
+                    AssessmentForm, MCQOptionForm, CourseBasicsForm, CourseTopicsForm,
                     CourseTopicContentForm, AssessmentQuestionForm, CourseTrailerForm, CourseRequirementsForm, 
                     CourseMarketingForm, CourseObjectivesForm, CourseForm, ModuleFormSet, CourseTopicContentForm, 
-                    ContentFormSet, AssignmentFormSet, RubricForm, RubricFormSet,
-                    AssessmentQuestionFormSet, MCQOptionFormSet 
+                    ContentFormSet,
                     )
 
 def create_faculty(request):
@@ -704,11 +703,12 @@ def manage_courses(request):
 
 
 @login_required
-def create_assignment(request, course_id):
-    course = get_object_or_404(Course, id=course_id)
+def create_assignment(request):
     if request.method == 'POST':
         form = AssignmentForm(request.POST, request.FILES, user=request.user)
-        form.fields['topic'].queryset = Topic.objects.filter(course=course)
+        course_id = request.POST.get('course')
+        if course_id:
+            form.fields['topic'].queryset = Topic.objects.filter(course_id=course_id)
         if form.is_valid():
             assignment = form.save(commit=False)
             assignment.is_graded = False
@@ -751,7 +751,6 @@ def create_assignment(request, course_id):
             messages.error(request, "There was an error creating the assignment. Please correct the errors below.")
     else:
         form = AssignmentForm()
-        form.fields['topic'].queryset = Topic.objects.filter(course=course)
     # Get the list of courses for the dropdown
     courses = Course.objects.filter(owner=request.user)
     return render(request, 'students/manage/create_assignment.html', {'form': form, 'courses': courses})

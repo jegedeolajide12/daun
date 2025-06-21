@@ -1,20 +1,55 @@
 {% extends parent_template|default:"navbar.html" %}
 {% load static %}
 {% block content %}	
-<div class="account-form">
-	<div class="account-head" style="background-image:url('{% static "assets/images/background/bg2.jpg" %}');">
-		<a href="index.html"><img src="{% static "assets/images/logo-white-2.png" %}" alt=""></a>
-	</div>
-	<div class="account-form-inner">
-		<div class="account-container">
-			<div class="error-page">
-				<h5>Are you sure you want to log out?</h5>
-				<form class="contact-bx" method="post" action="{% url "account_logout" %}">
-					{% csrf_token %}
-                        <button name="submit" type="submit" value="Submit" class="btn m-r5">Logout</button>
-						<a href="index.html" class="btn outline black">Back To Home</a>
-				</form>
-			</div>
-		</div>
-	</div>
+<div class="logout-container">
+    <!-- Hero Section -->
+    <div class="logout-hero">
+        <a href="{% url "course:index" %}"><img src="{% static "assets/images/logo-white-2.png" %}" alt="Course Platform Logo" class="login-logo"></a>
+        <div class="logout-content">
+            <h1 class="logout-title">We're Sad to See You Go</h1>
+            <p class="logout-message">Your learning journey is important to us. We hope you'll return soon to continue your progress.</p>
+            
+            <div class="logout-features">
+                <div class="logout-feature">
+                    <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+                    <div>Your progress is saved and ready when you return</div>
+                </div>
+                <div class="logout-feature">
+                    <div class="feature-icon"><i class="fas fa-bell"></i></div>
+                    <div>We'll notify you about new courses and updates</div>
+                </div>
+                <div class="logout-feature">
+                    <div class="feature-icon"><i class="fas fa-gift"></i></div>
+                    <div>Exclusive offers await when you come back</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Logout Form -->
+    <div class="logout-form-container">
+        <div class="logout-card">
+            <div class="logout-header">
+                <div class="logout-icon">
+                    <i class="fas fa-sign-out-alt"></i>
+                </div>
+                <h2 class="logout-heading">Logout Confirmation</h2>
+                <p class="logout-subheading">Are you sure you want to log out? You'll need to sign in again to access your courses and learning materials.</p>
+            </div>
+            
+            <form class="contact-bx" method="post" action="{% url "account_logout" %}">
+                {% csrf_token %}
+                <div class="logout-actions">
+                    <button type="submit" class="logout-btn logout-confirm">
+                        Yes, Logout
+                    </button>
+                    <a href="{% url "course:index" %}" class="logout-btn logout-cancel">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
